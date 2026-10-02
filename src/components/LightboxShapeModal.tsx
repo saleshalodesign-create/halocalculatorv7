@@ -803,9 +803,9 @@ ASPECT RATIO: ${shapeInfo.ratioStr}`;
                     </div>
 
                     <div className="flex items-center gap-1 flex-wrap">
-                      {POPULAR_BASE_COLORS.map(c => (
+                      {POPULAR_BASE_COLORS.map((c, idx) => (
                         <button
-                          key={c.hex}
+                          key={`${c.hex}-${idx}`}
                           type="button"
                           onClick={() => setBaseColor(c.hex)}
                           className={`w-3.5 h-3.5 rounded-none border transition-transform active:scale-90 ${
@@ -900,9 +900,9 @@ ASPECT RATIO: ${shapeInfo.ratioStr}`;
                   {showPresetsMenu === 'base' && (
                     <div className="p-1.5 bg-slate-200/90 dark:bg-slate-800 rounded-none flex items-center gap-1 flex-wrap border border-slate-300 dark:border-white/10">
                       <span className="font-bold text-slate-600 dark:text-neutral-300 mr-1">Textures:</span>
-                      {SAMPLE_BASE_PRESETS.map(p => (
+                      {SAMPLE_BASE_PRESETS.map((p, idx) => (
                         <button
-                          key={p.id}
+                          key={`${p.id}-${idx}`}
                           type="button"
                           onClick={() => {
                             setBaseImage(p.dataUrl);
@@ -927,9 +927,9 @@ ASPECT RATIO: ${shapeInfo.ratioStr}`;
                         { label: '+4"', val: unit === Unit.CM ? 10 : unit === Unit.MM ? 100 : unit === Unit.FT ? 0.33 : 4 },
                         { label: '+6"', val: unit === Unit.CM ? 15 : unit === Unit.MM ? 150 : unit === Unit.FT ? 0.5 : 6 },
                         { label: '+12"', val: unit === Unit.CM ? 30 : unit === Unit.MM ? 300 : unit === Unit.FT ? 1 : 12 },
-                      ].map(p => (
+                      ].map((p, idx) => (
                         <button
-                          key={p.label}
+                          key={`${p.label}-${idx}`}
                           type="button"
                           onClick={() => handleApplyPresetMargin(p.val)}
                           className="px-1.5 py-0.5 rounded-none bg-white hover:bg-blue-50 dark:bg-white/10 dark:hover:bg-blue-500/20 text-slate-700 dark:text-cyan-300 border border-slate-200 dark:border-white/10 font-mono font-bold transition-all active:scale-95"
@@ -1068,9 +1068,9 @@ ASPECT RATIO: ${shapeInfo.ratioStr}`;
                   {showPresetsMenu === 'lightbox' && (
                     <div className="p-1.5 bg-slate-200/90 dark:bg-slate-800 rounded-none flex items-center gap-1 flex-wrap border border-slate-300 dark:border-white/10">
                       <span className="font-bold text-slate-600 dark:text-neutral-300 mr-1">Logos:</span>
-                      {SAMPLE_LIGHTBOX_PRESETS.map(p => (
+                      {SAMPLE_LIGHTBOX_PRESETS.map((p, idx) => (
                         <button
-                          key={p.id}
+                          key={`${p.id}-${idx}`}
                           type="button"
                           onClick={() => {
                             setLightboxImage(p.dataUrl);
@@ -1199,9 +1199,9 @@ ASPECT RATIO: ${shapeInfo.ratioStr}`;
                         <Palette className="w-3 h-3 text-cyan-400" />
                         <span>Base Color:</span>
                       </span>
-                      {POPULAR_BASE_COLORS.slice(0, 6).map(c => (
+                      {POPULAR_BASE_COLORS.slice(0, 6).map((c, idx) => (
                         <button
-                          key={c.hex}
+                          key={`hdr-${c.hex}-${idx}`}
                           type="button"
                           onClick={() => setBaseColor(c.hex)}
                           className={`w-3.5 h-3.5 rounded-full border transition-transform active:scale-90 ${

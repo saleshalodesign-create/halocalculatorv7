@@ -243,7 +243,8 @@ export const renderTextToDataUrl = (
   isItalic: boolean = false,
   fontFamily: string = 'Arial, "Segoe UI", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif',
   backgroundColor?: string,
-  isUnderline: boolean = false
+  isUnderline: boolean = false,
+  targetBoxHeight?: number
 ): { dataUrl: string; width: number; height: number } => {
   if (typeof document === 'undefined') return { dataUrl: '', width: 0, height: 0 };
   const canvas = document.createElement('canvas');
@@ -253,36 +254,46 @@ export const renderTextToDataUrl = (
   const scale = 3;
   const effectiveFont = fontFamily || 'Arial, "Segoe UI", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif';
   const fontStyle = `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${fontSize * scale}px ${effectiveFont}`;
+  
+  // Measure text width using exact font style
   ctx.font = fontStyle;
   const textMetrics = ctx.measureText(text);
   const textWidth = textMetrics.width;
-  const height = Math.ceil(fontSize * scale * 1.35);
-  const width = Math.ceil(textWidth + 8 * scale);
 
-  canvas.width = width;
-  canvas.height = height;
+  // Exact height strictly matching the target box height, or font-proportional height
+  const boxHPt = targetBoxHeight && targetBoxHeight > 0 ? targetBoxHeight : Math.max(8, fontSize * 1.15);
+  const canvasHeight = Math.ceil(boxHPt * scale);
+  
+  // Padding matching screen CSS px-0.5 / px-1 (1pt padding)
+  const padLeft = 1 * scale;
+  const padRight = 2 * scale;
+  const canvasWidth = Math.ceil(textWidth + padLeft + padRight);
 
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
+
+  // Setting canvas width/height resets context state, re-apply:
   ctx.font = fontStyle;
   ctx.textBaseline = 'middle';
 
   if (backgroundColor && backgroundColor !== 'transparent') {
     ctx.fillStyle = backgroundColor;
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   }
 
   ctx.fillStyle = color;
-  ctx.fillText(text, 4 * scale, height / 2);
+  ctx.fillText(text, padLeft, canvasHeight / 2);
 
   if (isUnderline) {
     ctx.fillStyle = color;
-    const lineY = Math.min(height - 2 * scale, Math.floor(height / 2 + (fontSize * scale) / 2.2));
-    ctx.fillRect(4 * scale, lineY, textWidth, Math.max(2, Math.floor(1.5 * scale)));
+    const lineY = Math.min(canvasHeight - 2 * scale, Math.floor(canvasHeight / 2 + (fontSize * scale) / 2.2));
+    ctx.fillRect(padLeft, lineY, textWidth, Math.max(2, Math.floor(1.5 * scale)));
   }
 
   return {
     dataUrl: canvas.toDataURL('image/png'),
-    width: width / scale,
-    height: height / scale,
+    width: canvasWidth / scale,
+    height: boxHPt,
   };
 };
 
@@ -563,44 +574,60 @@ export const applyPdfAnnotations = async (
       const pdfY = Math.max(0, Math.min(pageHeight, pageHeight - ann.yPercent * pageHeight));
 
       if (ann.type === 'whiteout') {
-        const boxW = (ann.widthPercent || 0.15) * pageWidth;
-        const defaultBoxH = Math.max(8, (ann.fontSize || 12) * 1.05);
+        const defaultBoxH = Math.max(8, (ann.fontSize || 12) * 1.15);
         const boxH = Math.max(8, ann.heightPercent ? ann.heightPercent * pageHeight : defaultBoxH);
-
-        // Draw white rectangle to cover old text / typo
-        page.drawRectangle({
-          x: pdfX,
-          y: pdfY - boxH,
-          width: boxW,
-          height: boxH,
-          color: rgb(1, 1, 1),
-        });
+        const minBoxW = (ann.widthPercent || 0.15) * pageWidth;
 
         // Optional replacement text inside whiteout box
         if (ann.text) {
-          const size = ann.fontSize || Math.max(8, Math.round(boxH * 0.9));
-          const { dataUrl, width, height } = renderTextToDataUrl(
+          const size = ann.fontSize || 12;
+          const { dataUrl, width } = renderTextToDataUrl(
             ann.text,
             ann.textColor || '#000000',
             size,
             ann.isBold,
             ann.isItalic,
-            ann.fontFamily
+            ann.fontFamily,
+            undefined,
+            ann.isUnderline,
+            boxH
           );
+
+          const finalBoxW = Math.max(minBoxW, width + 1);
+
+          // 1. Draw pure white rectangle covering old text / typo
+          page.drawRectangle({
+            x: pdfX,
+            y: pdfY - boxH,
+            width: finalBoxW,
+            height: boxH,
+            color: rgb(1, 1, 1),
+          });
+
+          // 2. Draw replacement text perfectly aligned with 0 vertical jump
           if (dataUrl) {
             try {
               const imgBytes = await fetch(dataUrl).then(r => r.arrayBuffer());
               const img = await finalPdfDoc.embedPng(imgBytes);
               page.drawImage(img, {
-                x: pdfX + 0.5,
-                y: pdfY - boxH + Math.max(0, (boxH - height) / 2),
+                x: pdfX,
+                y: pdfY - boxH,
                 width: width,
-                height: height,
+                height: boxH,
               });
             } catch (e) {
               console.warn('Could not draw whiteout replacement text', e);
             }
           }
+        } else {
+          // Empty whiteout box
+          page.drawRectangle({
+            x: pdfX,
+            y: pdfY - boxH,
+            width: minBoxW,
+            height: boxH,
+            color: rgb(1, 1, 1),
+          });
         }
       } else if (ann.type === 'highlight') {
         const boxW = (ann.widthPercent || 0.2) * pageWidth;
@@ -662,7 +689,8 @@ export const applyPdfAnnotations = async (
         }
       } else if (ann.type === 'text' && ann.text) {
         const size = ann.fontSize || 12;
-        const { dataUrl, width, height } = renderTextToDataUrl(
+        const boxH = Math.max(8, ann.heightPercent ? ann.heightPercent * pageHeight : size * 1.15);
+        const { dataUrl, width } = renderTextToDataUrl(
           ann.text,
           ann.textColor || '#000000',
           size,
@@ -670,7 +698,8 @@ export const applyPdfAnnotations = async (
           ann.isItalic,
           ann.fontFamily,
           ann.backgroundColor,
-          ann.isUnderline
+          ann.isUnderline,
+          boxH
         );
         if (dataUrl) {
           try {
@@ -678,9 +707,9 @@ export const applyPdfAnnotations = async (
             const img = await finalPdfDoc.embedPng(imgBytes);
             page.drawImage(img, {
               x: pdfX,
-              y: pdfY - height,
+              y: pdfY - boxH,
               width: width,
-              height: height,
+              height: boxH,
             });
           } catch (e) {
             console.warn('Could not embed text in PDF', e);
@@ -729,16 +758,40 @@ export const applyPdfAnnotations = async (
             embeddedImage = await finalPdfDoc.embedJpg(imageBytes);
           }
 
-          const imgW = (ann.widthPercent || 0.22) * pageWidth;
-          const imgH =
-            (ann.heightPercent || (imgW * embeddedImage.height) / embeddedImage.width / pageHeight) *
-            pageHeight;
+          const targetW = (ann.widthPercent || 0.22) * pageWidth;
+          const targetH = (ann.heightPercent || 0.18) * pageHeight;
+          const naturalW = embeddedImage.width;
+          const naturalH = embeddedImage.height;
+
+          // Object-contain aspect ratio calculation matching screen CSS:
+          // Strictly preserves the original image aspect ratio without deformation/stretching!
+          const imgAspect = naturalW / naturalH;
+          const boxAspect = targetW / targetH;
+
+          let drawW = targetW;
+          let drawH = targetH;
+          let drawX = pdfX;
+          let drawY = pdfY - targetH;
+
+          if (boxAspect > imgAspect) {
+            // Box is wider than image: fit height, center horizontally
+            drawW = targetH * imgAspect;
+            drawH = targetH;
+            drawX = pdfX + (targetW - drawW) / 2;
+            drawY = pdfY - targetH;
+          } else {
+            // Box is taller than image: fit width, center vertically
+            drawW = targetW;
+            drawH = targetW / imgAspect;
+            drawX = pdfX;
+            drawY = (pdfY - targetH) + (targetH - drawH) / 2;
+          }
 
           page.drawImage(embeddedImage, {
-            x: pdfX,
-            y: pdfY - imgH,
-            width: imgW,
-            height: imgH,
+            x: drawX,
+            y: drawY,
+            width: drawW,
+            height: drawH,
           });
         } catch (err) {
           console.warn('Could not embed signature/image in PDF:', err);
@@ -822,4 +875,148 @@ export const downloadPdfBytes = (bytes: Uint8Array | Blob, filename: string): vo
 export const createPdfUrl = (bytes: Uint8Array | ArrayBuffer | Blob): string => {
   const blob = bytes instanceof Blob ? bytes : new Blob([bytes], { type: 'application/pdf' });
   return URL.createObjectURL(blob);
+};
+
+/**
+ * Parses user input page range strings like "1-3, 5, 8-10" into sorted 0-based page index array
+ */
+export const parsePageRange = (rangeStr: string, totalPages: number): number[] => {
+  const indices = new Set<number>();
+  const clean = rangeStr.trim();
+  if (!clean) return [];
+
+  const parts = clean.split(/[,，\s]+/);
+  for (const part of parts) {
+    if (!part) continue;
+    if (part.includes('-')) {
+      const [startStr, endStr] = part.split('-');
+      const start = parseInt(startStr, 10);
+      const end = parseInt(endStr, 10);
+      if (!isNaN(start) && !isNaN(end)) {
+        const min = Math.max(1, Math.min(start, end));
+        const max = Math.min(totalPages, Math.max(start, end));
+        for (let i = min; i <= max; i++) {
+          indices.add(i - 1);
+        }
+      }
+    } else {
+      const page = parseInt(part, 10);
+      if (!isNaN(page) && page >= 1 && page <= totalPages) {
+        indices.add(page - 1);
+      }
+    }
+  }
+  return Array.from(indices).sort((a, b) => a - b);
+};
+
+export interface PdfJoinItem {
+  id: string;
+  name: string;
+  bytes: ArrayBuffer | Uint8Array;
+  size: number;
+  pageCount: number;
+  selectedRangeText?: string;
+}
+
+/**
+ * Merges multiple PDF files in given order into a single unified PDF
+ */
+export const mergePdfDocuments = async (
+  items: PdfJoinItem[]
+): Promise<Uint8Array> => {
+  if (!items || items.length === 0) {
+    throw new Error('No PDF files provided to merge.');
+  }
+
+  const mergedDoc = await PDFDocument.create();
+
+  for (const item of items) {
+    const srcDoc = await PDFDocument.load(item.bytes, { ignoreEncryption: true });
+    const count = srcDoc.getPageCount();
+
+    let pageIndicesToCopy: number[] = [];
+    if (item.selectedRangeText && item.selectedRangeText.trim()) {
+      pageIndicesToCopy = parsePageRange(item.selectedRangeText, count);
+    }
+    if (pageIndicesToCopy.length === 0) {
+      pageIndicesToCopy = srcDoc.getPageIndices();
+    }
+
+    if (pageIndicesToCopy.length > 0) {
+      const copiedPages = await mergedDoc.copyPages(srcDoc, pageIndicesToCopy);
+      copiedPages.forEach(p => mergedDoc.addPage(p));
+    }
+  }
+
+  return await mergedDoc.save();
+};
+
+/**
+ * Splits / extracts specified pages (0-based indices) into a new PDF
+ */
+export const splitPdfDocument = async (
+  pdfBytes: ArrayBuffer | Uint8Array,
+  pageIndices: number[]
+): Promise<Uint8Array> => {
+  const srcDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+  const total = srcDoc.getPageCount();
+  const validIndices = pageIndices.filter(i => i >= 0 && i < total);
+
+  if (validIndices.length === 0) {
+    throw new Error('No valid pages selected for splitting.');
+  }
+
+  const splitDoc = await PDFDocument.create();
+  const copied = await splitDoc.copyPages(srcDoc, validIndices);
+  copied.forEach(p => splitDoc.addPage(p));
+  return await splitDoc.save();
+};
+
+/**
+ * Splits an entire PDF into individual 1-page PDF documents
+ */
+export const splitPdfToPages = async (
+  pdfBytes: ArrayBuffer | Uint8Array
+): Promise<{ pageNumber: number; bytes: Uint8Array }[]> => {
+  const srcDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+  const total = srcDoc.getPageCount();
+  const results: { pageNumber: number; bytes: Uint8Array }[] = [];
+
+  for (let i = 0; i < total; i++) {
+    const singleDoc = await PDFDocument.create();
+    const [page] = await singleDoc.copyPages(srcDoc, [i]);
+    singleDoc.addPage(page);
+    const bytes = await singleDoc.save();
+    results.push({ pageNumber: i + 1, bytes });
+  }
+
+  return results;
+};
+
+/**
+ * Splits a PDF every N pages (e.g. chunks of 2 pages, 5 pages)
+ */
+export const splitPdfByChunkSize = async (
+  pdfBytes: ArrayBuffer | Uint8Array,
+  chunkSize: number = 1
+): Promise<{ rangeText: string; bytes: Uint8Array }[]> => {
+  const srcDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+  const total = srcDoc.getPageCount();
+  const step = Math.max(1, chunkSize);
+  const results: { rangeText: string; bytes: Uint8Array }[] = [];
+
+  for (let start = 0; start < total; start += step) {
+    const end = Math.min(total, start + step);
+    const indices: number[] = [];
+    for (let p = start; p < end; p++) indices.push(p);
+
+    const chunkDoc = await PDFDocument.create();
+    const pages = await chunkDoc.copyPages(srcDoc, indices);
+    pages.forEach(p => chunkDoc.addPage(p));
+    const bytes = await chunkDoc.save();
+    const rangeText = start + 1 === end ? `Page_${start + 1}` : `Pages_${start + 1}-${end}`;
+    results.push({ rangeText, bytes });
+  }
+
+  return results;
 };

@@ -1,251 +1,233 @@
-import React from 'react';
-import { Theme, ThemeType, UserProfile } from '../types';
-import { GoogleIcon } from './GoogleIcon';
+import React, { useState } from 'react';
 import {
   FileText,
-  Sparkles,
-  Sun,
-  Moon,
-  Calculator,
   RectangleHorizontal,
   RectangleVertical,
   Square,
-  Globe,
   FileSpreadsheet,
   FileCheck,
+  Layers,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { playHoverTick, playSoftPop } from '../utils/soundEffects';
 
-interface MacDockProps {
+export interface MacDockProps {
   quoteCount: number;
   onOpenQuoteList: () => void;
-  theme: ThemeType;
-  setTheme: (theme: ThemeType) => void;
-  wallpaper: string;
-  setWallpaper: (wp: string) => void;
-  user: UserProfile | null;
-  onOpenAuth: () => void;
-  onOpenMobileApp?: () => void;
-  onOpenMathCalc: () => void;
   onOpenShapeModal?: () => void;
   onOpenDailySchedule?: () => void;
   onOpenPdfEditor?: () => void;
+  onOpenPdfTools?: (tab?: 'join' | 'split') => void;
+  onOpenImageConverter?: () => void;
   shapeType?: 'horizontal' | 'vertical' | 'square' | 'invalid';
   shapeLabel?: string;
+  // Optional legacy props kept for caller compatibility
+  theme?: any;
+  setTheme?: any;
+  wallpaper?: any;
+  setWallpaper?: any;
+  user?: any;
+  onOpenAuth?: any;
+  onOpenMobileApp?: any;
+  onOpenMathCalc?: any;
 }
 
 export const MacDock: React.FC<MacDockProps> = ({
   quoteCount,
   onOpenQuoteList,
-  theme,
-  setTheme,
-  wallpaper,
-  setWallpaper,
-  user,
-  onOpenAuth,
-  onOpenMobileApp,
-  onOpenMathCalc,
   onOpenShapeModal,
   onOpenDailySchedule,
   onOpenPdfEditor,
+  onOpenPdfTools,
+  onOpenImageConverter,
   shapeType = 'horizontal',
   shapeLabel = 'Horizontal',
 }) => {
-  const { language, toggleLanguage, t } = useLanguage();
-  const wallpapersList = ['cyber-midnight', 'sequoia', 'sonoma', 'dark', 'silver'];
+  const { language, t } = useLanguage();
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const nextWallpaper = () => {
-    const idx = wallpapersList.indexOf(wallpaper);
-    const next = wallpapersList[(idx + 1) % wallpapersList.length];
-    setWallpaper(next);
-  };
-
-  const cycleTheme = () => {
-    if (theme === Theme.DARK) {
-      setTheme(Theme.LIGHT);
-    } else {
-      setTheme(Theme.DARK);
-    }
-  };
-
-  const getThemeButtonDetails = () => {
-    if (theme === Theme.LIGHT) {
-      return {
-        icon: <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-amber-900" />,
-        label: t.nav.light,
-        bg: 'bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 shadow-amber-400/40',
-        title: `${t.nav.themeTitle}: ${t.nav.light}`,
-      };
-    }
-    return {
-      icon: <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-200" />,
-      label: t.nav.dark,
-      bg: 'bg-gradient-to-tr from-indigo-950 via-indigo-900 to-purple-800 shadow-indigo-900/40',
-      title: `${t.nav.themeTitle}: ${t.nav.dark}`,
-    };
-  };
-
-  const themeDetails = getThemeButtonDetails();
-
-  return (
-    <div className="fixed bottom-safe left-1/2 -translate-x-1/2 z-40 pointer-events-none pb-1 sm:pb-2 gpu-layer">
-      <div className="flex items-center gap-1 sm:gap-2.5 px-2 sm:px-3.5 py-1 sm:py-1.5 bg-white/80 dark:bg-[#070b19]/85 backdrop-blur-xl border border-white/60 dark:border-indigo-500/25 rounded-2xl sm:rounded-[22px] shadow-lg shadow-black/40 transition-all duration-200 pointer-events-auto max-w-[96vw]">
-        {/* Quotations & Invoices Tab */}
-        <button
-          onClick={onOpenQuoteList}
-          className="group relative flex flex-col items-center p-1 sm:p-1.5 transition-transform duration-150 hover:-translate-y-1.5 hover:scale-105 active:scale-95"
-          title={t.dock.quotes}
-        >
-          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-rose-600 via-pink-500 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-500/30 border border-white/30 relative">
-            <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
-            {quoteCount > 0 && (
-              <span className="absolute -top-1 -right-1 px-1 sm:px-1.5 py-0.2 min-w-[15px] sm:min-w-[18px] h-[15px] sm:h-[18px] bg-red-500 text-white font-bold text-[9px] sm:text-[10px] rounded-full flex items-center justify-center border-1.5 sm:border-2 border-white shadow-md">
-                {quoteCount}
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] text-slate-800 dark:text-white font-semibold mt-1 hidden sm:block">
-            {t.dock.quotes} ({quoteCount})
-          </span>
-        </button>
-
-        {/* Daily Outside Schedule Tab */}
-        {onOpenDailySchedule && (
-          <button
-            onClick={onOpenDailySchedule}
-            className="group relative flex flex-col items-center p-1 sm:p-1.5 transition-transform duration-150 hover:-translate-y-1.5 hover:scale-105 active:scale-95"
-            title={t.dailySchedule.title}
-          >
-            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/30 border border-white/30 relative">
-              <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <span className="text-[10px] text-slate-800 dark:text-white font-semibold mt-1 hidden sm:block">
-              {t.dock.schedule}
-            </span>
-          </button>
-        )}
-
-        {/* PDF Editor Tab */}
-        {onOpenPdfEditor && (
-          <button
-            onClick={onOpenPdfEditor}
-            className="group relative flex flex-col items-center p-1 sm:p-1.5 transition-transform duration-150 hover:-translate-y-1.5 hover:scale-105 active:scale-95"
-            title={t.nav.pdfEditor || 'Edit PDF'}
-          >
-            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-purple-500/30 border border-white/30 relative">
-              <FileCheck className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <span className="text-[10px] text-slate-800 dark:text-white font-semibold mt-1 hidden sm:block">
-              {t.dock.pdfEditor || 'Edit PDF'}
-            </span>
-          </button>
-        )}
-
-        <div className="w-px h-6 sm:h-8 bg-black/10 dark:bg-white/20 my-auto mx-0.5 sm:mx-1"></div>
-
-        {/* Google Cloud Account Button */}
-        <button
-          onClick={onOpenAuth}
-          className="group relative flex flex-col items-center p-1 sm:p-1.5 transition-transform duration-150 hover:-translate-y-1.5 hover:scale-105 active:scale-95"
-          title={user ? `Google Account: ${user.email}` : t.nav.signInGoogle}
-        >
-          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-white dark:bg-[#202028] flex items-center justify-center shadow-md shadow-black/10 border border-slate-200 dark:border-white/20 relative">
-            <GoogleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            {user && (
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#202028] absolute -top-0.5 -right-0.5 shadow"></span>
-            )}
-          </div>
-          <span className="text-[10px] text-slate-800 dark:text-white font-semibold mt-1 hidden sm:block">
-            {user ? t.dock.cloud : t.dock.login}
-          </span>
-        </button>
-
-        {/* iOS Calculator Button */}
-        <button
-          onClick={onOpenMathCalc}
-          className="group relative flex flex-col items-center p-1 sm:p-1.5 transition-transform duration-150 hover:-translate-y-1.5 hover:scale-105 active:scale-95"
-          title={t.dock.calc}
-        >
-          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#1c1c1e] border border-white/25 flex items-center justify-center shadow-lg shadow-black/40 relative overflow-hidden">
-            <div className="grid grid-cols-2 gap-0.5 sm:gap-1 p-1 sm:p-1.5 w-full h-full">
-              <span className="bg-[#a5a5a5] text-black text-[7px] sm:text-[9px] font-bold rounded-full flex items-center justify-center">±</span>
-              <span className="bg-[#ff9f0a] text-white text-[7px] sm:text-[9px] font-bold rounded-full flex items-center justify-center">÷</span>
-              <span className="bg-[#333333] text-white text-[7px] sm:text-[9px] font-bold rounded-full flex items-center justify-center">7</span>
-              <span className="bg-[#ff9f0a] text-white text-[7px] sm:text-[9px] font-bold rounded-full flex items-center justify-center">=</span>
-            </div>
-          </div>
-          <span className="text-[10px] text-slate-800 dark:text-white font-semibold mt-1 hidden sm:block">
-            {t.dock.calc}
-          </span>
-        </button>
-
-        {/* Lightbox Shape Visualizer Button - RIGHT BESIDE CALCULATOR */}
-        {onOpenShapeModal && (
-          <button
-            onClick={onOpenShapeModal}
-            className="group relative flex flex-col items-center p-1 sm:p-1.5 transition-transform duration-150 hover:-translate-y-1.5 hover:scale-105 active:scale-95"
-            title={`${t.dock.shape} (${shapeLabel})`}
-          >
-            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-blue-500/30 border border-white/30 relative overflow-hidden">
-              {shapeType === 'horizontal' ? (
+  const dockItems = [
+    {
+      id: 'quotes',
+      title: `${t.dock.quotes} (${quoteCount})`,
+      tooltip: t.dock.quotes,
+      icon: <FileText className="w-4 h-4 sm:w-5 sm:h-5" />,
+      gradient: 'from-rose-600 via-pink-500 to-amber-500',
+      shadow: 'shadow-rose-500/30',
+      badge: quoteCount > 0 ? quoteCount : undefined,
+      onClick: onOpenQuoteList,
+      hasDot: quoteCount > 0,
+    },
+    ...(onOpenDailySchedule
+      ? [
+          {
+            id: 'schedule',
+            title: t.dock.schedule,
+            tooltip: t.dailySchedule.title,
+            icon: <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5" />,
+            gradient: 'from-emerald-600 via-teal-500 to-cyan-500',
+            shadow: 'shadow-emerald-500/30',
+            onClick: onOpenDailySchedule,
+            hasDot: false,
+          },
+        ]
+      : []),
+    ...(onOpenPdfEditor
+      ? [
+          {
+            id: 'pdf-editor',
+            title: t.dock.pdfEditor || 'Edit PDF',
+            tooltip: t.nav.pdfEditor || 'Edit PDF',
+            icon: <FileCheck className="w-4 h-4 sm:w-5 sm:h-5" />,
+            gradient: 'from-purple-600 via-indigo-600 to-blue-500',
+            shadow: 'shadow-purple-500/30',
+            onClick: onOpenPdfEditor,
+            hasDot: false,
+          },
+        ]
+      : []),
+    ...(onOpenPdfTools
+      ? [
+          {
+            id: 'pdf-tools',
+            title: t.dock.pdfTools || (language === 'zh' ? '合并/拆分' : 'Join/Split'),
+            tooltip: language === 'zh' ? 'PDF 合并与拆分工具箱' : 'PDF Joiner & Splitter',
+            icon: <Layers className="w-4 h-4 sm:w-5 sm:h-5" />,
+            gradient: 'from-cyan-600 via-blue-600 to-indigo-600',
+            shadow: 'shadow-blue-500/30',
+            onClick: () => onOpenPdfTools('join'),
+            hasDot: false,
+          },
+        ]
+      : []),
+    ...(onOpenImageConverter
+      ? [
+          {
+            id: 'converter',
+            title: t.dock.imageConverter || (language === 'zh' ? '图片转换' : 'Converter'),
+            tooltip: language === 'zh' ? '图片格式转换工作台' : 'Image File Converter',
+            icon: <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />,
+            gradient: 'from-teal-600 via-cyan-600 to-sky-500',
+            shadow: 'shadow-cyan-500/30',
+            onClick: onOpenImageConverter,
+            hasDot: false,
+          },
+        ]
+      : []),
+    ...(onOpenShapeModal
+      ? [
+          {
+            id: 'shape',
+            title: t.dock.shape,
+            tooltip: `${t.dock.shape} (${shapeLabel})`,
+            icon:
+              shapeType === 'horizontal' ? (
                 <RectangleHorizontal className="w-4 h-4 sm:w-5 sm:h-5" />
               ) : shapeType === 'vertical' ? (
                 <RectangleVertical className="w-4 h-4 sm:w-5 sm:h-5" />
               ) : (
                 <Square className="w-4 h-4 sm:w-5 sm:h-5" />
-              )}
-              {/* Orientation indicator badge */}
-              <span className="absolute bottom-0.5 text-[7px] font-bold uppercase tracking-tighter opacity-80 hidden sm:block">
-                {shapeType === 'horizontal' ? 'HORIZ' : shapeType === 'vertical' ? 'VERT' : 'SQR'}
-              </span>
-            </div>
-            <span className="text-[10px] text-slate-800 dark:text-white font-semibold mt-1 hidden sm:block">
-              {t.dock.shape}
-            </span>
-          </button>
-        )}
+              ),
+            subLabel: shapeType === 'horizontal' ? 'HORIZ' : shapeType === 'vertical' ? 'VERT' : 'SQR',
+            gradient: 'from-blue-600 via-indigo-600 to-cyan-500',
+            shadow: 'shadow-blue-500/30',
+            onClick: onOpenShapeModal,
+            hasDot: false,
+          },
+        ]
+      : []),
+  ];
 
-        {/* Wallpaper Switcher */}
-        <button
-          onClick={nextWallpaper}
-          className="group relative flex flex-col items-center p-1 sm:p-1.5 transition-transform duration-150 hover:-translate-y-1.5 hover:scale-105 active:scale-95"
-          title={`Change Wallpaper (Current: ${wallpaper === 'cyber-midnight' ? 'Cyber Midnight' : wallpaper})`}
-        >
-          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-fuchsia-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/40 border border-white/30">
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <span className="text-[10px] text-slate-800 dark:text-white font-semibold mt-1 hidden sm:block">
-            {t.dock.wallpaper}
-          </span>
-        </button>
+  const getItemTransform = (index: number) => {
+    if (hoveredIdx === null) return { transform: 'scale(1) translateY(0px)', transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)' };
+    const dist = Math.abs(hoveredIdx - index);
+    if (dist === 0) {
+      return { transform: 'scale(1.24) translateY(-8px)', transition: 'transform 0.15s cubic-bezier(0.16, 1, 0.3, 1)' };
+    }
+    if (dist === 1) {
+      return { transform: 'scale(1.12) translateY(-4px)', transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)' };
+    }
+    return { transform: 'scale(1) translateY(0px)', transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)' };
+  };
 
-        {/* Dark / Warm / Light Mode */}
-        <button
-          onClick={cycleTheme}
-          className="group relative flex flex-col items-center p-1 sm:p-1.5 transition-transform duration-150 hover:-translate-y-1.5 hover:scale-105 active:scale-95"
-          title={themeDetails.title}
+  return (
+    <div className="fixed inset-x-0 bottom-safe z-40 pointer-events-none flex justify-center items-end pb-1.5 sm:pb-3 px-2 sm:px-4">
+      <div className="apple-dock-reflection-wrapper relative pointer-events-auto flex flex-col items-center">
+        <div
+          onMouseLeave={() => setHoveredIdx(null)}
+          className="apple-dock-glass glass-rainbow-rim flex items-center gap-1.5 sm:gap-3 px-3 sm:px-5 py-1.5 sm:py-2 rounded-2xl sm:rounded-[24px] max-w-[96vw] relative shadow-2xl"
         >
-          <div className={`w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl ${themeDetails.bg} flex items-center justify-center text-white shadow-md border border-white/30 transition-all`}>
-            {themeDetails.icon}
-          </div>
-          <span className="text-[10px] text-slate-800 dark:text-white font-semibold mt-1 hidden sm:block">
-            {themeDetails.label}
-          </span>
-        </button>
+          {dockItems.map((item, idx) => {
+            const trans = getItemTransform(idx);
+            const isHovered = hoveredIdx === idx;
+            return (
+              <button
+                key={`${item.id}-${idx}`}
+                onClick={() => {
+                  playSoftPop();
+                  item.onClick();
+                }}
+                onMouseEnter={() => {
+                  if (hoveredIdx !== idx) playHoverTick();
+                  setHoveredIdx(idx);
+                }}
+                style={trans}
+                className="group relative flex flex-col items-center p-1 sm:p-1.5 cursor-pointer origin-bottom select-none active:scale-95 transition-transform"
+                title={item.tooltip}
+              >
+                {/* Dynamic Aura Glow on Hover */}
+                {isHovered && (
+                  <div
+                    className={`absolute -inset-1 rounded-2xl bg-gradient-to-tr ${item.gradient} opacity-40 blur-md pointer-events-none animate-pulse`}
+                  />
+                )}
 
-        {/* Language Switcher in Dock */}
-        <button
-          onClick={toggleLanguage}
-          className="group relative flex flex-col items-center p-1 sm:p-1.5 transition-transform duration-150 hover:-translate-y-1.5 hover:scale-105 active:scale-95"
-          title={t.nav.switchLanguage}
-        >
-          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-blue-600 via-cyan-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-cyan-500/30 border border-white/30">
-            <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <span className="text-[10px] text-slate-800 dark:text-white font-semibold mt-1 hidden sm:block">
-            {t.dock.langCode}
-          </span>
-        </button>
+                <div
+                  className={`w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr ${item.gradient} flex items-center justify-center text-white shadow-md ${item.shadow} border border-white/40 relative overflow-hidden transition-all group-hover:shadow-xl group-hover:brightness-105`}
+                >
+                  {/* Subtle glass reflection highlight */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-transparent to-black/10 pointer-events-none" />
+
+                  {item.icon}
+
+                  {item.subLabel && (
+                    <span className="absolute bottom-0.5 text-[7px] font-bold uppercase tracking-tighter opacity-80 hidden sm:block">
+                      {item.subLabel}
+                    </span>
+                  )}
+
+                  {item.badge !== undefined && (
+                    <span className="absolute -top-1 -right-1 px-1 sm:px-1.5 py-0.2 min-w-[15px] sm:min-w-[18px] h-[15px] sm:h-[18px] bg-red-500 text-white font-bold text-[9px] sm:text-[10px] rounded-full flex items-center justify-center border-1.5 sm:border-2 border-white shadow-md animate-pulse">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+
+                <span className="text-[10px] text-slate-800 dark:text-white font-semibold mt-1 hidden sm:block truncate max-w-[70px] drop-shadow-xs">
+                  {item.title}
+                </span>
+
+                {/* Active app running dot indicator */}
+                {item.hasDot ? (
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.9)] mt-0.5" />
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full bg-transparent mt-0.5" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Glossy Dock Floor Reflection */}
+        <div className="apple-dock-reflection flex items-center justify-center gap-1.5 sm:gap-3 px-3 sm:px-5 pointer-events-none">
+          {dockItems.map((item, idx) => (
+            <div
+              key={`refl-${item.id}-${idx}`}
+              className={`w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr ${item.gradient} opacity-30`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -74,6 +74,7 @@ import {
 } from './pdf/PdfescapePropertyBar';
 import { PdfescapeToolPanel, PdfescapeTab } from './pdf/PdfescapeToolPanel';
 import { PdfescapeCanvasOverlay } from './pdf/PdfescapeCanvasOverlay';
+import { PdfToolsModal } from './PdfToolsModal';
 
 interface PdfEditorModalProps {
   isOpen: boolean;
@@ -81,7 +82,11 @@ interface PdfEditorModalProps {
   initialItems?: QuoteItem[];
   initialRecordData?: Partial<QuoteRecord>;
   initialDocType?: DocumentType;
+  initialPdfBytes?: ArrayBuffer | null;
+  initialPdfName?: string;
   onSaveToQuoteSheet?: (items: QuoteItem[], data: Partial<QuoteRecord>) => void;
+  onOpenPdfTools?: (tab?: 'join' | 'split') => void;
+  onOpenImageConverter?: () => void;
 }
 
 type DocumentSource = 'currentQuote' | 'upload' | 'blankA4';
@@ -92,10 +97,36 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
   initialItems = [],
   initialRecordData = {},
   initialDocType = 'quote',
+  initialPdfBytes = null,
+  initialPdfName = '',
   onSaveToQuoteSheet,
+  onOpenPdfTools,
+  onOpenImageConverter,
 }) => {
   const { language } = useLanguage();
   const isZh = language === 'zh';
+
+  // Internal PDF Tools modal state
+  const [internalPdfToolsOpen, setInternalPdfToolsOpen] = useState<boolean>(false);
+  const [internalPdfToolsTab, setInternalPdfToolsTab] = useState<'join' | 'split'>('join');
+
+  const handleOpenJoinerFromEditor = () => {
+    if (onOpenPdfTools) {
+      onOpenPdfTools('join');
+    } else {
+      setInternalPdfToolsTab('join');
+      setInternalPdfToolsOpen(true);
+    }
+  };
+
+  const handleOpenSplitterFromEditor = () => {
+    if (onOpenPdfTools) {
+      onOpenPdfTools('split');
+    } else {
+      setInternalPdfToolsTab('split');
+      setInternalPdfToolsOpen(true);
+    }
+  };
 
   // Active Editor Tab & Document Source (PDFescape style tabs: insert | annotate | page | document | upload)
   const [activeTab, setActiveTab] = useState<PdfescapeTab>('insert');
@@ -297,11 +328,26 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
       if (initialRecordData.contact) setContact(initialRecordData.contact);
       if (initialDocType) setDocType(initialDocType);
 
-      // User requested: PDF editor defaults to a clean blank A4 file
-      setActiveSource('blankA4');
-      setUploadedFileName('Blank_A4_Canvas.pdf');
+      if (initialPdfBytes) {
+        setUploadedPdfBytes(initialPdfBytes);
+        setUploadedFileName(initialPdfName || 'Document.pdf');
+        setActiveSource('upload');
+        setActiveTab('annotate');
+        setActiveTool('text');
+        getPdfPageCount(initialPdfBytes).then(count => {
+          setTotalPages(count);
+          setCurrentPageIndex(0);
+          setRotations({});
+          setAnnotations([]);
+          setDeletePageIndices([]);
+        });
+      } else {
+        // User requested: PDF editor defaults to a clean blank A4 file
+        setActiveSource('blankA4');
+        setUploadedFileName('Blank_A4_Canvas.pdf');
+      }
     }
-  }, [isOpen, initialItems, initialRecordData, initialDocType]);
+  }, [isOpen, initialItems, initialRecordData, initialDocType, initialPdfBytes, initialPdfName]);
 
   // Financial calculations
   const grandTotal = useMemo(() => {
@@ -707,16 +753,17 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
     setActiveEditingText(prev => {
       if (!prev) return null;
       const targetFontSize = updates.fontSize || prev.fontSize || 11;
-      // Strictly compute tight single-line height in proportion to font size
-      // 842pt is standard A4 height. 12pt font is 12*1.05/842 = 0.0149 (1.49% of page height).
-      const nextHeight = Math.max(0.008, Math.min(0.02, (targetFontSize * 1.05) / 842));
+      const ph = pageCanvasDimensions.height || 842;
+      const pw = pageCanvasDimensions.width || 595;
+      // Proportional single-line height matching font size
+      const nextHeight = Math.max(0.008, Math.min(0.035, (targetFontSize * 1.15) / ph));
 
       const currentText = updates.text !== undefined ? updates.text : prev.text;
       const estWidthPercent = Math.max(
         0.02,
-        Math.min(0.98, ((currentText.length + 1) * targetFontSize * 0.58) / 595)
+        Math.min(0.98, ((currentText.length + 1) * targetFontSize * 0.65) / pw)
       );
-      const nextWidth = Math.max(prev.widthPercent, estWidthPercent);
+      const nextWidth = Math.max(0.04, estWidthPercent);
 
       const nextObj = {
         ...prev,
@@ -856,27 +903,58 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
     }
   };
 
-  // Image upload handler
+  // Image upload handler - preserves original aspect ratio and converts to clean PNG
   const handleImageFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      const dataUrl = reader.result as string;
-      pushUndoSnapshot();
-      const newAnn: PdfAnnotation = {
-        id: generateUniqueAnnotationId(),
-        pageIndex: currentPageIndex,
-        type: 'image',
-        xPercent: 0.35,
-        yPercent: 0.35,
-        widthPercent: 0.25,
-        heightPercent: 0.18,
-        imageDataUrl: dataUrl,
+      const rawDataUrl = reader.result as string;
+      const img = new Image();
+      img.onload = () => {
+        // Convert to standard PNG to guarantee universal pdf-lib embedding compatibility
+        const offscreen = document.createElement('canvas');
+        offscreen.width = img.naturalWidth;
+        offscreen.height = img.naturalHeight;
+        const ctx = offscreen.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+        }
+        const pngDataUrl = offscreen.toDataURL('image/png');
+
+        const pw = pageCanvasDimensions.width || 595;
+        const ph = pageCanvasDimensions.height || 842;
+        const imgAspect = (img.naturalWidth || 1) / (img.naturalHeight || 1);
+
+        // Choose a comfortable initial size (e.g. 30% of page width)
+        let wPercent = 0.30;
+        let hPercent = (wPercent * pw) / imgAspect / ph;
+
+        // If height exceeds 40% of page, scale down proportionally
+        if (hPercent > 0.40) {
+          hPercent = 0.40;
+          wPercent = (hPercent * ph * imgAspect) / pw;
+        }
+
+        wPercent = Math.max(0.08, Math.min(0.85, Number(wPercent.toFixed(4))));
+        hPercent = Math.max(0.05, Math.min(0.85, Number(hPercent.toFixed(4))));
+
+        pushUndoSnapshot();
+        const newAnn: PdfAnnotation = {
+          id: generateUniqueAnnotationId(),
+          pageIndex: currentPageIndex,
+          type: 'image',
+          xPercent: Math.max(0.05, Number(((1 - wPercent) / 2).toFixed(4))),
+          yPercent: Math.max(0.05, Number(((1 - hPercent) / 2).toFixed(4))),
+          widthPercent: wPercent,
+          heightPercent: hPercent,
+          imageDataUrl: pngDataUrl,
+        };
+        appendAnnotationSafe(newAnn);
+        setSelectedAnnotationId(newAnn.id);
+        showToast(isZh ? '已插入图片，保持原始比例不失真' : 'Image inserted with original aspect ratio preserved!');
       };
-      appendAnnotationSafe(newAnn);
-      setSelectedAnnotationId(newAnn.id);
-      showToast(isZh ? '已插入图片，可拖拽调整位置与大小' : 'Image inserted! Drag to move or resize.');
+      img.src = rawDataUrl;
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -1742,6 +1820,9 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                 onUploadPdf={handleFileUpload}
                 onCreateBlankA4={handleCreateBlankA4}
                 onSelectCurrentQuote={handleSelectCurrentQuote}
+                onOpenPdfJoiner={handleOpenJoinerFromEditor}
+                onOpenPdfSplitter={handleOpenSplitterFromEditor}
+                onOpenImageConverter={onOpenImageConverter}
                 watermarkText={watermarkText}
                 onChangeWatermarkText={setWatermarkText}
                 watermarkColor={watermarkColor}
@@ -1895,7 +1976,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                     <div className="space-y-2 max-h-48 overflow-y-auto mac-scrollbar pr-1">
                       {items.map((it, idx) => (
                         <div
-                          key={it.id}
+                          key={`${it.id || 'quote-item'}-${idx}`}
                           className="p-2 rounded-lg bg-white dark:bg-[#050817] border border-slate-200 dark:border-white/10 space-y-1.5 text-xs shadow-2xs"
                         >
                           <div className="flex items-center justify-between gap-1">
@@ -1987,7 +2068,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                   ) : (
                     filteredTextItems.map((item, idx) => (
                       <div
-                        key={item.id || idx}
+                        key={`${item.id || 'text-item'}-${idx}`}
                         onMouseEnter={() => setHoveredTextId(item.id)}
                         onMouseLeave={() => setHoveredTextId(null)}
                         className={`p-1.5 rounded-lg border flex items-center justify-between gap-1.5 text-xs transition-all ${
@@ -2023,9 +2104,9 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                     {isZh ? '印章样式预设' : 'Stamp Presets'}
                   </span>
                   <div className="grid grid-cols-2 gap-1.5">
-                    {STAMP_PRESETS.map(preset => (
+                    {STAMP_PRESETS.map((preset, idx) => (
                       <button
-                        key={preset.id}
+                        key={`${preset.id}-${idx}`}
                         type="button"
                         onClick={() => setSelectedStampId(preset.id)}
                         className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
@@ -2104,9 +2185,9 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                         { color: '#0f172a', label: isZh ? '黑墨' : 'Black' },
                         { color: '#1d4ed8', label: isZh ? '蓝墨' : 'Blue' },
                         { color: '#b91c1c', label: isZh ? '红墨' : 'Red' },
-                      ].map(c => (
+                      ].map((c, idx) => (
                         <button
-                          key={c.color}
+                          key={`${c.color}-${idx}`}
                           type="button"
                           onClick={() => setSignaturePenColor(c.color)}
                           className={`w-4 h-4 rounded-full border cursor-pointer transition-all ${
@@ -2560,9 +2641,9 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                             { color: '#0f172a', label: 'Black' },
                             { color: '#1d4ed8', label: 'Blue' },
                             { color: '#b91c1c', label: 'Red' },
-                          ].map(c => (
+                          ].map((c, idx) => (
                             <button
-                              key={c.color}
+                              key={`modal-pen-${c.color}-${idx}`}
                               type="button"
                               onClick={() => setSignaturePenColor(c.color)}
                               className={`w-5 h-5 rounded-full border cursor-pointer transition-all ${
@@ -2631,9 +2712,9 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                           { id: 'script', label: isZh ? '流动草书' : 'Expressive Script' },
                           { id: 'cursive', label: isZh ? '优雅行书' : 'Flowing Cursive' },
                           { id: 'formal', label: isZh ? '正式公文体' : 'Formal Script' },
-                        ].map(st => (
+                        ].map((st, idx) => (
                           <button
-                            key={st.id}
+                            key={`${st.id}-${idx}`}
                             type="button"
                             onClick={() => setTypedSignatureStyle(st.id as any)}
                             className={`p-2 rounded-xl border text-center font-bold text-xs transition-all cursor-pointer ${
@@ -2720,6 +2801,38 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
           </div>
         )}
       </AnimatePresence>
+
+      {/* Embedded PDF Tools (Joiner / Splitter) */}
+      {internalPdfToolsOpen && (
+        <PdfToolsModal
+          isOpen={internalPdfToolsOpen}
+          onClose={() => setInternalPdfToolsOpen(false)}
+          initialTab={internalPdfToolsTab}
+          currentActivePdfBytes={basePdfBytes}
+          currentActivePdfName={uploadedFileName || 'Document.pdf'}
+          onOpenInEditor={(bytes, name) => {
+            const arr =
+              bytes instanceof ArrayBuffer
+                ? bytes
+                : (bytes.buffer.slice(
+                    bytes.byteOffset,
+                    bytes.byteOffset + bytes.byteLength
+                  ) as ArrayBuffer);
+            setUploadedPdfBytes(arr);
+            setUploadedFileName(name);
+            setActiveSource('upload');
+            setActiveTab('annotate');
+            getPdfPageCount(arr).then(count => {
+              setTotalPages(count);
+              setCurrentPageIndex(0);
+              setRotations({});
+              setAnnotations([]);
+              setDeletePageIndices([]);
+            });
+            showToast(isZh ? `已载入: ${name}` : `Opened: ${name}`);
+          }}
+        />
+      )}
     </AnimatePresence>
   );
 };

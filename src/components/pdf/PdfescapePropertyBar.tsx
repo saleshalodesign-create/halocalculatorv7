@@ -144,8 +144,10 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
     : selectedAnnotation?.type === 'whiteout';
 
   const handleFontChange = (val: string) => {
-    if (activeEditingText) onUpdateActiveText({ fontFamily: val });
-    if (selectedAnnotation) onUpdateSelectedAnnotation({ fontFamily: val });
+    const matched = STANDARD_FONTS.find(f => f.value === val);
+    const displayName = matched ? matched.label : val;
+    if (activeEditingText) onUpdateActiveText({ fontFamily: val, fontDisplayName: displayName });
+    if (selectedAnnotation) onUpdateSelectedAnnotation({ fontFamily: val, fontDisplayName: displayName });
   };
 
   const handleSizeChange = (val: number) => {
@@ -198,31 +200,26 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
               <span>{isZh ? '文字属性' : 'Text'}</span>
             </span>
 
-            {/* When editing existing text from PDF: strictly lock and preserve original font */}
-            {currentFontDisplayName ? (
-              <div
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-cyan-950/80 text-cyan-300 font-mono text-[10px] font-bold border border-cyan-500/30 whitespace-nowrap shadow-xs"
-                title={isZh ? '已锁定原 PDF 字体，保持原文档格式不变' : 'Original PDF font locked - never changed'}
+            {/* Font Family Dropdown - Always accessible, with Original Font if detected */}
+            <div className="flex items-center gap-1">
+              <select
+                value={currentFont}
+                onChange={e => handleFontChange(e.target.value)}
+                className="bg-slate-800 text-slate-200 border border-slate-700 rounded px-2 py-1 text-xs outline-none focus:border-cyan-400 max-w-[170px] sm:max-w-[220px] cursor-pointer"
+                title={isZh ? '文字字体 (点击可切换任意字体)' : 'Font Family (Select to change font)'}
               >
-                <span>🔒 {isZh ? '原文档字体' : 'Original Font'}: {currentFontDisplayName}</span>
-              </div>
-            ) : (
-              /* Font Family Dropdown for newly created text */
-              <div className="flex items-center gap-1">
-                <select
-                  value={currentFont}
-                  onChange={e => handleFontChange(e.target.value)}
-                  className="bg-slate-800 text-slate-200 border border-slate-700 rounded px-2 py-1 text-xs outline-none focus:border-cyan-400 max-w-[160px] sm:max-w-[210px] cursor-pointer"
-                  title={isZh ? '文字字体' : 'Font'}
-                >
-                  {STANDARD_FONTS.map(f => (
-                    <option key={f.label} value={f.value}>
-                      {f.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+                {currentFontDisplayName && !STANDARD_FONTS.some(f => f.value === currentFont) && (
+                  <option key="custom-font-opt" value={currentFont}>
+                    {isZh ? `原文档字体 (${currentFontDisplayName})` : `Original (${currentFontDisplayName})`}
+                  </option>
+                )}
+                {STANDARD_FONTS.map(f => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* Font Size Dropdown */}
             <select
@@ -441,12 +438,12 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
               onChange={e => onChangeStampId(e.target.value)}
               className="bg-slate-800 text-slate-200 border border-slate-700 rounded px-2 py-0.5 text-xs outline-none cursor-pointer"
             >
-              {STAMP_PRESETS.map(p => (
-                <option key={p.id} value={p.id}>
+              {STAMP_PRESETS.map((p, idx) => (
+                <option key={`${p.id}-${idx}`} value={p.id}>
                   {p.label}
                 </option>
               ))}
-              <option value="CUSTOM">{isZh ? '自定义印章...' : 'Custom Stamp...'}</option>
+              <option key="custom-stamp-opt" value="CUSTOM">{isZh ? '自定义印章...' : 'Custom Stamp...'}</option>
             </select>
             {selectedStampId === 'CUSTOM' && (
               <input

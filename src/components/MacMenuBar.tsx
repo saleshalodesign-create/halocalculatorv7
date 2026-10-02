@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { UserProfile, Theme, ThemeType } from '../types';
 import { GoogleIcon } from './GoogleIcon';
 import { HaloLogo } from './HaloLogo';
-import { Moon, Sun, Smartphone, Calculator, RectangleHorizontal, RectangleVertical, Square, Globe, FileSpreadsheet, Sparkles, FileCheck } from 'lucide-react';
+import { Moon, Sun, Smartphone, Calculator, RectangleHorizontal, RectangleVertical, Square, Globe, FileSpreadsheet, Sparkles, FileCheck, Layers, Image as ImageIcon, Volume2, VolumeX } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { isSoundEnabled, toggleSound, playSoftPop } from '../utils/soundEffects';
 
 interface MacMenuBarProps {
   quoteCount: number;
   onOpenQuoteList: () => void;
   theme: ThemeType;
   setTheme: (theme: ThemeType) => void;
+  wallpaper?: string;
+  onNextWallpaper?: () => void;
   user: UserProfile | null;
   onOpenAuth: () => void;
   onOpenMobileApp: () => void;
@@ -17,6 +20,8 @@ interface MacMenuBarProps {
   onOpenShapeModal?: () => void;
   onOpenDailySchedule?: () => void;
   onOpenPdfEditor?: () => void;
+  onOpenPdfTools?: (tab?: 'join' | 'split') => void;
+  onOpenImageConverter?: () => void;
   onOpenAiModal?: () => void;
   shapeType?: 'horizontal' | 'vertical' | 'square' | 'invalid';
   shapeLabel?: string;
@@ -27,6 +32,8 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
   onOpenQuoteList,
   theme,
   setTheme,
+  wallpaper,
+  onNextWallpaper,
   user,
   onOpenAuth,
   onOpenMobileApp,
@@ -34,12 +41,15 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
   onOpenShapeModal,
   onOpenDailySchedule,
   onOpenPdfEditor,
+  onOpenPdfTools,
+  onOpenImageConverter,
   onOpenAiModal,
   shapeType = 'horizontal',
   shapeLabel = 'Horizontal',
 }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const [timeString, setTimeString] = useState('');
+  const [soundOn, setSoundOn] = useState<boolean>(() => isSoundEnabled());
 
   const cycleTheme = () => {
     if (theme === Theme.DARK) {
@@ -78,7 +88,7 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 pt-[env(safe-area-inset-top,0px)] bg-white/85 dark:bg-[#070b19]/90 backdrop-blur-2xl border-b border-slate-200/90 dark:border-indigo-500/20 z-50 select-none shadow-sm">
+    <div className="apple-menubar-glass fixed top-0 left-0 right-0 pt-[env(safe-area-inset-top,0px)] z-50 select-none">
       <div className="h-7 sm:h-8 flex items-center justify-between px-2 xs:px-3 text-[12px] sm:text-[13px] font-sans font-medium text-slate-800 dark:text-neutral-200">
         {/* Left System Menu */}
         <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-4 min-w-0">
@@ -147,6 +157,26 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
                 <span>{t.nav.pdfEditor || 'Edit PDF'}</span>
               </button>
             )}
+            {onOpenPdfTools && (
+              <button
+                onClick={() => onOpenPdfTools('join')}
+                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 font-medium"
+                title={language === 'zh' ? 'PDF 合并与拆分工具箱' : 'PDF Joiner & Splitter'}
+              >
+                <Layers className="w-3.5 h-3.5 text-blue-500" />
+                <span>{language === 'zh' ? '合并/拆分' : 'Merge/Split'}</span>
+              </button>
+            )}
+            {onOpenImageConverter && (
+              <button
+                onClick={onOpenImageConverter}
+                className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors flex items-center gap-1 font-medium"
+                title={language === 'zh' ? '图片格式转换工作台' : 'Image File Converter'}
+              >
+                <ImageIcon className="w-3.5 h-3.5 text-cyan-500" />
+                <span>{t.nav.imageConverter || (language === 'zh' ? '图片转换' : 'Converter')}</span>
+              </button>
+            )}
             {onOpenAiModal && (
               <button
                 onClick={onOpenAiModal}
@@ -171,6 +201,49 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
           <Globe className="w-3 h-3 text-blue-600 dark:text-blue-400" />
           <span>{language === 'zh' ? '中文' : 'EN'}</span>
         </button>
+
+        {/* Wallpaper Switcher Pill Button */}
+        {onNextWallpaper && (
+          <button
+            onClick={() => {
+              playSoftPop();
+              onNextWallpaper();
+            }}
+            className="flex items-center gap-1 px-1.5 xs:px-2 sm:px-2.5 py-0.5 rounded-md sm:rounded-lg bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 border border-slate-200 dark:border-white/10 text-[10px] xs:text-[11px] font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+            title={`Wallpaper: ${wallpaper || 'Default'} (Click to switch)`}
+          >
+            <Sparkles className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-cyan-500" />
+            <span className="hidden lg:inline">{t.dock.wallpaper || (language === 'zh' ? '壁纸' : 'Wallpaper')}</span>
+          </button>
+        )}
+
+        {/* Haptic Sound Effects Toggle */}
+        <button
+          onClick={() => {
+            const next = toggleSound();
+            setSoundOn(next);
+          }}
+          className={`flex items-center gap-1 px-1.5 xs:px-2 sm:px-2 py-0.5 rounded-md sm:rounded-lg border text-[10px] xs:text-[11px] font-bold transition-all shadow-xs active:scale-95 cursor-pointer ${
+            soundOn
+              ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+              : 'bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-neutral-500 border-slate-200 dark:border-white/10 opacity-70'
+          }`}
+          title={soundOn ? (language === 'zh' ? '触感音效: 已开启 (点击静音)' : 'Sound Effects: On (Click to mute)') : (language === 'zh' ? '触感音效: 已静音 (点击开启)' : 'Sound Effects: Muted (Click to enable)')}
+        >
+          {soundOn ? <Volume2 className="w-3 h-3 text-emerald-500" /> : <VolumeX className="w-3 h-3 text-slate-400" />}
+          <span className="hidden xl:inline">{soundOn ? (language === 'zh' ? '音效' : 'Sound') : (language === 'zh' ? '静音' : 'Mute')}</span>
+        </button>
+
+        {/* Calculator Button (Quick access icon for mobile screens) */}
+        {onOpenMathCalc && (
+          <button
+            onClick={onOpenMathCalc}
+            className="md:hidden flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[10px] font-bold transition-all active:scale-95 cursor-pointer"
+            title={t.nav.calculatorBtn}
+          >
+            <Calculator className="w-3 h-3 text-amber-500" />
+          </button>
+        )}
 
         {/* Quote item pill */}
         {quoteCount > 0 && (

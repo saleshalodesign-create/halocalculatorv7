@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import {
   Box,
   Zap,
@@ -9,6 +9,7 @@ import {
   Layers,
   Edit2,
 } from 'lucide-react';
+import { playGlassTap } from '../utils/soundEffects';
 
 interface MacPricingCardProps {
   title: string;
@@ -194,14 +195,56 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
 }) => {
   const [localRate, setLocalRate] = useState<string>(rate !== undefined ? rate.toString() : '');
   const [isClicked, setIsClicked] = useState<boolean>(false);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const cardRef = useRef<HTMLDivElement>(null);
   const theme = cardThemes[iconType] || cardThemes.lightbox;
 
   const isLit = isSelected || isClicked;
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Generate waterdrop ripple
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const newRipple = { id: Date.now(), x, y };
+      setRipples(prev => [...prev.slice(-3), newRipple]);
+      setTimeout(() => {
+        setRipples(prev => prev.filter(r => r.id !== newRipple.id));
+      }, 550);
+    }
+
+    playGlassTap();
     setIsClicked(true);
     setTimeout(() => setIsClicked(false), 600);
     onClick();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMousePos({ x, y });
+
+    // Subtle 3D tilt math: max 4 degrees
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const tiltX = ((y - centerY) / centerY) * -4.5;
+    const tiltY = ((x - centerX) / centerX) * 4.5;
+    setTilt({ x: tiltX, y: tiltY });
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setTilt({ x: 0, y: 0 });
   };
 
   useEffect(() => {
@@ -237,15 +280,49 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
 
   return (
     <div
+      ref={cardRef}
       onClick={handleClick}
-      className={`group relative rounded-xl sm:rounded-2xl p-2 sm:p-3 lg:p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between overflow-hidden min-h-[76px] sm:min-h-[96px] lg:min-h-[118px] gpu-layer active:scale-[0.98] ${
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: isHovered
+          ? `perspective(700px) rotateX(${tilt.x.toFixed(2)}deg) rotateY(${tilt.y.toFixed(2)}deg) translateY(-2px)`
+          : 'perspective(700px) rotateX(0deg) rotateY(0deg) translateY(0px)',
+        transition: isHovered ? 'transform 0.08s ease-out' : 'transform 0.3s ease',
+      }}
+      className={`group relative rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 lg:p-4 cursor-pointer flex flex-col justify-between overflow-hidden min-h-[76px] sm:min-h-[96px] lg:min-h-[118px] gpu-layer active:scale-[0.98] ${
         isLit
-          ? `${theme.selectedLightBg} ${theme.selectedDarkBg} border-2 ${theme.selectedLightBorder} ${theme.selectedDarkBorder} ${theme.selectedDarkShadow} ring-2 ring-current/20 shadow-md`
-          : `${theme.lightBg} ${theme.hoverBgLight} dark:bg-[#0a0f24]/90 ${theme.hoverBgDark} backdrop-blur-md border ${theme.lightBorder} dark:border-indigo-500/20 ${theme.hoverBorder} shadow-sm hover:shadow-lg hover:shadow-indigo-500/10 hover:-translate-y-0.5`
+          ? `${theme.selectedLightBg} ${theme.selectedDarkBg} border-2 ${theme.selectedLightBorder} ${theme.selectedDarkBorder} ${theme.selectedDarkShadow} glass-rainbow-rim ring-2 ring-current/20 shadow-lg`
+          : `apple-card-glass ${theme.hoverBorder}`
       }`}
     >
+      {/* Interactive Cursor Spotlight Sheen */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[inherit] z-0"
+        style={{
+          background: `radial-gradient(190px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255, 255, 255, 0.18), transparent 75%)`,
+        }}
+      />
+
+      {/* Dynamic Waterdrop Ripple Clicks */}
+      {ripples.map(r => (
+        <span
+          key={r.id}
+          className="liquid-ripple"
+          style={{
+            left: r.x,
+            top: r.y,
+            width: 70,
+            height: 70,
+            marginLeft: -35,
+            marginTop: -35,
+          }}
+        />
+      ))}
+
       {/* Top Row: Icon + Title */}
-      <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+      <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 relative z-10">
         <div
           className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 rounded-lg ${iconBg} text-white flex items-center justify-center shadow-sm shrink-0 transition-transform ${
             isLit ? 'scale-105 shadow-md' : 'group-hover:scale-105'

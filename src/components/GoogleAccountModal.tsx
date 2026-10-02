@@ -363,11 +363,11 @@ export const GoogleAccountModal: React.FC<GoogleAccountModalProps> = ({
                 {!isNewAccountMode ? (
                   /* Saved Accounts List */
                   <div className="space-y-2 max-h-48 overflow-y-auto mac-scrollbar">
-                    {accounts.map(acc => {
+                    {accounts.map((acc, idx) => {
                       const isSelected = selectedEmail === acc.email;
                       return (
                         <div
-                          key={acc.email}
+                          key={`${acc.email || 'acc'}-${acc.uid || idx}`}
                           onClick={() => {
                             setSelectedEmail(acc.email);
                             setErrorMessage('');

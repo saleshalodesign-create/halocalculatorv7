@@ -102,7 +102,7 @@ export function AiHelpModal({ isOpen, onClose }: AiHelpModalProps) {
     if (!textToSend || loading) return;
 
     const userMessage: ChatMessage = {
-      id: Date.now().toString(),
+      id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       role: 'user',
       text: textToSend,
       timestamp: Date.now(),
@@ -144,7 +144,7 @@ export function AiHelpModal({ isOpen, onClose }: AiHelpModalProps) {
       setMessages(prev => [
         ...prev,
         {
-          id: (Date.now() + 1).toString(),
+          id: `ai-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
           role: 'assistant',
           text: aiReply,
           timestamp: Date.now(),
@@ -157,7 +157,7 @@ export function AiHelpModal({ isOpen, onClose }: AiHelpModalProps) {
       setMessages(prev => [
         ...prev,
         {
-          id: (Date.now() + 1).toString(),
+          id: `err-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
           role: 'assistant',
           text:
             language === 'zh'
@@ -416,7 +416,7 @@ export function AiHelpModal({ isOpen, onClose }: AiHelpModalProps) {
             <div className="flex items-center gap-1.5 w-max">
               {getPromptSuggestions().map((suggestion, idx) => (
                 <button
-                  key={idx}
+                  key={`sug-${idx}`}
                   type="button"
                   onClick={() => handleSendMessage(suggestion)}
                   disabled={loading}
@@ -431,11 +431,11 @@ export function AiHelpModal({ isOpen, onClose }: AiHelpModalProps) {
 
           {/* Scrollable Conversation Thread */}
           <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-4 mac-scrollbar bg-slate-50/20 dark:bg-transparent">
-            {messages.map((msg) => {
+            {messages.map((msg, idx) => {
               const badge = getRoleBadge(msg.roleType, msg.model);
               return (
                 <div
-                  key={msg.id}
+                  key={`${msg.id}-${idx}`}
                   className={`flex gap-2.5 sm:gap-3.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {/* Model Avatar */}

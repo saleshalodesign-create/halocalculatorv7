@@ -44,6 +44,7 @@ import {
   FileCheck,
   Printer,
   FileSpreadsheet,
+  Layers,
 } from 'lucide-react';
 
 export const PRESET_ITEMS: Array<{ name: string; price: number }> = [
@@ -77,6 +78,7 @@ interface QuotationListModalProps {
   onLoadQuoteRecord: (record: QuoteRecord) => void;
   onOpenDailySchedule?: (customerName?: string, customerAddress?: string) => void;
   onOpenPdfEditor?: (items?: QuoteItem[], data?: Partial<QuoteRecord>, docType?: DocumentType) => void;
+  onOpenPdfTools?: (tab?: 'join' | 'split') => void;
 }
 
 export const QuotationListModal: React.FC<QuotationListModalProps> = ({
@@ -92,6 +94,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
   onLoadQuoteRecord,
   onOpenDailySchedule,
   onOpenPdfEditor,
+  onOpenPdfTools,
 }) => {
   const { language, t } = useLanguage();
   const [activeSubTab, setActiveSubTab] = useState<'active' | 'cloudRecords'>('active');
@@ -827,13 +830,13 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                       <option value="" disabled>
                         ⚡ {language === 'zh' ? '快捷预设' : 'Presets'} ({PRESET_ITEMS.length})
                       </option>
-                      {PRESET_ITEMS.map(item => {
+                      {PRESET_ITEMS.map((item, index) => {
                         const displayName = language === 'zh' && (t.quotationList.presets as any)?.[item.name]
                           ? (t.quotationList.presets as any)[item.name]
                           : item.name;
                         return (
                           <option
-                            key={item.name}
+                            key={`${item.name}-${index}`}
                             value={item.name}
                             className="bg-white dark:bg-[#080d22] text-neutral-900 dark:text-neutral-100 font-normal"
                           >
@@ -946,7 +949,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                 ) : (
                   items.map((item, index) => (
                     <div
-                      key={item.id}
+                      key={`${item.id || 'quote-item'}-${index}`}
                       className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white dark:bg-[#0d1433]/85 hover:dark:bg-[#121c45] border border-slate-200/80 dark:border-indigo-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3 shadow-sm hover:border-cyan-500/40 transition-all group"
                     >
                       <div className="flex-1 min-w-0">
@@ -1241,6 +1244,16 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                     >
                       <FileCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                       <span className="truncate">{language === 'zh' ? '编辑 PDF' : 'Edit PDF'}</span>
+                    </button>
+                  )}
+                  {onOpenPdfTools && (
+                    <button
+                      onClick={() => onOpenPdfTools('join')}
+                      className="py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-[10px] sm:text-xs hover:brightness-110 transition-all flex items-center justify-center gap-1 shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+                      title={language === 'zh' ? 'PDF 合并与拆分工具箱' : 'PDF Joiner & Splitter'}
+                    >
+                      <Layers className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                      <span className="truncate">{language === 'zh' ? '合并/拆分' : 'Join/Split'}</span>
                     </button>
                   )}
                 </div>
@@ -1848,9 +1861,9 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                       </p>
                     </div>
                   ) : (
-                    filteredCloudRecords.map(record => (
+                    filteredCloudRecords.map((record, index) => (
                       <div
-                        key={record.id}
+                        key={`${record.id || 'cloud-rec'}-${index}`}
                         className="p-4 rounded-2xl bg-white dark:bg-[#0d1433] border border-slate-200/80 dark:border-indigo-500/20 hover:border-cyan-500/40 shadow-sm transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                       >
                         <div className="flex-1 min-w-0">

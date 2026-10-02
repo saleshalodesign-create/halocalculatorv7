@@ -48,10 +48,27 @@ export const useFirebaseAuth = () => {
 
   // Stored known accounts on this device
   const [accounts, setAccounts] = useState<StoredAccount[]>(() => {
+    const deduplicate = (list: StoredAccount[]) => {
+      const seen = new Set<string>();
+      const result: StoredAccount[] = [];
+      for (const item of list) {
+        const key = (item.email || '').trim().toLowerCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          result.push(item);
+        }
+      }
+      return result;
+    };
+
     const stored = localStorage.getItem('halo_stored_accounts');
     if (stored) {
       try {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const clean = deduplicate(parsed);
+          return clean.length > 0 ? clean : DEFAULT_ACCOUNTS;
+        }
       } catch {
         return DEFAULT_ACCOUNTS;
       }
@@ -61,8 +78,17 @@ export const useFirebaseAuth = () => {
   });
 
   const saveAccountsList = (updated: StoredAccount[]) => {
-    setAccounts(updated);
-    localStorage.setItem('halo_stored_accounts', JSON.stringify(updated));
+    const seen = new Set<string>();
+    const deduped: StoredAccount[] = [];
+    for (const item of updated) {
+      const key = (item.email || '').trim().toLowerCase();
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        deduped.push(item);
+      }
+    }
+    setAccounts(deduped);
+    localStorage.setItem('halo_stored_accounts', JSON.stringify(deduped));
   };
 
   const loadUserQuotes = async (uid: string) => {

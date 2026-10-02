@@ -26,9 +26,13 @@ import {
   ShieldAlert,
   X,
   Check,
+  Layers,
+  Scissors,
+  Split,
+  Plus,
 } from 'lucide-react';
 
-export type PdfescapeTab = 'insert' | 'annotate' | 'watermark' | 'page' | 'document' | 'upload';
+export type PdfescapeTab = 'insert' | 'annotate' | 'watermark' | 'page' | 'merge_split' | 'document' | 'upload';
 
 interface PdfescapeToolPanelProps {
   activeTab: PdfescapeTab;
@@ -52,6 +56,11 @@ interface PdfescapeToolPanelProps {
   onUploadPdf: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCreateBlankA4: () => void;
   onSelectCurrentQuote: () => void;
+  // PDF Joiner and Splitter
+  onOpenPdfJoiner?: () => void;
+  onOpenPdfSplitter?: () => void;
+  // Image converter
+  onOpenImageConverter?: () => void;
   // Watermark controls
   watermarkText?: string;
   onChangeWatermarkText?: (t: string) => void;
@@ -87,6 +96,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
   onUploadPdf,
   onCreateBlankA4,
   onSelectCurrentQuote,
+  onOpenPdfJoiner,
+  onOpenPdfSplitter,
+  onOpenImageConverter,
   watermarkText = '',
   onChangeWatermarkText = () => {},
   watermarkColor = '#94a3b8',
@@ -106,6 +118,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
     { id: 'annotate', labelZh: '标注 (Annotate)', labelEn: 'Annotate' },
     { id: 'watermark', labelZh: '水印 (Watermark)', labelEn: 'Watermark' },
     { id: 'page', labelZh: '页面 (Page)', labelEn: 'Page' },
+    { id: 'merge_split', labelZh: '合并/拆分', labelEn: 'Merge & Split' },
     { id: 'document', labelZh: '单据明细', labelEn: 'Quote Form' },
     { id: 'upload', labelZh: '文件源', labelEn: 'Files' },
   ];
@@ -639,6 +652,125 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 <Trash2 className="w-4 h-4" />
                 <span>{isZh ? '删除本页' : 'Delete Page'}</span>
               </button>
+            </div>
+
+            {/* Quick Access to Merge & Split Tools */}
+            <div className="pt-2 border-t border-slate-700/80 space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block">
+                {isZh ? 'PDF 合并与拆分工具' : 'PDF Joiner & Splitter'}
+              </span>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={onOpenPdfJoiner}
+                  className="p-2.5 rounded-xl bg-gradient-to-r from-blue-900/30 to-indigo-900/30 hover:from-blue-900/50 hover:to-indigo-900/50 border border-blue-500/30 text-blue-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                >
+                  <Layers className="w-4 h-4 text-blue-400" />
+                  <span>{isZh ? '合并多个 PDF' : 'Merge PDFs'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onOpenPdfSplitter}
+                  className="p-2.5 rounded-xl bg-gradient-to-r from-purple-900/30 to-pink-900/30 hover:from-purple-900/50 hover:to-pink-900/50 border border-purple-500/30 text-purple-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                >
+                  <Scissors className="w-4 h-4 text-purple-400" />
+                  <span>{isZh ? '拆分提取页面' : 'Split PDF'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 5. MERGE & SPLIT TAB */}
+        {activeTab === 'merge_split' && (
+          <div className="space-y-3">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+              {isZh ? 'PDF 合并与拆分 (Joiner & Splitter)' : 'PDF Joiner & Splitter Studio'}
+            </span>
+
+            {/* Merge PDFs Card */}
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-950/60 to-indigo-950/60 border border-blue-500/30 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400">
+                  <Layers className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-white">
+                    {isZh ? 'PDF 合并器 (PDF Joiner)' : 'PDF Joiner (Merge)'}
+                  </h4>
+                  <p className="text-[10px] text-slate-400">
+                    {isZh ? '将多个 PDF 文件按序拼合成一个' : 'Combine multiple PDFs in sequence'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenPdfJoiner}
+                className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>{isZh ? '打开 PDF 合并工具箱...' : 'Open PDF Joiner Studio...'}</span>
+              </button>
+            </div>
+
+            {/* Split PDF Card */}
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-950/60 to-pink-950/60 border border-purple-500/30 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400">
+                  <Scissors className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-white">
+                    {isZh ? 'PDF 拆分器 (PDF Splitter)' : 'PDF Splitter'}
+                  </h4>
+                  <p className="text-[10px] text-slate-400">
+                    {isZh ? '提取指定页码、每页拆分或固定页数分割' : 'Extract pages, single pages, or chunks'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenPdfSplitter}
+                className="w-full py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all"
+              >
+                <Scissors className="w-3.5 h-3.5" />
+                <span>{isZh ? '打开 PDF 拆分工具箱...' : 'Open PDF Splitter Studio...'}</span>
+              </button>
+            </div>
+
+            {/* Image Converter Card */}
+            {onOpenImageConverter && (
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-teal-950/60 to-emerald-950/60 border border-teal-500/30 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-teal-500/20 text-teal-400">
+                    <ImageIcon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-white">
+                      {isZh ? '图片格式转换器 (Image Converter)' : 'Image Converter'}
+                    </h4>
+                    <p className="text-[10px] text-slate-400">
+                      {isZh ? 'PNG ⇄ JPG ⇄ WEBP ⇄ PDF ⇄ ICO ⇄ SVG 互转' : 'Convert PNG, JPG, WEBP, PDF, ICO, SVG'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={onOpenImageConverter}
+                  className="w-full py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all"
+                >
+                  <ImageIcon className="w-3.5 h-3.5" />
+                  <span>{isZh ? '打开图片格式转换工作台...' : 'Open Image Converter...'}</span>
+                </button>
+              </div>
+            )}
+
+            <div className="p-2.5 rounded-xl bg-slate-800/40 border border-slate-700/80 text-[11px] text-slate-400 leading-relaxed">
+              💡 {isZh
+                ? '提示：支持将外部导入的多个 PDF 以及当前开单的报价单自由拼接合并，或从长文档中单独提取任一部分。'
+                : 'Tip: You can merge multiple external PDFs with your current quotation, or extract specific pages.'}
             </div>
           </div>
         )}

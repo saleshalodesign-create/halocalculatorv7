@@ -223,7 +223,7 @@ export const MathCalculatorModal: React.FC<MathCalculatorModalProps> = ({
 
     // Save history
     const entry: HistoryEntry = {
-      id: Date.now().toString(),
+      id: `calc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       expression,
       result: formattedResult,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -532,9 +532,9 @@ export const MathCalculatorModal: React.FC<MathCalculatorModalProps> = ({
               </p>
             ) : (
               <div className="space-y-1.5">
-                {historyList.map(item => (
+                {historyList.map((item, idx) => (
                   <button
-                    key={item.id}
+                    key={`${item.id}-${idx}`}
                     type="button"
                     onClick={() => {
                       setDisplay(item.result);

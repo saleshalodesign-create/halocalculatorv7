@@ -337,15 +337,39 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
       let newX = initialX;
       let newY = initialY;
 
-      if (handle.includes('e')) newW = Math.max(0.02, initialW + dx);
-      if (handle.includes('s')) newH = Math.max(0.015, initialH + dy);
-      if (handle.includes('w')) {
-        newW = Math.max(0.02, initialW - dx);
-        newX = initialX + dx;
-      }
-      if (handle.includes('n')) {
-        newH = Math.max(0.015, initialH - dy);
-        newY = initialY + dy;
+      const targetAnn = annotations.find(a => a.id === resizingAnnotation.id);
+      const isMedia = targetAnn && (targetAnn.type === 'image' || targetAnn.type === 'signature');
+
+      if (isMedia) {
+        const aspect = (initialW * rect.width) / Math.max(1, initialH * rect.height);
+        if (handle === 'se') {
+          newW = Math.max(0.04, initialW + dx);
+          newH = (newW * rect.width) / aspect / rect.height;
+        } else if (handle === 'sw') {
+          newW = Math.max(0.04, initialW - dx);
+          newX = initialX + (initialW - newW);
+          newH = (newW * rect.width) / aspect / rect.height;
+        } else if (handle === 'ne') {
+          newW = Math.max(0.04, initialW + dx);
+          newH = (newW * rect.width) / aspect / rect.height;
+          newY = initialY - (newH - initialH);
+        } else if (handle === 'nw') {
+          newW = Math.max(0.04, initialW - dx);
+          newX = initialX + (initialW - newW);
+          newH = (newW * rect.width) / aspect / rect.height;
+          newY = initialY - (newH - initialH);
+        }
+      } else {
+        if (handle.includes('e')) newW = Math.max(0.02, initialW + dx);
+        if (handle.includes('s')) newH = Math.max(0.015, initialH + dy);
+        if (handle.includes('w')) {
+          newW = Math.max(0.02, initialW - dx);
+          newX = initialX + dx;
+        }
+        if (handle.includes('n')) {
+          newH = Math.max(0.015, initialH - dy);
+          newY = initialY + dy;
+        }
       }
 
       onUpdateAnnotation(resizingAnnotation.id, {
@@ -741,11 +765,11 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
         const left = `${ann.xPercent * 100}%`;
         const top = `${ann.yPercent * 100}%`;
         const isTextLayer = ann.type === 'text' || (ann.type === 'whiteout' && !!ann.text);
-        const tightTextHeight = ((ann.fontSize || 11) * 1.05) / (canvasHeight / zoomScale);
+        const tightTextHeight = ((ann.fontSize || 11) * 1.15) / (canvasHeight / zoomScale);
         const defaultHeight = Math.max(0.008, tightTextHeight);
         const width = `${(ann.widthPercent || 0.1) * 100}%`;
         const height = isTextLayer
-          ? `${Math.min(ann.heightPercent || defaultHeight, tightTextHeight * 1.08) * 100}%`
+          ? `${(ann.heightPercent || defaultHeight) * 100}%`
           : `${(ann.heightPercent || defaultHeight) * 100}%`;
         const uniqueAnnKey = `ann-canvas-${ann.id || 'box'}-${idx}`;
 
@@ -790,10 +814,11 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
 
             {ann.type === 'text' && (
               <div
-                className="w-full h-full flex items-center px-1 whitespace-nowrap overflow-hidden"
+                className="w-full h-full flex items-center px-0.5 whitespace-nowrap overflow-hidden leading-none box-border"
                 style={{
                   fontFamily: ann.fontFamily,
                   fontSize: `${(ann.fontSize || 12) * zoomScale}px`,
+                  lineHeight: 1,
                   fontWeight: ann.isBold ? 'bold' : 'normal',
                   fontStyle: ann.isItalic ? 'italic' : 'normal',
                   textDecoration: ann.isUnderline ? 'underline' : 'none',

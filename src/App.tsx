@@ -18,7 +18,10 @@ import { HaloLogo } from './components/HaloLogo';
 import { LightboxShapeModal } from './components/LightboxShapeModal';
 import { DailyOutsideScheduleModal } from './components/DailyOutsideScheduleModal';
 import { PdfEditorModal } from './components/PdfEditorModal';
-import { RotateCcw, RectangleHorizontal, RectangleVertical, Square, FileCheck } from 'lucide-react';
+import { PdfToolsModal } from './components/PdfToolsModal';
+import { ImageConverterModal } from './components/ImageConverterModal';
+import { RotateCcw, RectangleHorizontal, RectangleVertical, Square, FileCheck, Layers, Image as ImageIcon } from 'lucide-react';
+import { playSuccessChime } from './utils/soundEffects';
 
 export default function App() {
   const { language, t } = useLanguage();
@@ -56,7 +59,19 @@ export default function App() {
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>(() => {
     try {
       const saved = localStorage.getItem('halo_sign_quote_items');
-      return saved ? JSON.parse(saved) : [];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const seen = new Set<string>();
+          return parsed.map((item, idx) => {
+            const rawId = item.id || `quote-${idx}`;
+            const id = seen.has(rawId) ? `${rawId}-${idx}-${Math.random().toString(36).slice(2, 6)}` : rawId;
+            seen.add(id);
+            return { ...item, id };
+          });
+        }
+      }
+      return [];
     } catch {
       return [];
     }
@@ -80,6 +95,11 @@ export default function App() {
   const [pdfEditorItems, setPdfEditorItems] = useState<QuoteItem[]>([]);
   const [pdfEditorData, setPdfEditorData] = useState<Partial<QuoteRecord>>({});
   const [pdfEditorDocType, setPdfEditorDocType] = useState<any>('quote');
+  const [pdfEditorCustomBytes, setPdfEditorCustomBytes] = useState<ArrayBuffer | null>(null);
+  const [pdfEditorCustomName, setPdfEditorCustomName] = useState<string>('');
+  const [pdfToolsOpen, setPdfToolsOpen] = useState(false);
+  const [pdfToolsInitialTab, setPdfToolsInitialTab] = useState<'join' | 'split'>('join');
+  const [imageConverterOpen, setImageConverterOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   const handleOpenPdfEditor = (
@@ -87,10 +107,34 @@ export default function App() {
     dataToEdit?: Partial<QuoteRecord>,
     typeToEdit?: any
   ) => {
+    setPdfEditorCustomBytes(null);
+    setPdfEditorCustomName('');
     setPdfEditorItems(itemsToEdit && itemsToEdit.length > 0 ? itemsToEdit : quoteItems);
     setPdfEditorData(dataToEdit || {});
     setPdfEditorDocType(typeToEdit || 'quote');
     setPdfEditorOpen(true);
+  };
+
+  const handleOpenPdfEditorWithFile = (bytes: ArrayBuffer | Uint8Array, fileName: string) => {
+    const arr =
+      bytes instanceof ArrayBuffer
+        ? bytes
+        : (bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer);
+    setPdfEditorCustomBytes(arr);
+    setPdfEditorCustomName(fileName);
+    setPdfEditorItems(quoteItems);
+    setPdfEditorData({});
+    setPdfEditorDocType('quote');
+    setPdfEditorOpen(true);
+  };
+
+  const handleOpenPdfTools = (tab: 'join' | 'split' = 'join') => {
+    setPdfToolsInitialTab(tab);
+    setPdfToolsOpen(true);
+  };
+
+  const handleOpenImageConverter = () => {
+    setImageConverterOpen(true);
   };
 
   const handleOpenDailySchedule = (customerName?: string, customerAddress?: string) => {
@@ -144,6 +188,13 @@ export default function App() {
     } else if (newTheme === Theme.DARK) {
       setWallpaper('cyber-midnight');
     }
+  };
+
+  const wallpapersList = ['cyber-midnight', 'sequoia', 'sonoma', 'dark', 'silver'];
+  const handleNextWallpaper = () => {
+    const idx = wallpapersList.indexOf(wallpaper);
+    const next = wallpapersList[(idx + 1) % wallpapersList.length];
+    setWallpaper(next);
   };
 
   useEffect(() => {
@@ -249,7 +300,9 @@ export default function App() {
   const handleAddToQuote = (itemOverride?: QuoteItem) => {
     const itemToAdd = itemOverride || modalData;
     if (!itemToAdd) return;
-    setQuoteItems(prev => [...prev, { ...itemToAdd, id: Date.now().toString() }]);
+    const uniqueId = `quote-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setQuoteItems(prev => [...prev, { ...itemToAdd, id: uniqueId }]);
+    playSuccessChime();
     setModalOpen(false);
     setQuoteListOpen(true);
   };
@@ -287,6 +340,8 @@ export default function App() {
         onOpenQuoteList={() => setQuoteListOpen(true)}
         theme={theme}
         setTheme={handleSetTheme}
+        wallpaper={wallpaper}
+        onNextWallpaper={handleNextWallpaper}
         user={auth.user}
         onOpenAuth={() => auth.setAuthModalOpen(true)}
         onOpenMobileApp={() => setMobileModalOpen(true)}
@@ -294,6 +349,8 @@ export default function App() {
         onOpenShapeModal={() => setShapeModalOpen(true)}
         onOpenDailySchedule={() => handleOpenDailySchedule()}
         onOpenPdfEditor={() => handleOpenPdfEditor()}
+        onOpenPdfTools={handleOpenPdfTools}
+        onOpenImageConverter={handleOpenImageConverter}
         shapeType={shapeInfo.type}
         shapeLabel={shapeInfo.label}
       />
@@ -320,18 +377,26 @@ export default function App() {
 
       {/* Main Workspace Frame */}
       <main className="flex-1 pt-3 sm:pt-6 pb-28 sm:pb-32 px-2 sm:px-4 md:px-6 flex items-center justify-center w-full relative gpu-layer">
+        {/* Ambient Liquid Caustic Glow Orbs (Apple visionOS / Liquid Glass Depth) */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden z-0">
+          <div className="liquid-orb-1 absolute top-[10%] left-[5%] w-80 sm:w-96 h-80 sm:h-96 rounded-full bg-gradient-to-tr from-cyan-500/25 via-blue-500/15 to-transparent blur-3xl" />
+          <div className="liquid-orb-2 absolute bottom-[15%] right-[6%] w-[26rem] sm:w-[32rem] h-[26rem] sm:h-[32rem] rounded-full bg-gradient-to-bl from-purple-500/25 via-pink-500/15 to-transparent blur-3xl" />
+          <div className="liquid-orb-3 absolute bottom-[28%] left-[12%] w-72 sm:w-80 h-72 sm:h-80 rounded-full bg-gradient-to-tr from-emerald-500/20 via-teal-500/12 to-transparent blur-3xl" />
+          <div className="liquid-orb-4 absolute top-[25%] right-[14%] w-72 sm:w-80 h-72 sm:h-80 rounded-full bg-gradient-to-br from-indigo-500/20 via-fuchsia-500/12 to-transparent blur-3xl" />
+        </div>
+
         {/* MacBook Main Application Window Frame */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-          className="mac-main-window w-full max-w-5xl xl:max-w-6xl rounded-xl sm:rounded-2xl overflow-hidden backdrop-blur-lg border border-slate-200/90 dark:border-indigo-500/25 shadow-xl z-10 my-auto relative"
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="mac-main-window apple-liquid-glass glass-rainbow-rim glass-shimmer w-full max-w-5xl xl:max-w-6xl rounded-2xl sm:rounded-3xl overflow-hidden z-10 my-auto relative shadow-2xl"
         >
           {/* Ambient Cyber Neon Crown Accent */}
           <div className="h-[2px] w-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 opacity-90"></div>
 
           {/* Window Titlebar with Traffic Lights */}
-          <div className="h-8 sm:h-10 px-2.5 sm:px-4 bg-slate-100/95 dark:bg-[#0c122c]/95 border-b border-slate-200/90 dark:border-indigo-500/20 flex items-center justify-between select-none">
+          <div className="h-8 sm:h-10 px-2.5 sm:px-4 bg-white/40 dark:bg-white/[0.04] backdrop-blur-xl border-b border-white/50 dark:border-white/10 flex items-center justify-between select-none">
             <div className="flex items-center gap-1.5 sm:gap-2 traffic-group">
               <button
                 className="traffic-btn w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FF5F56] border border-black/10 flex items-center justify-center"
@@ -367,7 +432,7 @@ export default function App() {
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                 {t.nav.calculator}
               </span>
@@ -375,7 +440,7 @@ export default function App() {
               {/* View Button beside Calculator */}
               <button
                 onClick={() => setShapeModalOpen(true)}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-cyan-400 border border-blue-500/30 font-bold text-[10px] transition-all active:scale-95 shadow-xs cursor-pointer"
+                className="apple-liquid-pill flex items-center gap-1 px-2 py-0.5 rounded-full text-blue-600 dark:text-cyan-400 font-bold text-[10px] cursor-pointer"
                 title={`View: ${shapeInfo.label} (${shapeInfo.ratioText})`}
               >
                 {shapeInfo.type === 'horizontal' ? (
@@ -391,11 +456,31 @@ export default function App() {
               {/* Edit PDF Button */}
               <button
                 onClick={() => handleOpenPdfEditor()}
-                className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-500/15 to-indigo-500/15 hover:from-purple-500/25 hover:to-indigo-500/25 text-purple-700 dark:text-purple-300 border border-purple-500/35 font-bold text-[10px] transition-all active:scale-95 shadow-xs cursor-pointer"
+                className="apple-liquid-pill flex items-center gap-1 px-2.5 py-0.5 rounded-full text-purple-700 dark:text-purple-300 font-bold text-[10px] cursor-pointer"
                 title={language === 'zh' ? 'Halo PDF 编辑器: 自由编辑单据、上传外部 PDF、加印章、签名、涂白修改与批注' : 'Halo PDF Editor: Edit quotes/invoices, upload external PDFs, stamps, signatures & whiteout'}
               >
                 <FileCheck className="w-3 h-3 text-purple-600 dark:text-purple-400" />
                 <span>{language === 'zh' ? '编辑 PDF' : 'Edit PDF'}</span>
+              </button>
+
+              {/* PDF Joiner & Splitter Button */}
+              <button
+                onClick={() => handleOpenPdfTools('join')}
+                className="apple-liquid-pill flex items-center gap-1 px-2.5 py-0.5 rounded-full text-blue-700 dark:text-cyan-300 font-bold text-[10px] cursor-pointer"
+                title={language === 'zh' ? 'Halo PDF 工具箱: 合并多个 PDF、提取与拆分单页或自定义页码' : 'Halo PDF Tools: Merge multiple PDFs, split and extract pages'}
+              >
+                <Layers className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
+                <span>{language === 'zh' ? '合并/拆分' : 'Merge/Split'}</span>
+              </button>
+
+              {/* Image File Converter Button */}
+              <button
+                onClick={handleOpenImageConverter}
+                className="apple-liquid-pill flex items-center gap-1 px-2.5 py-0.5 rounded-full text-teal-700 dark:text-teal-300 font-bold text-[10px] cursor-pointer"
+                title={language === 'zh' ? '图片转换工作台: PNG, JPG, WEBP, SVG, PDF, ICO 格式互转与智能缩放' : 'Image Converter: PNG, JPG, WEBP, SVG, PDF, ICO conversion and smart scaling'}
+              >
+                <ImageIcon className="w-3 h-3 text-teal-600 dark:text-teal-400" />
+                <span>{language === 'zh' ? '图片转换' : 'Converter'}</span>
               </button>
             </div>
           </div>
@@ -403,7 +488,7 @@ export default function App() {
           {/* Window Content */}
           <div className="p-2 sm:p-4 md:p-6 space-y-2.5 sm:space-y-4 md:space-y-5">
             {/* Dimensions Input Panel (Native macOS Toolbar Style) */}
-            <div className="p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl bg-white/80 dark:bg-[#0c122c]/75 border border-slate-200/90 dark:border-indigo-500/20 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-2.5 sm:gap-4">
+            <div className="p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-2.5 sm:gap-4">
               {/* Center/Main Dimension & Unit Controls */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 w-full lg:w-auto">
                 {/* Long Centered Dimension Input */}
@@ -638,17 +723,11 @@ export default function App() {
       <MacDock
         quoteCount={quoteItems.reduce((sum, item) => sum + item.quantity, 0)}
         onOpenQuoteList={() => setQuoteListOpen(true)}
-        theme={theme}
-        setTheme={handleSetTheme}
-        wallpaper={wallpaper}
-        setWallpaper={setWallpaper}
-        user={auth.user}
-        onOpenAuth={() => auth.setAuthModalOpen(true)}
-        onOpenMobileApp={() => setMobileModalOpen(true)}
-        onOpenMathCalc={() => setMathCalcOpen(true)}
         onOpenShapeModal={() => setShapeModalOpen(true)}
         onOpenDailySchedule={() => handleOpenDailySchedule()}
         onOpenPdfEditor={() => handleOpenPdfEditor()}
+        onOpenPdfTools={handleOpenPdfTools}
+        onOpenImageConverter={handleOpenImageConverter}
         shapeType={shapeInfo.type}
         shapeLabel={shapeInfo.label}
       />
@@ -685,6 +764,7 @@ export default function App() {
         onOpenPdfEditor={(itemsToEdit, dataToEdit, typeToEdit) =>
           handleOpenPdfEditor(itemsToEdit, dataToEdit, typeToEdit)
         }
+        onOpenPdfTools={handleOpenPdfTools}
       />
 
       {/* Google Account Modal */}
@@ -744,10 +824,37 @@ export default function App() {
         initialItems={pdfEditorItems}
         initialRecordData={pdfEditorData}
         initialDocType={pdfEditorDocType}
+        initialPdfBytes={pdfEditorCustomBytes}
+        initialPdfName={pdfEditorCustomName}
+        onOpenPdfTools={handleOpenPdfTools}
+        onOpenImageConverter={handleOpenImageConverter}
         onSaveToQuoteSheet={(updatedItems) => {
           setQuoteItems(updatedItems);
         }}
       />
+
+      {/* Halo PDF Joiner & Splitter Modal */}
+      {pdfToolsOpen && (
+        <PdfToolsModal
+          isOpen={pdfToolsOpen}
+          onClose={() => setPdfToolsOpen(false)}
+          initialTab={pdfToolsInitialTab}
+          onOpenInEditor={(bytes, fileName) => {
+            handleOpenPdfEditorWithFile(bytes, fileName);
+          }}
+        />
+      )}
+
+      {/* Halo Image Converter Modal */}
+      {imageConverterOpen && (
+        <ImageConverterModal
+          isOpen={imageConverterOpen}
+          onClose={() => setImageConverterOpen(false)}
+          onOpenInEditor={(bytes, fileName) => {
+            handleOpenPdfEditorWithFile(bytes, fileName);
+          }}
+        />
+      )}
     </div>
   );
 }
