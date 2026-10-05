@@ -20,8 +20,8 @@ import { DailyOutsideScheduleModal } from './components/DailyOutsideScheduleModa
 import { PdfEditorModal } from './components/PdfEditorModal';
 import { PdfToolsModal } from './components/PdfToolsModal';
 import { ImageConverterModal } from './components/ImageConverterModal';
-import { RotateCcw, RectangleHorizontal, RectangleVertical, Square, FileCheck, Layers, Image as ImageIcon } from 'lucide-react';
-import { playSuccessChime } from './utils/soundEffects';
+import { RotateCcw } from 'lucide-react';
+import { playSuccessChime, playSoftPop } from './utils/soundEffects';
 
 export default function App() {
   const { language, t } = useLanguage();
@@ -336,8 +336,6 @@ export default function App() {
     >
       {/* Top macOS Menu Bar */}
       <MacMenuBar
-        quoteCount={quoteItems.reduce((sum, item) => sum + item.quantity, 0)}
-        onOpenQuoteList={() => setQuoteListOpen(true)}
         theme={theme}
         setTheme={handleSetTheme}
         wallpaper={wallpaper}
@@ -346,13 +344,6 @@ export default function App() {
         onOpenAuth={() => auth.setAuthModalOpen(true)}
         onOpenMobileApp={() => setMobileModalOpen(true)}
         onOpenMathCalc={() => setMathCalcOpen(true)}
-        onOpenShapeModal={() => setShapeModalOpen(true)}
-        onOpenDailySchedule={() => handleOpenDailySchedule()}
-        onOpenPdfEditor={() => handleOpenPdfEditor()}
-        onOpenPdfTools={handleOpenPdfTools}
-        onOpenImageConverter={handleOpenImageConverter}
-        shapeType={shapeInfo.type}
-        shapeLabel={shapeInfo.label}
       />
 
       {/* Top Mobile Quick Install Strip */}
@@ -399,7 +390,8 @@ export default function App() {
           <div className="h-8 sm:h-10 px-2.5 sm:px-4 bg-white/40 dark:bg-white/[0.04] backdrop-blur-xl border-b border-white/50 dark:border-white/10 flex items-center justify-between select-none">
             <div className="flex items-center gap-1.5 sm:gap-2 traffic-group">
               <button
-                className="traffic-btn w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FF5F56] border border-black/10 flex items-center justify-center"
+                onClick={playSoftPop}
+                className="traffic-btn w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FF5F56] border border-black/10 flex items-center justify-center cursor-pointer transition-transform active:scale-75 hover:shadow-[0_0_8px_rgba(255,95,86,0.6)]"
                 title="Close"
               >
                 <span className="traffic-glyph text-[8px] opacity-0 text-black/60 font-bold leading-none">
@@ -407,7 +399,8 @@ export default function App() {
                 </span>
               </button>
               <button
-                className="traffic-btn w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FFBD2E] border border-black/10 flex items-center justify-center"
+                onClick={playSoftPop}
+                className="traffic-btn w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FFBD2E] border border-black/10 flex items-center justify-center cursor-pointer transition-transform active:scale-75 hover:shadow-[0_0_8px_rgba(255,189,46,0.6)]"
                 title="Minimize"
               >
                 <span className="traffic-glyph text-[8px] opacity-0 text-black/60 font-bold leading-none">
@@ -415,7 +408,8 @@ export default function App() {
                 </span>
               </button>
               <button
-                className="traffic-btn w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27C93F] border border-black/10 flex items-center justify-center"
+                onClick={playSoftPop}
+                className="traffic-btn w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27C93F] border border-black/10 flex items-center justify-center cursor-pointer transition-transform active:scale-75 hover:shadow-[0_0_8px_rgba(39,201,63,0.6)]"
                 title="Maximize"
               >
                 <span className="traffic-glyph text-[8px] opacity-0 text-black/60 font-bold leading-none">
@@ -436,52 +430,6 @@ export default function App() {
               <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                 {t.nav.calculator}
               </span>
-
-              {/* View Button beside Calculator */}
-              <button
-                onClick={() => setShapeModalOpen(true)}
-                className="apple-liquid-pill flex items-center gap-1 px-2 py-0.5 rounded-full text-blue-600 dark:text-cyan-400 font-bold text-[10px] cursor-pointer"
-                title={`View: ${shapeInfo.label} (${shapeInfo.ratioText})`}
-              >
-                {shapeInfo.type === 'horizontal' ? (
-                  <RectangleHorizontal className="w-3 h-3 text-blue-500" />
-                ) : shapeInfo.type === 'vertical' ? (
-                  <RectangleVertical className="w-3 h-3 text-emerald-500" />
-                ) : (
-                  <Square className="w-3 h-3 text-amber-500" />
-                )}
-                <span>View</span>
-              </button>
-
-              {/* Edit PDF Button */}
-              <button
-                onClick={() => handleOpenPdfEditor()}
-                className="apple-liquid-pill flex items-center gap-1 px-2.5 py-0.5 rounded-full text-purple-700 dark:text-purple-300 font-bold text-[10px] cursor-pointer"
-                title={language === 'zh' ? 'Halo PDF 编辑器: 自由编辑单据、上传外部 PDF、加印章、签名、涂白修改与批注' : 'Halo PDF Editor: Edit quotes/invoices, upload external PDFs, stamps, signatures & whiteout'}
-              >
-                <FileCheck className="w-3 h-3 text-purple-600 dark:text-purple-400" />
-                <span>{language === 'zh' ? '编辑 PDF' : 'Edit PDF'}</span>
-              </button>
-
-              {/* PDF Joiner & Splitter Button */}
-              <button
-                onClick={() => handleOpenPdfTools('join')}
-                className="apple-liquid-pill flex items-center gap-1 px-2.5 py-0.5 rounded-full text-blue-700 dark:text-cyan-300 font-bold text-[10px] cursor-pointer"
-                title={language === 'zh' ? 'Halo PDF 工具箱: 合并多个 PDF、提取与拆分单页或自定义页码' : 'Halo PDF Tools: Merge multiple PDFs, split and extract pages'}
-              >
-                <Layers className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
-                <span>{language === 'zh' ? '合并/拆分' : 'Merge/Split'}</span>
-              </button>
-
-              {/* Image File Converter Button */}
-              <button
-                onClick={handleOpenImageConverter}
-                className="apple-liquid-pill flex items-center gap-1 px-2.5 py-0.5 rounded-full text-teal-700 dark:text-teal-300 font-bold text-[10px] cursor-pointer"
-                title={language === 'zh' ? '图片转换工作台: PNG, JPG, WEBP, SVG, PDF, ICO 格式互转与智能缩放' : 'Image Converter: PNG, JPG, WEBP, SVG, PDF, ICO conversion and smart scaling'}
-              >
-                <ImageIcon className="w-3 h-3 text-teal-600 dark:text-teal-400" />
-                <span>{language === 'zh' ? '图片转换' : 'Converter'}</span>
-              </button>
             </div>
           </div>
 
@@ -537,8 +485,11 @@ export default function App() {
                     ].map(u => (
                       <button
                         key={u.key}
-                        onClick={() => setUnit(u.key)}
-                        className={`px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all ${
+                        onClick={() => {
+                          playSoftPop();
+                          setUnit(u.key);
+                        }}
+                        className={`px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all cursor-pointer ${
                           unit === u.key
                             ? 'bg-blue-600 text-white shadow-sm'
                             : 'text-slate-800 hover:text-black hover:bg-slate-200/70 dark:text-neutral-400 dark:hover:text-white'
@@ -552,8 +503,11 @@ export default function App() {
                   {/* Reset Rates Button */}
                   {isCustomRatesActive && (
                     <button
-                      onClick={handleResetRates}
-                      className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[10px] sm:text-xs font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                      onClick={() => {
+                        playSoftPop();
+                        handleResetRates();
+                      }}
+                      className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[10px] sm:text-xs font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap cursor-pointer"
                       title={t.toolbar.resetRatesTitle}
                     >
                       <RotateCcw className="w-3 h-3" />

@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { UserProfile, Theme, ThemeType } from '../types';
 import { GoogleIcon } from './GoogleIcon';
 import { HaloLogo } from './HaloLogo';
-import { Moon, Sun, Smartphone, Calculator, RectangleHorizontal, RectangleVertical, Square, Globe, FileSpreadsheet, Sparkles, FileCheck, Layers, Image as ImageIcon, Volume2, VolumeX } from 'lucide-react';
+import { Moon, Sun, Smartphone, Calculator, Globe, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { isSoundEnabled, toggleSound, playSoftPop } from '../utils/soundEffects';
 
 interface MacMenuBarProps {
-  quoteCount: number;
-  onOpenQuoteList: () => void;
+  quoteCount?: number;
+  onOpenQuoteList?: () => void;
   theme: ThemeType;
   setTheme: (theme: ThemeType) => void;
   wallpaper?: string;
@@ -28,8 +28,6 @@ interface MacMenuBarProps {
 }
 
 export const MacMenuBar: React.FC<MacMenuBarProps> = ({
-  quoteCount,
-  onOpenQuoteList,
   theme,
   setTheme,
   wallpaper,
@@ -38,14 +36,7 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
   onOpenAuth,
   onOpenMobileApp,
   onOpenMathCalc,
-  onOpenShapeModal,
-  onOpenDailySchedule,
-  onOpenPdfEditor,
-  onOpenPdfTools,
-  onOpenImageConverter,
   onOpenAiModal,
-  shapeType = 'horizontal',
-  shapeLabel = 'Horizontal',
 }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const [timeString, setTimeString] = useState('');
@@ -77,110 +68,38 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
     return () => clearInterval(timer);
   }, [language]);
 
-  const displayShapeLabel = () => {
-    if (language === 'zh') {
-      if (shapeType === 'horizontal') return t.shapes.horizontal;
-      if (shapeType === 'vertical') return t.shapes.vertical;
-      if (shapeType === 'square') return t.shapes.square;
-      return t.shapes.custom;
-    }
-    return shapeLabel;
-  };
-
   return (
     <div className="apple-menubar-glass fixed top-0 left-0 right-0 pt-[env(safe-area-inset-top,0px)] z-50 select-none">
       <div className="h-7 sm:h-8 flex items-center justify-between px-2 xs:px-3 text-[12px] sm:text-[13px] font-sans font-medium text-slate-800 dark:text-neutral-200">
         {/* Left System Menu */}
-        <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-4 min-w-0">
+        <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 min-w-0">
           <div className="flex items-center gap-1 cursor-pointer hover:opacity-85 transition-opacity px-0.5 py-0.5 rounded shrink-0">
             <HaloLogo className="w-3.5 h-3.5 sm:w-4 sm:h-4 shadow-sm" />
           </div>
           <span className="font-bold text-slate-900 dark:text-white truncate text-[11px] xs:text-xs sm:text-[13px]">
             Halo Design Hub
           </span>
-          <div className="hidden md:flex items-center gap-3 text-slate-600 dark:text-neutral-300">
-            <button
-              onClick={onOpenQuoteList}
-              className="hover:text-slate-900 dark:hover:text-white transition-colors"
-            >
-              {t.nav.quoteSheet} ({quoteCount})
-            </button>
+          <div className="hidden lg:flex items-center gap-2.5 text-slate-600 dark:text-neutral-300">
             <button
               onClick={onOpenMobileApp}
-              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 font-semibold"
+              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 font-medium text-[11px] sm:text-xs cursor-pointer"
             >
               <Smartphone className="w-3.5 h-3.5 text-blue-500" />
-              {t.nav.installApp}
+              <span>{t.nav.installApp}</span>
             </button>
             {onOpenMathCalc && (
               <button
                 onClick={onOpenMathCalc}
-                className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center gap-1 font-medium"
+                className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center gap-1 font-medium text-[11px] sm:text-xs cursor-pointer"
               >
                 <Calculator className="w-3.5 h-3.5 text-amber-500" />
-                {t.nav.calculatorBtn}
-              </button>
-            )}
-            {onOpenShapeModal && (
-              <button
-                onClick={onOpenShapeModal}
-                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 font-medium"
-                title={t.shapes.title}
-              >
-                {shapeType === 'horizontal' ? (
-                  <RectangleHorizontal className="w-3.5 h-3.5 text-blue-500" />
-                ) : shapeType === 'vertical' ? (
-                  <RectangleVertical className="w-3.5 h-3.5 text-emerald-500" />
-                ) : (
-                  <Square className="w-3.5 h-3.5 text-amber-500" />
-                )}
-                <span>{t.nav.shapeLabel} ({displayShapeLabel()})</span>
-              </button>
-            )}
-            {onOpenDailySchedule && (
-              <button
-                onClick={onOpenDailySchedule}
-                className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1 font-medium"
-                title={t.dailySchedule.title}
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" />
-                <span>{t.nav.schedule}</span>
-              </button>
-            )}
-            {onOpenPdfEditor && (
-              <button
-                onClick={onOpenPdfEditor}
-                className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1 font-medium"
-                title="Halo PDF Editor"
-              >
-                <FileCheck className="w-3.5 h-3.5 text-indigo-500" />
-                <span>{t.nav.pdfEditor || 'Edit PDF'}</span>
-              </button>
-            )}
-            {onOpenPdfTools && (
-              <button
-                onClick={() => onOpenPdfTools('join')}
-                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1 font-medium"
-                title={language === 'zh' ? 'PDF 合并与拆分工具箱' : 'PDF Joiner & Splitter'}
-              >
-                <Layers className="w-3.5 h-3.5 text-blue-500" />
-                <span>{language === 'zh' ? '合并/拆分' : 'Merge/Split'}</span>
-              </button>
-            )}
-            {onOpenImageConverter && (
-              <button
-                onClick={onOpenImageConverter}
-                className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors flex items-center gap-1 font-medium"
-                title={language === 'zh' ? '图片格式转换工作台' : 'Image File Converter'}
-              >
-                <ImageIcon className="w-3.5 h-3.5 text-cyan-500" />
-                <span>{t.nav.imageConverter || (language === 'zh' ? '图片转换' : 'Converter')}</span>
+                <span>{t.nav.calculatorBtn}</span>
               </button>
             )}
             {onOpenAiModal && (
               <button
                 onClick={onOpenAiModal}
-                className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors flex items-center gap-1 font-semibold text-purple-600 dark:text-purple-400"
+                className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors flex items-center gap-1 font-semibold text-purple-600 dark:text-purple-400 text-[11px] sm:text-xs cursor-pointer"
                 title="Gemini AI Assistant & Multi-turn Chat"
               >
                 <Sparkles className="w-3.5 h-3.5 text-purple-500 animate-pulse" />
@@ -191,7 +110,7 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
         </div>
 
       {/* Right System Tray */}
-      <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-2.5 text-slate-700 dark:text-neutral-300 shrink-0">
+      <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-2 text-slate-700 dark:text-neutral-300 shrink-0">
         {/* Language Switcher Pill Button (中 / EN) */}
         <button
           onClick={toggleLanguage}
@@ -209,11 +128,11 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
               playSoftPop();
               onNextWallpaper();
             }}
-            className="flex items-center gap-1 px-1.5 xs:px-2 sm:px-2.5 py-0.5 rounded-md sm:rounded-lg bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 border border-slate-200 dark:border-white/10 text-[10px] xs:text-[11px] font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+            className="flex items-center gap-1 px-1.5 xs:px-2 py-0.5 rounded-md sm:rounded-lg bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 border border-slate-200 dark:border-white/10 text-[10px] xs:text-[11px] font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
             title={`Wallpaper: ${wallpaper || 'Default'} (Click to switch)`}
           >
             <Sparkles className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-cyan-500" />
-            <span className="hidden lg:inline">{t.dock.wallpaper || (language === 'zh' ? '壁纸' : 'Wallpaper')}</span>
+            <span className="hidden xl:inline">{t.dock.wallpaper || (language === 'zh' ? '壁纸' : 'Wallpaper')}</span>
           </button>
         )}
 
@@ -223,7 +142,7 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
             const next = toggleSound();
             setSoundOn(next);
           }}
-          className={`flex items-center gap-1 px-1.5 xs:px-2 sm:px-2 py-0.5 rounded-md sm:rounded-lg border text-[10px] xs:text-[11px] font-bold transition-all shadow-xs active:scale-95 cursor-pointer ${
+          className={`flex items-center gap-1 px-1.5 xs:px-2 py-0.5 rounded-md sm:rounded-lg border text-[10px] xs:text-[11px] font-bold transition-all shadow-xs active:scale-95 cursor-pointer ${
             soundOn
               ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
               : 'bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-neutral-500 border-slate-200 dark:border-white/10 opacity-70'
@@ -245,20 +164,10 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
           </button>
         )}
 
-        {/* Quote item pill */}
-        {quoteCount > 0 && (
-          <button
-            onClick={onOpenQuoteList}
-            className="hidden sm:flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 text-[11px] font-bold hover:bg-blue-500/25 transition-colors border border-blue-500/20"
-          >
-            <span>{quoteCount} {t.nav.itemsCount}</span>
-          </button>
-        )}
-
         {/* Google Sign In / Account Pill */}
         <button
           onClick={onOpenAuth}
-          className={`flex items-center gap-1 xs:gap-1.5 px-1.5 xs:px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] xs:text-[11px] font-semibold transition-all border shadow-sm ${
+          className={`flex items-center gap-1 xs:gap-1.5 px-1.5 xs:px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] xs:text-[11px] font-semibold transition-all border shadow-sm cursor-pointer ${
             user
               ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
               : 'bg-white dark:bg-neutral-800 text-slate-800 dark:text-neutral-200 border-slate-200 dark:border-white/10 hover:border-blue-500/50'
