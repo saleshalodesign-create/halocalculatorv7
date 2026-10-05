@@ -213,8 +213,8 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
                     {isZh ? `原文档字体 (${currentFontDisplayName})` : `Original (${currentFontDisplayName})`}
                   </option>
                 )}
-                {STANDARD_FONTS.map(f => (
-                  <option key={f.value} value={f.value}>
+                {STANDARD_FONTS.map((f, idx) => (
+                  <option key={`std-font-${f.value}-${idx}`} value={f.value}>
                     {f.label}
                   </option>
                 ))}
@@ -227,8 +227,8 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
               onChange={e => handleSizeChange(parseInt(e.target.value, 10))}
               className="bg-slate-800 text-slate-200 border border-slate-700 rounded px-2 py-1 text-xs outline-none focus:border-cyan-400 cursor-pointer"
             >
-              {FONT_SIZES.map(s => (
-                <option key={s} value={s}>
+              {FONT_SIZES.map((s, idx) => (
+                <option key={`fs-opt-${s}-${idx}`} value={s}>
                   {s} pt
                 </option>
               ))}
@@ -278,9 +278,9 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
                 title="Custom color"
               />
               <div className="hidden sm:flex items-center gap-1">
-                {QUICK_COLORS.slice(0, 5).map(c => (
+                {QUICK_COLORS.slice(0, 5).map((c, idx) => (
                   <button
-                    key={c}
+                    key={`prop-qc-${c}-${idx}`}
                     type="button"
                     onClick={() => handleColorChange(c)}
                     className="w-3.5 h-3.5 rounded-full border border-white/20 cursor-pointer"
@@ -411,9 +411,9 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
               <span>{isZh ? '荧光高亮 (Highlight)' : 'Highlight'}</span>
             </span>
             <div className="flex items-center gap-1 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">
-              {['#fef08a', '#bbf7d0', '#a5f3fc', '#fbcfe8', '#fed7aa'].map(c => (
+              {['#fef08a', '#bbf7d0', '#a5f3fc', '#fbcfe8', '#fed7aa'].map((c, idx) => (
                 <button
-                  key={c}
+                  key={`prop-hlc-${c}-${idx}`}
                   type="button"
                   onClick={() => onChangeHighlightColor(c)}
                   className={`w-4 h-4 rounded-full border cursor-pointer ${

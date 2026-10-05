@@ -466,7 +466,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
 
   // Render current PDF page to HTML5 Canvas using pdfjs-dist
   useEffect(() => {
-    if (!isOpen || !basePdfBytes || !pdfCanvasRef.current) return;
+    if (!isOpen || !basePdfBytes) return;
 
     let isCancelled = false;
     setIsRenderingPage(true);
@@ -474,6 +474,8 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
     const renderPage = async () => {
       try {
         const pdfDoc = await loadPdfDocument(basePdfBytes);
+        if (isCancelled) return;
+
         const actualPageCount = pdfDoc.numPages;
         setTotalPages(actualPageCount);
 
@@ -483,22 +485,29 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
           return;
         }
 
+        const canvasEl = pdfCanvasRef.current;
+        if (!canvasEl || isCancelled) return;
+
         const renderRes = await renderPdfPageToCanvas(
           pdfDoc,
           safePageIndex + 1,
-          pdfCanvasRef.current!,
+          canvasEl,
           zoomScale
         );
 
-        if (!isCancelled) {
+        if (!isCancelled && canvasEl) {
           setPageCanvasDimensions({ width: renderRes.width, height: renderRes.height });
 
           // Extract text items with exact bounding coordinates, font family, style, and sampled color
-          const extracted = await extractTextFromPage(pdfDoc, safePageIndex + 1, pdfCanvasRef.current);
-          setExtractedTextItems(extracted);
+          const extracted = await extractTextFromPage(pdfDoc, safePageIndex + 1, canvasEl);
+          if (!isCancelled) {
+            setExtractedTextItems(extracted);
+          }
         }
-      } catch (err) {
-        console.error('Failed to render PDF page on canvas:', err);
+      } catch (err: any) {
+        if (!isCancelled) {
+          console.error('Failed to render PDF page on canvas:', err);
+        }
       } finally {
         if (!isCancelled) {
           setIsRenderingPage(false);
@@ -510,6 +519,12 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
 
     return () => {
       isCancelled = true;
+      if (pdfCanvasRef.current && (pdfCanvasRef.current as any)._renderTask) {
+        try {
+          (pdfCanvasRef.current as any)._renderTask.cancel();
+        } catch {}
+        (pdfCanvasRef.current as any)._renderTask = null;
+      }
     };
   }, [isOpen, basePdfBytes, currentPageIndex, zoomScale]);
 
@@ -1846,9 +1861,9 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                       {isZh ? '单据类型与编号' : 'Document Type & Number'}
                     </span>
                     <div className="grid grid-cols-3 gap-1">
-                      {(['quote', 'invoice', 'receipt'] as DocumentType[]).map(t => (
+                      {(['quote', 'invoice', 'receipt'] as DocumentType[]).map((t, idx) => (
                         <button
-                          key={t}
+                          key={`doctype-btn-${t}-${idx}`}
                           type="button"
                           onClick={() => setDocType(t)}
                           className={`py-1 text-[10px] sm:text-xs font-bold rounded-lg uppercase transition-all cursor-pointer ${

@@ -20,15 +20,44 @@ import { DailyOutsideScheduleModal } from './components/DailyOutsideScheduleModa
 import { PdfEditorModal } from './components/PdfEditorModal';
 import { PdfToolsModal } from './components/PdfToolsModal';
 import { ImageConverterModal } from './components/ImageConverterModal';
-import { RotateCcw } from 'lucide-react';
-import { playSuccessChime, playSoftPop } from './utils/soundEffects';
+import {
+  RotateCcw,
+  Lightbulb,
+  Maximize2,
+  Minimize2,
+  Image as ImageIcon,
+  FileSpreadsheet,
+  FileCheck,
+  Layers,
+  Sparkles,
+  ClipboardList,
+  Volume2,
+  VolumeX,
+  Globe,
+  Sun,
+  Moon,
+  Calculator,
+} from 'lucide-react';
+import { MacDesktopContextMenu, ContextMenuItem } from './components/MacDesktopContextMenu';
+import { playSuccessChime, playSoftPop, isSoundEnabled, toggleSound } from './utils/soundEffects';
 
 export default function App() {
-  const { language, t } = useLanguage();
+  const { language, t, toggleLanguage } = useLanguage();
   const [theme, setTheme] = useState<ThemeType>(Theme.DARK);
   const [wallpaper, setWallpaper] = useState<string>(() => {
     return localStorage.getItem('halo_wallpaper') || 'cyber-midnight';
   });
+
+  // Window states (Traffic lights: compact mode, maximize)
+  const [isCompact, setIsCompact] = useState<boolean>(false);
+  const [isMaximized, setIsMaximized] = useState<boolean>(false);
+
+  // Night Lit LED Simulation states
+  const [isNightLit, setIsNightLit] = useState<boolean>(false);
+  const [litColor, setLitColor] = useState<'warm' | 'neutral' | 'cool' | 'neon'>('warm');
+
+  // Desktop right-click context menu
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     localStorage.setItem('halo_wallpaper', wallpaper);
@@ -330,8 +359,129 @@ export default function App() {
     }
   };
 
+  const contextMenuItems: ContextMenuItem[] = useMemo(() => [
+    {
+      id: 'wallpaper',
+      label: language === 'zh' ? '切换桌面壁纸' : 'Next Wallpaper',
+      icon: <Sparkles className="w-4 h-4 text-cyan-400" />,
+      onClick: handleNextWallpaper,
+      shortcut: 'Space',
+    },
+    {
+      id: 'lit',
+      label: isNightLit
+        ? (language === 'zh' ? '关闭夜间通电发光' : 'Turn Off Lit Preview')
+        : (language === 'zh' ? '开启夜间通电发光' : 'Night Lit LED Preview'),
+      icon: <Lightbulb className="w-4 h-4 text-amber-400" />,
+      onClick: () => {
+        playSoftPop();
+        setIsNightLit(prev => !prev);
+      },
+      highlight: isNightLit,
+      shortcut: 'L',
+    },
+    {
+      id: 'quotes',
+      label: `${t.dock.quotes} (${quoteItems.reduce((sum, item) => sum + item.quantity, 0)})`,
+      icon: <ClipboardList className="w-4 h-4 text-rose-400" />,
+      onClick: () => setQuoteListOpen(true),
+      shortcut: '⌘Q',
+      dividerAbove: true,
+    },
+    {
+      id: 'schedule',
+      label: t.dock.schedule,
+      icon: <FileSpreadsheet className="w-4 h-4 text-emerald-400" />,
+      onClick: () => handleOpenDailySchedule(),
+      shortcut: '⌘S',
+    },
+    {
+      id: 'pdf-editor',
+      label: t.dock.pdfEditor || (language === 'zh' ? 'Halo PDF 编辑器' : 'Halo PDF Editor'),
+      icon: <FileCheck className="w-4 h-4 text-indigo-400" />,
+      onClick: () => handleOpenPdfEditor(),
+      shortcut: '⌘P',
+    },
+    {
+      id: 'pdf-tools',
+      label: t.dock.pdfTools || (language === 'zh' ? 'PDF 合并与拆分' : 'PDF Merge/Split'),
+      icon: <Layers className="w-4 h-4 text-blue-400" />,
+      onClick: () => handleOpenPdfTools('join'),
+    },
+    {
+      id: 'converter',
+      label: t.dock.imageConverter || (language === 'zh' ? '图片格式转换' : 'Image Converter'),
+      icon: <ImageIcon className="w-4 h-4 text-teal-400" />,
+      onClick: handleOpenImageConverter,
+    },
+    {
+      id: 'calc',
+      label: t.nav.calculatorBtn || (language === 'zh' ? '科学计算器' : 'Calculator'),
+      icon: <Calculator className="w-4 h-4 text-amber-400" />,
+      onClick: () => setMathCalcOpen(true),
+      shortcut: '⌘C',
+    },
+    {
+      id: 'window-toggle',
+      label: isMaximized
+        ? (language === 'zh' ? '退出全屏/还原窗口' : 'Restore Window Size')
+        : (language === 'zh' ? '全屏扩展窗口' : 'Maximize Window'),
+      icon: isMaximized ? <Minimize2 className="w-4 h-4 text-cyan-400" /> : <Maximize2 className="w-4 h-4 text-cyan-400" />,
+      onClick: () => {
+        playSoftPop();
+        setIsMaximized(prev => !prev);
+      },
+      dividerAbove: true,
+    },
+    {
+      id: 'theme',
+      label: theme === Theme.DARK ? (language === 'zh' ? '切换为浅色模式' : 'Light Mode') : (language === 'zh' ? '切换为深色模式' : 'Dark Mode'),
+      icon: theme === Theme.DARK ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />,
+      onClick: () => handleSetTheme(theme === Theme.DARK ? Theme.LIGHT : Theme.DARK),
+      dividerAbove: true,
+    },
+    {
+      id: 'sound',
+      label: isSoundEnabled() ? (language === 'zh' ? '触感音效: 已开启 (点击静音)' : 'Mute Sound') : (language === 'zh' ? '触感音效: 已静音 (点击开启)' : 'Enable Sound'),
+      icon: isSoundEnabled() ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-400" />,
+      onClick: () => toggleSound(),
+    },
+    {
+      id: 'lang',
+      label: language === 'zh' ? 'Switch to English' : '切换为中文界面',
+      icon: <Globe className="w-4 h-4 text-blue-400" />,
+      onClick: toggleLanguage,
+    },
+  ], [
+    language,
+    t,
+    handleNextWallpaper,
+    isNightLit,
+    quoteItems,
+    theme,
+    isMaximized,
+    isCompact,
+    toggleLanguage,
+    handleSetTheme,
+    handleOpenDailySchedule,
+    handleOpenPdfEditor,
+    handleOpenPdfTools,
+    handleOpenImageConverter,
+  ]);
+
   return (
     <div
+      onContextMenu={(e) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('input, textarea, select, [contenteditable="true"]')) {
+          return;
+        }
+        e.preventDefault();
+        setContextMenu({ x: e.clientX, y: e.clientY });
+      }}
+      onClick={() => {
+        if (contextMenu) setContextMenu(null);
+      }}
       className={`min-h-[100dvh] w-full flex flex-col relative transition-all duration-500 overflow-y-auto overflow-x-hidden ${getWallpaperClass()}`}
     >
       {/* Top macOS Menu Bar */}
@@ -381,7 +531,11 @@ export default function App() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="mac-main-window apple-liquid-glass glass-rainbow-rim glass-shimmer w-full max-w-5xl xl:max-w-6xl rounded-2xl sm:rounded-3xl overflow-hidden z-10 my-auto relative shadow-2xl"
+          className={`mac-main-window apple-liquid-glass glass-rainbow-rim glass-shimmer w-full rounded-2xl sm:rounded-3xl overflow-hidden z-10 my-auto relative shadow-2xl transition-all duration-300 ${
+            isMaximized
+              ? 'w-[98vw] max-w-none h-[calc(100vh-85px)] my-1 overflow-y-auto'
+              : 'max-w-5xl xl:max-w-6xl'
+          }`}
         >
           {/* Ambient Cyber Neon Crown Accent */}
           <div className="h-[2px] w-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 opacity-90"></div>
@@ -390,27 +544,41 @@ export default function App() {
           <div className="h-8 sm:h-10 px-2.5 sm:px-4 bg-white/40 dark:bg-white/[0.04] backdrop-blur-xl border-b border-white/50 dark:border-white/10 flex items-center justify-between select-none">
             <div className="flex items-center gap-1.5 sm:gap-2 traffic-group">
               <button
-                onClick={playSoftPop}
+                type="button"
+                onClick={() => {
+                  playSoftPop();
+                  setWidth('120');
+                  setHeight('36');
+                  setUnit(Unit.IN);
+                }}
                 className="traffic-btn w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FF5F56] border border-black/10 flex items-center justify-center cursor-pointer transition-transform active:scale-75 hover:shadow-[0_0_8px_rgba(255,95,86,0.6)]"
-                title="Close"
+                title={language === 'zh' ? '重置尺寸为默认值 (120×36 IN)' : 'Reset Dimensions to Default'}
               >
                 <span className="traffic-glyph text-[8px] opacity-0 text-black/60 font-bold leading-none">
                   ×
                 </span>
               </button>
               <button
-                onClick={playSoftPop}
+                type="button"
+                onClick={() => {
+                  playSoftPop();
+                  setIsCompact(prev => !prev);
+                }}
                 className="traffic-btn w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FFBD2E] border border-black/10 flex items-center justify-center cursor-pointer transition-transform active:scale-75 hover:shadow-[0_0_8px_rgba(255,189,46,0.6)]"
-                title="Minimize"
+                title={isCompact ? (language === 'zh' ? '展开算价卡片网格' : 'Expand Grid') : (language === 'zh' ? '折叠收起算价网格' : 'Collapse Grid')}
               >
                 <span className="traffic-glyph text-[8px] opacity-0 text-black/60 font-bold leading-none">
                   -
                 </span>
               </button>
               <button
-                onClick={playSoftPop}
+                type="button"
+                onClick={() => {
+                  playSoftPop();
+                  setIsMaximized(prev => !prev);
+                }}
                 className="traffic-btn w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27C93F] border border-black/10 flex items-center justify-center cursor-pointer transition-transform active:scale-75 hover:shadow-[0_0_8px_rgba(39,201,63,0.6)]"
-                title="Maximize"
+                title={isMaximized ? (language === 'zh' ? '还原窗口大小' : 'Restore Size') : (language === 'zh' ? '最大化窗口' : 'Maximize Window')}
               >
                 <span className="traffic-glyph text-[8px] opacity-0 text-black/60 font-bold leading-none">
                   +
@@ -418,20 +586,31 @@ export default function App() {
               </button>
             </div>
 
-            {/* macOS Window Title */}
-            <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-none min-w-0 truncate">
-              <HaloLogo className="w-3.5 h-3.5 sm:w-4 sm:h-4 shadow-sm shrink-0" />
-              <span className="text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 dark:text-neutral-100 tracking-tight truncate">
-                Halo Design Hub
-              </span>
-            </div>
+              {/* macOS Window Title */}
+              <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-none min-w-0 truncate">
+                <HaloLogo className="w-3.5 h-3.5 sm:w-4 sm:h-4 shadow-sm shrink-0" />
+                <span className="text-[11px] sm:text-xs md:text-sm font-bold text-slate-800 dark:text-neutral-100 tracking-tight truncate">
+                  Halo Design Hub
+                </span>
+              </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                {t.nav.calculator}
-              </span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                  {t.nav.calculator}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSoftPop();
+                    setIsMaximized(prev => !prev);
+                  }}
+                  className="text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-white p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer hidden sm:block"
+                  title={isMaximized ? (language === 'zh' ? '还原窗口' : 'Restore Window') : (language === 'zh' ? '最大化窗口' : 'Maximize Window')}
+                >
+                  {isMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                </button>
+              </div>
             </div>
-          </div>
 
           {/* Window Content */}
           <div className="p-2 sm:p-4 md:p-6 space-y-2.5 sm:space-y-4 md:space-y-5">
@@ -482,9 +661,9 @@ export default function App() {
                       { key: Unit.CM, label: 'CM' },
                       { key: Unit.MM, label: 'MM' },
                       { key: Unit.M, label: 'M' },
-                    ].map(u => (
+                    ].map((u, idx) => (
                       <button
-                        key={u.key}
+                        key={`unit-pill-${u.key}-${idx}`}
                         onClick={() => {
                           playSoftPop();
                           setUnit(u.key);
@@ -547,128 +726,213 @@ export default function App() {
               </div>
             </div>
 
-            {/* Pricing Grid - 8 Items (2 cols on mobile, 3 on tablet, 4 on desktop) */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-              {/* 1. LIGHTBOX */}
-              <MacPricingCard
-                title={t.products.lightbox.title}
-                subtitle={language === 'zh' ? t.products.lightbox.enTitle : undefined}
-                price={prices.lightbox}
-                rate={rates.LIGHTBOX}
-                rateUnit={t.products.lightbox.unit}
-                iconType="lightbox"
-                iconBg="bg-gradient-to-tr from-amber-600 to-yellow-500"
-                isSelected={modalOpen && modalData?.priceKey === 'lightbox'}
-                onClick={() => handleCardClick(t.products.lightbox.title, 'lightbox')}
-                onRateChange={(val) => handleRateChange('LIGHTBOX', val)}
-                editTooltip={t.products.clickToEdit}
-              />
+            {/* Interactive Day/Night Lit LED Simulator Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2 p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-100/70 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/10 select-none">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSoftPop();
+                    setIsNightLit(prev => !prev);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95 ${
+                    isNightLit
+                      ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-black shadow-[0_0_15px_rgba(251,191,36,0.6)]'
+                      : 'bg-white dark:bg-neutral-800 text-slate-700 dark:text-neutral-300 border border-slate-200 dark:border-white/10 hover:border-amber-400/50'
+                  }`}
+                  title={isNightLit ? (language === 'zh' ? '关闭通电发光效果' : 'Turn off lit preview') : (language === 'zh' ? '开启夜间通电发光模拟' : 'Turn on night lit preview')}
+                >
+                  <Lightbulb className={`w-3.5 h-3.5 ${isNightLit ? 'text-black fill-current animate-pulse' : 'text-amber-500'}`} />
+                  <span>{isNightLit ? (language === 'zh' ? '通电发光中 (Lit ON)' : 'Lit ON') : (language === 'zh' ? '通电发光模拟' : 'Night Lit Preview')}</span>
+                </button>
 
-              {/* 2. LIGHTBOX W BACKLIT */}
-              <MacPricingCard
-                title={t.products.lightboxBacklit.title}
-                subtitle={language === 'zh' ? t.products.lightboxBacklit.enTitle : undefined}
-                price={prices.lightboxBacklit}
-                rate={rates.LIGHTBOX_W_BACKLIT}
-                rateUnit={t.products.lightboxBacklit.unit}
-                iconType="lightboxBacklit"
-                iconBg="bg-gradient-to-tr from-rose-600 to-pink-500"
-                isSelected={modalOpen && modalData?.priceKey === 'lightboxBacklit'}
-                onClick={() => handleCardClick(t.products.lightboxBacklit.title, 'lightboxBacklit')}
-                onRateChange={(val) => handleRateChange('LIGHTBOX_W_BACKLIT', val)}
-                editTooltip={t.products.clickToEdit}
-              />
+                <span className="text-[11px] text-slate-500 dark:text-neutral-400 hidden sm:inline">
+                  {isNightLit
+                    ? (language === 'zh' ? '正在模拟招牌通电打光与背发光光晕效果' : 'Simulating real illuminated signs & backlit halo glow')
+                    : (language === 'zh' ? '点击可预览招牌夜间通电打光质感' : 'Click to preview night illuminated signs')}
+                </span>
+              </div>
 
-              {/* 3. BACKLIT */}
-              <MacPricingCard
-                title={t.products.backlit.title}
-                subtitle={language === 'zh' ? t.products.backlit.enTitle : undefined}
-                price={prices.backlit}
-                rate={rates.BACKLIT}
-                rateUnit={t.products.backlit.unit}
-                iconType="backlit"
-                iconBg="bg-gradient-to-tr from-blue-600 to-cyan-500"
-                isSelected={modalOpen && modalData?.priceKey === 'backlit'}
-                onClick={() => handleCardClick(t.products.backlit.title, 'backlit')}
-                onRateChange={(val) => handleRateChange('BACKLIT', val)}
-                editTooltip={t.products.clickToEdit}
-              />
-
-              {/* 4. TRANS */}
-              <MacPricingCard
-                title={t.products.trans.title}
-                subtitle={language === 'zh' ? t.products.trans.enTitle : undefined}
-                price={prices.trans}
-                rate={rates.TRANS}
-                rateUnit={t.products.trans.unit}
-                iconType="trans"
-                iconBg="bg-gradient-to-tr from-indigo-600 to-violet-500"
-                isSelected={modalOpen && modalData?.priceKey === 'trans'}
-                onClick={() => handleCardClick(t.products.trans.title, 'trans')}
-                onRateChange={(val) => handleRateChange('TRANS', val)}
-                editTooltip={t.products.clickToEdit}
-              />
-
-              {/* 5. 3D PRINTED */}
-              <MacPricingCard
-                title={t.products.printed3d.title}
-                subtitle={language === 'zh' ? t.products.printed3d.enTitle : undefined}
-                price={prices.printed3d}
-                rate={rates.PRINTED_3D}
-                rateUnit={t.products.printed3d.unit}
-                iconType="printed3d"
-                iconBg="bg-gradient-to-tr from-orange-600 to-amber-500"
-                isSelected={modalOpen && modalData?.priceKey === 'printed3d'}
-                onClick={() => handleCardClick(t.products.printed3d.title, 'printed3d')}
-                onRateChange={(val) => handleRateChange('PRINTED_3D', val)}
-                editTooltip={t.products.clickToEdit}
-              />
-
-              {/* 6. VINYL STICKER */}
-              <MacPricingCard
-                title={t.products.vinylSticker.title}
-                subtitle={language === 'zh' ? t.products.vinylSticker.enTitle : undefined}
-                price={prices.vinylSticker}
-                rate={rates.VINYL_STICKER}
-                rateUnit={t.products.vinylSticker.unit}
-                iconType="vinylSticker"
-                iconBg="bg-gradient-to-tr from-purple-600 to-fuchsia-500"
-                isSelected={modalOpen && modalData?.priceKey === 'vinylSticker'}
-                onClick={() => handleCardClick(t.products.vinylSticker.title, 'vinylSticker')}
-                onRateChange={(val) => handleRateChange('VINYL_STICKER', val)}
-                editTooltip={t.products.clickToEdit}
-              />
-
-              {/* 7. LED STRIP */}
-              <MacPricingCard
-                title={t.products.ledStrip.title}
-                subtitle={language === 'zh' ? t.products.ledStrip.enTitle : undefined}
-                price={prices.ledStrip}
-                rate={rates.LED_STRIP}
-                rateUnit={t.products.ledStrip.unit}
-                iconType="ledStrip"
-                iconBg="bg-gradient-to-tr from-emerald-600 to-teal-500"
-                isSelected={modalOpen && modalData?.priceKey === 'ledStrip'}
-                onClick={() => handleCardClick(t.products.ledStrip.title, 'ledStrip')}
-                onRateChange={(val) => handleRateChange('LED_STRIP', val)}
-                editTooltip={t.products.clickToEdit}
-              />
-
-              {/* 8. ACRYLIC */}
-              <MacPricingCard
-                title={t.products.acrylic.title}
-                subtitle={language === 'zh' ? t.products.acrylic.enTitle : undefined}
-                price={prices.acrylic}
-                rate={rates.ACRYLIC}
-                rateUnit={t.products.acrylic.unit}
-                iconType="acrylic"
-                iconBg="bg-gradient-to-tr from-teal-600 to-cyan-500"
-                isSelected={modalOpen && modalData?.priceKey === 'acrylic'}
-                onClick={() => handleCardClick(t.products.acrylic.title, 'acrylic')}
-                onRateChange={(val) => handleRateChange('ACRYLIC', val)}
-                editTooltip={t.products.clickToEdit}
-              />
+              {/* Color Temperature Selector (Only visible when Lit is ON) */}
+              {isNightLit && (
+                <div className="flex items-center gap-1 bg-black/40 p-0.5 rounded-lg border border-white/15 animate-in fade-in zoom-in-95 duration-150">
+                  {[
+                    { key: 'warm', label: language === 'zh' ? '3000K 暖白' : '3000K Warm', color: 'bg-amber-400' },
+                    { key: 'neutral', label: language === 'zh' ? '4500K 自然' : '4500K Natural', color: 'bg-slate-100' },
+                    { key: 'cool', label: language === 'zh' ? '6500K 冷白' : '6500K Cool', color: 'bg-cyan-400' },
+                    { key: 'neon', label: language === 'zh' ? 'RGB 霓虹' : 'RGB Neon', color: 'bg-fuchsia-400' },
+                  ].map((ct) => (
+                    <button
+                      key={ct.key}
+                      type="button"
+                      onClick={() => {
+                        playSoftPop();
+                        setLitColor(ct.key as any);
+                      }}
+                      className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        litColor === ct.key
+                          ? 'bg-white/20 text-white shadow-xs'
+                          : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full ${ct.color} ${litColor === ct.key ? 'animate-ping' : ''}`} />
+                      <span>{ct.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
+            {/* Pricing Grid - 8 Items (Collapsible with yellow traffic button) */}
+            {!isCompact ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 animate-in fade-in duration-200">
+                {/* 1. LIGHTBOX */}
+                <MacPricingCard
+                  title={t.products.lightbox.title}
+                  subtitle={language === 'zh' ? t.products.lightbox.enTitle : undefined}
+                  price={prices.lightbox}
+                  rate={rates.LIGHTBOX}
+                  rateUnit={t.products.lightbox.unit}
+                  iconType="lightbox"
+                  iconBg="bg-gradient-to-tr from-amber-600 to-yellow-500"
+                  isSelected={modalOpen && modalData?.priceKey === 'lightbox'}
+                  onClick={() => handleCardClick(t.products.lightbox.title, 'lightbox')}
+                  onRateChange={(val) => handleRateChange('LIGHTBOX', val)}
+                  editTooltip={t.products.clickToEdit}
+                  isNightLit={isNightLit}
+                  litColor={litColor}
+                />
+
+                {/* 2. LIGHTBOX W BACKLIT */}
+                <MacPricingCard
+                  title={t.products.lightboxBacklit.title}
+                  subtitle={language === 'zh' ? t.products.lightboxBacklit.enTitle : undefined}
+                  price={prices.lightboxBacklit}
+                  rate={rates.LIGHTBOX_W_BACKLIT}
+                  rateUnit={t.products.lightboxBacklit.unit}
+                  iconType="lightboxBacklit"
+                  iconBg="bg-gradient-to-tr from-rose-600 to-pink-500"
+                  isSelected={modalOpen && modalData?.priceKey === 'lightboxBacklit'}
+                  onClick={() => handleCardClick(t.products.lightboxBacklit.title, 'lightboxBacklit')}
+                  onRateChange={(val) => handleRateChange('LIGHTBOX_W_BACKLIT', val)}
+                  editTooltip={t.products.clickToEdit}
+                  isNightLit={isNightLit}
+                  litColor={litColor}
+                />
+
+                {/* 3. BACKLIT */}
+                <MacPricingCard
+                  title={t.products.backlit.title}
+                  subtitle={language === 'zh' ? t.products.backlit.enTitle : undefined}
+                  price={prices.backlit}
+                  rate={rates.BACKLIT}
+                  rateUnit={t.products.backlit.unit}
+                  iconType="backlit"
+                  iconBg="bg-gradient-to-tr from-blue-600 to-cyan-500"
+                  isSelected={modalOpen && modalData?.priceKey === 'backlit'}
+                  onClick={() => handleCardClick(t.products.backlit.title, 'backlit')}
+                  onRateChange={(val) => handleRateChange('BACKLIT', val)}
+                  editTooltip={t.products.clickToEdit}
+                  isNightLit={isNightLit}
+                  litColor={litColor}
+                />
+
+                {/* 4. TRANS */}
+                <MacPricingCard
+                  title={t.products.trans.title}
+                  subtitle={language === 'zh' ? t.products.trans.enTitle : undefined}
+                  price={prices.trans}
+                  rate={rates.TRANS}
+                  rateUnit={t.products.trans.unit}
+                  iconType="trans"
+                  iconBg="bg-gradient-to-tr from-indigo-600 to-violet-500"
+                  isSelected={modalOpen && modalData?.priceKey === 'trans'}
+                  onClick={() => handleCardClick(t.products.trans.title, 'trans')}
+                  onRateChange={(val) => handleRateChange('TRANS', val)}
+                  editTooltip={t.products.clickToEdit}
+                  isNightLit={isNightLit}
+                  litColor={litColor}
+                />
+
+                {/* 5. 3D PRINTED */}
+                <MacPricingCard
+                  title={t.products.printed3d.title}
+                  subtitle={language === 'zh' ? t.products.printed3d.enTitle : undefined}
+                  price={prices.printed3d}
+                  rate={rates.PRINTED_3D}
+                  rateUnit={t.products.printed3d.unit}
+                  iconType="printed3d"
+                  iconBg="bg-gradient-to-tr from-orange-600 to-amber-500"
+                  isSelected={modalOpen && modalData?.priceKey === 'printed3d'}
+                  onClick={() => handleCardClick(t.products.printed3d.title, 'printed3d')}
+                  onRateChange={(val) => handleRateChange('PRINTED_3D', val)}
+                  editTooltip={t.products.clickToEdit}
+                  isNightLit={isNightLit}
+                  litColor={litColor}
+                />
+
+                {/* 6. VINYL STICKER */}
+                <MacPricingCard
+                  title={t.products.vinylSticker.title}
+                  subtitle={language === 'zh' ? t.products.vinylSticker.enTitle : undefined}
+                  price={prices.vinylSticker}
+                  rate={rates.VINYL_STICKER}
+                  rateUnit={t.products.vinylSticker.unit}
+                  iconType="vinylSticker"
+                  iconBg="bg-gradient-to-tr from-purple-600 to-fuchsia-500"
+                  isSelected={modalOpen && modalData?.priceKey === 'vinylSticker'}
+                  onClick={() => handleCardClick(t.products.vinylSticker.title, 'vinylSticker')}
+                  onRateChange={(val) => handleRateChange('VINYL_STICKER', val)}
+                  editTooltip={t.products.clickToEdit}
+                  isNightLit={isNightLit}
+                  litColor={litColor}
+                />
+
+                {/* 7. LED STRIP */}
+                <MacPricingCard
+                  title={t.products.ledStrip.title}
+                  subtitle={language === 'zh' ? t.products.ledStrip.enTitle : undefined}
+                  price={prices.ledStrip}
+                  rate={rates.LED_STRIP}
+                  rateUnit={t.products.ledStrip.unit}
+                  iconType="ledStrip"
+                  iconBg="bg-gradient-to-tr from-emerald-600 to-teal-500"
+                  isSelected={modalOpen && modalData?.priceKey === 'ledStrip'}
+                  onClick={() => handleCardClick(t.products.ledStrip.title, 'ledStrip')}
+                  onRateChange={(val) => handleRateChange('LED_STRIP', val)}
+                  editTooltip={t.products.clickToEdit}
+                  isNightLit={isNightLit}
+                  litColor={litColor}
+                />
+
+                {/* 8. ACRYLIC */}
+                <MacPricingCard
+                  title={t.products.acrylic.title}
+                  subtitle={language === 'zh' ? t.products.acrylic.enTitle : undefined}
+                  price={prices.acrylic}
+                  rate={rates.ACRYLIC}
+                  rateUnit={t.products.acrylic.unit}
+                  iconType="acrylic"
+                  iconBg="bg-gradient-to-tr from-teal-600 to-cyan-500"
+                  isSelected={modalOpen && modalData?.priceKey === 'acrylic'}
+                  onClick={() => handleCardClick(t.products.acrylic.title, 'acrylic')}
+                  onRateChange={(val) => handleRateChange('ACRYLIC', val)}
+                  editTooltip={t.products.clickToEdit}
+                  isNightLit={isNightLit}
+                  litColor={litColor}
+                />
+              </div>
+            ) : (
+              <div
+                onClick={() => {
+                  playSoftPop();
+                  setIsCompact(false);
+                }}
+                className="p-3.5 text-center rounded-xl bg-blue-500/10 border border-blue-500/25 text-xs font-bold text-blue-600 dark:text-cyan-400 cursor-pointer hover:bg-blue-500/15 transition-all shadow-inner select-none active:scale-[0.99]"
+              >
+                {language === 'zh' ? '↕ 招牌算价卡片已折叠收起（点击此处或黄色减号键展开）' : '↕ Signage pricing grid collapsed (Click here or yellow button to expand)'}
+              </div>
+            )}
           </div>
         </motion.div>
       </main>
@@ -809,6 +1073,15 @@ export default function App() {
           }}
         />
       )}
+
+      {/* macOS Desktop Right-Click Context Menu */}
+      <MacDesktopContextMenu
+        isOpen={Boolean(contextMenu)}
+        x={contextMenu?.x || 0}
+        y={contextMenu?.y || 0}
+        onClose={() => setContextMenu(null)}
+        items={contextMenuItems}
+      />
     </div>
   );
 }

@@ -1091,9 +1091,9 @@ ASPECT RATIO: ${shapeInfo.ratioStr}`;
                     </span>
                     {onUpdateUnit && (
                       <div className="flex p-0.5 rounded-none bg-white dark:bg-[#050817] border border-slate-300 dark:border-white/15">
-                        {[Unit.IN, Unit.FT, Unit.CM, Unit.MM, Unit.M].map(u => (
+                        {[Unit.IN, Unit.FT, Unit.CM, Unit.MM, Unit.M].map((u, idx) => (
                           <button
-                            key={u}
+                            key={`shape-unit-${u}-${idx}`}
                             type="button"
                             onClick={() => onUpdateUnit(u)}
                             className={`px-1.5 py-0.2 rounded-none text-[9px] font-bold uppercase transition-all ${

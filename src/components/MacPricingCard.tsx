@@ -23,6 +23,8 @@ interface MacPricingCardProps {
   onClick: () => void;
   onRateChange?: (newRate: number) => void;
   editTooltip?: string;
+  isNightLit?: boolean;
+  litColor?: 'warm' | 'neutral' | 'cool' | 'neon';
 }
 
 const cardThemes: Record<MacPricingCardProps['iconType'], {
@@ -192,17 +194,56 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
   onClick,
   onRateChange,
   editTooltip = "Click to edit rate",
+  isNightLit = false,
+  litColor = 'warm',
 }) => {
   const [localRate, setLocalRate] = useState<string>(rate !== undefined ? rate.toString() : '');
   const [isClicked, setIsClicked] = useState<boolean>(false);
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [tilt, setTilt] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState<boolean>(false);
-  const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const [ripples, setRipples] = useState<Array<{ id: string; x: number; y: number }>>([]);
   const cardRef = useRef<HTMLDivElement>(null);
   const theme = cardThemes[iconType] || cardThemes.lightbox;
 
   const isLit = isSelected || isClicked;
+
+  const getLitAuraClasses = () => {
+    if (!isNightLit) return '';
+    switch (litColor) {
+      case 'warm':
+        return 'shadow-[0_0_36px_rgba(251,191,36,0.6)] border-amber-400 bg-amber-950/40 dark:bg-amber-950/60 ring-2 ring-amber-400/40';
+      case 'neutral':
+        return 'shadow-[0_0_36px_rgba(255,255,255,0.65)] border-white/90 bg-slate-900/60 dark:bg-black/60 ring-2 ring-white/50';
+      case 'cool':
+        return 'shadow-[0_0_38px_rgba(56,189,248,0.7)] border-cyan-400 bg-cyan-950/40 dark:bg-cyan-950/60 ring-2 ring-cyan-400/40';
+      case 'neon':
+        return 'shadow-[0_0_42px_rgba(236,72,153,0.7)] border-fuchsia-400 bg-fuchsia-950/40 dark:bg-fuchsia-950/60 ring-2 ring-fuchsia-400/40 animate-pulse';
+      default:
+        return 'shadow-[0_0_36px_rgba(251,191,36,0.6)] border-amber-400';
+    }
+  };
+
+  const getLitBadge = () => {
+    if (!isNightLit) return null;
+    let label = '3000K WARM';
+    let badgeClass = 'bg-amber-400/20 text-amber-300 border-amber-400/50 shadow-[0_0_10px_rgba(251,191,36,0.8)]';
+    if (litColor === 'neutral') {
+      label = '4500K NATURAL';
+      badgeClass = 'bg-white/20 text-white border-white/60 shadow-[0_0_10px_rgba(255,255,255,0.85)]';
+    } else if (litColor === 'cool') {
+      label = '6500K COOL';
+      badgeClass = 'bg-cyan-400/20 text-cyan-300 border-cyan-400/50 shadow-[0_0_10px_rgba(56,189,248,0.85)]';
+    } else if (litColor === 'neon') {
+      label = 'RGB NEON';
+      badgeClass = 'bg-fuchsia-400/20 text-fuchsia-300 border-fuchsia-400/50 shadow-[0_0_12px_rgba(236,72,153,0.9)] animate-pulse';
+    }
+    return (
+      <span className={`text-[7.5px] font-mono font-black uppercase px-1.5 py-0.5 rounded-full border shrink-0 tracking-wider ${badgeClass}`}>
+        ⚡ {label}
+      </span>
+    );
+  };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Generate waterdrop ripple
@@ -210,7 +251,7 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
       const rect = cardRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      const newRipple = { id: Date.now(), x, y };
+      const newRipple = { id: `rip-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, x, y };
       setRipples(prev => [...prev.slice(-3), newRipple]);
       setTimeout(() => {
         setRipples(prev => prev.filter(r => r.id !== newRipple.id));
@@ -291,8 +332,10 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
           : 'perspective(700px) rotateX(0deg) rotateY(0deg) translateY(0px)',
         transition: isHovered ? 'transform 0.08s ease-out' : 'transform 0.3s ease',
       }}
-      className={`group relative rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 lg:p-4 cursor-pointer flex flex-col justify-between overflow-hidden min-h-[76px] sm:min-h-[96px] lg:min-h-[118px] gpu-layer active:scale-[0.98] ${
-        isLit
+      className={`group relative rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 lg:p-4 cursor-pointer flex flex-col justify-between overflow-hidden min-h-[76px] sm:min-h-[96px] lg:min-h-[118px] gpu-layer active:scale-[0.98] transition-all duration-300 ${
+        isNightLit
+          ? `${getLitAuraClasses()} border-2 text-white`
+          : isLit
           ? `${theme.selectedLightBg} ${theme.selectedDarkBg} border-2 ${theme.selectedLightBorder} ${theme.selectedDarkBorder} ${theme.selectedDarkShadow} glass-rainbow-rim ring-2 ring-current/20 shadow-lg`
           : `apple-card-glass ${theme.hoverBorder}`
       }`}
@@ -321,31 +364,44 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
         />
       ))}
 
-      {/* Top Row: Icon + Title */}
-      <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 relative z-10">
-        <div
-          className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 rounded-lg ${iconBg} text-white flex items-center justify-center shadow-sm shrink-0 transition-transform ${
-            isLit ? 'scale-105 shadow-md' : 'group-hover:scale-105'
-          }`}
-        >
-          {getIcon()}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h4
-            className={`font-extrabold text-[11px] sm:text-xs lg:text-sm tracking-tight leading-snug truncate transition-colors ${
-              isLit
-                ? `${theme.selectedTitleText}`
-                : `text-black dark:text-white ${theme.hoverTitleText}`
+      {/* Top Row: Icon + Title + Lit Badge */}
+      <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 min-w-0 relative z-10">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-1">
+          <div
+            className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 rounded-lg ${iconBg} text-white flex items-center justify-center shadow-sm shrink-0 transition-all ${
+              isNightLit
+                ? 'scale-110 shadow-lg ring-2 ring-white/60 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] animate-pulse'
+                : isLit
+                ? 'scale-105 shadow-md'
+                : 'group-hover:scale-105'
             }`}
           >
-            {title}
-          </h4>
-          {subtitle && (
-            <span className="block text-[8px] sm:text-[9px] font-bold tracking-wider text-slate-500 dark:text-neutral-400 uppercase truncate">
-              {subtitle}
-            </span>
-          )}
+            {getIcon()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h4
+              className={`font-extrabold text-[11px] sm:text-xs lg:text-sm tracking-tight leading-snug truncate transition-colors ${
+                isNightLit
+                  ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+                  : isLit
+                  ? `${theme.selectedTitleText}`
+                  : `text-black dark:text-white ${theme.hoverTitleText}`
+              }`}
+            >
+              {title}
+            </h4>
+            {subtitle && (
+              <span className={`block text-[8px] sm:text-[9px] font-bold tracking-wider uppercase truncate ${
+                isNightLit ? 'text-white/80' : 'text-slate-500 dark:text-neutral-400'
+              }`}>
+                {subtitle}
+              </span>
+            )}
+          </div>
         </div>
+
+        {/* Top-Right Night Lit Simulation Pill */}
+        {getLitBadge()}
       </div>
 
       {/* Bottom Row: Rate Badge & Total Price */}
@@ -393,7 +449,9 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
         {/* Calculated Total */}
         <span
           className={`font-black font-mono tracking-tight transition-colors whitespace-nowrap shrink-0 text-right ${
-            isLit
+            isNightLit
+              ? 'text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]'
+              : isLit
               ? `${theme.selectedPriceText}`
               : `text-black dark:text-white ${theme.hoverPriceText}`
           } ${

@@ -127,9 +127,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
     <div className="flex flex-col h-full bg-slate-900/90 border-r border-slate-700/80 w-full select-none">
       {/* Top Tab Bar (PDFescape Style: Insert | Annotate | Page | Document | Upload) */}
       <div className="flex border-b border-slate-700 bg-slate-950 overflow-x-auto mac-scrollbar">
-        {tabs.map(tab => (
+        {tabs.map((tab, idx) => (
           <button
-            key={tab.id}
+            key={`pdfescape-tab-${tab.id}-${idx}`}
             type="button"
             onClick={() => onChangeTab(tab.id)}
             className={`flex-1 py-2 px-2.5 text-center font-bold text-xs whitespace-nowrap transition-colors cursor-pointer border-b-2 ${
@@ -403,9 +403,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                   { text: 'VOID', labelZh: '作废无效', color: '#dc2626' },
                   { text: 'INTERNAL ONLY', labelZh: '内部专用', color: '#8b5cf6' },
                   { text: 'HALO DESIGN HUB', labelZh: '公司水印', color: '#6366f1' },
-                ].map(p => (
+                ].map((p, idx) => (
                   <button
-                    key={p.text}
+                    key={`wm-txt-opt-${p.text}-${idx}`}
                     type="button"
                     onClick={() => {
                       onChangeWatermarkText(p.text);
@@ -461,9 +461,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 {isZh ? '水印颜色' : 'Color'}:
               </label>
               <div className="flex items-center gap-2">
-                {['#94a3b8', '#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#334155'].map(c => (
+                {['#94a3b8', '#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#334155'].map((c, idx) => (
                   <button
-                    key={c}
+                    key={`wm-color-opt-${c}-${idx}`}
                     type="button"
                     onClick={() => onChangeWatermarkColor(c)}
                     className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer ${
@@ -488,9 +488,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 {isZh ? '透明度 (Opacity)' : 'Opacity'}: {(watermarkOpacity * 100).toFixed(0)}%
               </label>
               <div className="grid grid-cols-4 gap-1.5">
-                {[0.12, 0.22, 0.35, 0.5].map(op => (
+                {[0.12, 0.22, 0.35, 0.5].map((op, idx) => (
                   <button
-                    key={op}
+                    key={`wm-opacity-opt-${op}-${idx}`}
                     type="button"
                     onClick={() => onChangeWatermarkOpacity(op)}
                     className={`py-1 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer ${
@@ -516,9 +516,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                   { angle: 30, label: '30°' },
                   { angle: 0, label: '0°' },
                   { angle: -45, label: '-45°' },
-                ].map(r => (
+                ].map((r, idx) => (
                   <button
-                    key={r.angle}
+                    key={`wm-rot-opt-${r.angle}-${idx}`}
                     type="button"
                     onClick={() => onChangeWatermarkRotation(r.angle)}
                     className={`py-1 text-center rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
@@ -539,9 +539,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 {isZh ? '字号大小 (Font Size)' : 'Size'}: {watermarkFontSize}pt
               </label>
               <div className="grid grid-cols-4 gap-1.5">
-                {[32, 44, 56, 72].map(sz => (
+                {[32, 44, 56, 72].map((sz, idx) => (
                   <button
-                    key={sz}
+                    key={`wm-font-sz-${sz}-${idx}`}
                     type="button"
                     onClick={() => onChangeWatermarkFontSize(sz)}
                     className={`py-1 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer ${

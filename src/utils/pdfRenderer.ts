@@ -160,16 +160,21 @@ export const renderPdfPageToCanvas = async (
   canvas: HTMLCanvasElement,
   scale: number = 1.5
 ): Promise<RenderPageResult> => {
+  if (!canvas) {
+    throw new Error('Canvas element is required for rendering');
+  }
+
   const page = await pdfDoc.getPage(pageNumber);
   const viewport = page.getViewport({ scale });
 
   // Cancel any existing render task on this canvas to prevent collision
-  if ((canvas as any)._renderTask) {
+  if (canvas && (canvas as any)._renderTask) {
     try {
       (canvas as any)._renderTask.cancel();
     } catch {
       // ignore
     }
+    (canvas as any)._renderTask = null;
   }
 
   // Handle High-DPI screens
@@ -206,7 +211,9 @@ export const renderPdfPageToCanvas = async (
     }
     throw err;
   } finally {
-    (canvas as any)._renderTask = null;
+    if (canvas) {
+      (canvas as any)._renderTask = null;
+    }
   }
 
   return {

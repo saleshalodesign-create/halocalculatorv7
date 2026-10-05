@@ -9,6 +9,7 @@ import {
   Layers,
   Image as ImageIcon,
 } from 'lucide-react';
+import { HaloLogo } from './HaloLogo';
 import { useLanguage } from '../context/LanguageContext';
 import { playHoverTick, playSoftPop } from '../utils/soundEffects';
 

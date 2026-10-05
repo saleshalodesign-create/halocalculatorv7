@@ -765,7 +765,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                     {/* Schedule Slots (Dynamic count) */}
                     <div className={`flex flex-col ${slotCount <= 3 ? 'gap-5' : slotCount === 4 ? 'gap-3.5' : slotCount === 5 ? 'gap-2.5' : 'gap-1.5'} mt-2.5`}>
                       {entries.slice(0, slotCount).map((entry, idx) => (
-                        <div key={idx} className="flex items-start gap-2.5 group">
+                        <div key={`sched-slot-${idx}`} className="flex items-start gap-2.5 group">
                           {/* Slot Number: 1 to N (Fixed template size) */}
                           <div
                             className="w-5 font-bold text-black font-serif text-base pt-1 shrink-0 text-center select-none flex flex-col items-center"
@@ -904,7 +904,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                         Boolean(entries[idx]?.descriptions);
                       return (
                         <button
-                          key={idx}
+                          key={`slot-btn-${idx}`}
                           type="button"
                           onClick={() => setActiveSlot(idx)}
                           className={`px-2 sm:px-3 py-2 rounded-xl text-xs font-bold transition-all border flex flex-col items-center justify-center relative ${
@@ -1006,7 +1006,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
                       {entries.slice(0, slotCount).map((ent, i) => (
                         <div
-                          key={i}
+                          key={`slot-overview-${i}`}
                           onClick={() => setActiveSlot(i)}
                           className={`p-2.5 rounded-xl border cursor-pointer transition-all ${
                             activeSlot === i
@@ -1095,7 +1095,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
             ? Array.from({ length: slotCount }, () => ({ companyName: '', address: '', descriptions: '' }))
             : entries.slice(0, slotCount)
           ).map((entry, idx) => (
-            <div key={idx} className="flex items-start gap-3 break-inside-avoid [break-inside:avoid] [page-break-inside:avoid]">
+            <div key={`print-slot-${idx}`} className="flex items-start gap-3 break-inside-avoid [break-inside:avoid] [page-break-inside:avoid]">
               {/* Number 1 to N (Fixed template size) */}
               <span
                 className="w-5 font-bold text-black font-serif text-base pt-1 shrink-0 text-center"
