@@ -85,7 +85,7 @@ interface PdfEditorModalProps {
   initialPdfBytes?: ArrayBuffer | null;
   initialPdfName?: string;
   onSaveToQuoteSheet?: (items: QuoteItem[], data: Partial<QuoteRecord>) => void;
-  onOpenPdfTools?: (tab?: 'join' | 'split') => void;
+  onOpenPdfTools?: (tab?: 'join' | 'split' | 'lock' | 'unlock') => void;
   onOpenImageConverter?: () => void;
 }
 
@@ -108,7 +108,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
 
   // Internal PDF Tools modal state
   const [internalPdfToolsOpen, setInternalPdfToolsOpen] = useState<boolean>(false);
-  const [internalPdfToolsTab, setInternalPdfToolsTab] = useState<'join' | 'split'>('join');
+  const [internalPdfToolsTab, setInternalPdfToolsTab] = useState<'join' | 'split' | 'lock' | 'unlock'>('join');
 
   const handleOpenJoinerFromEditor = () => {
     if (onOpenPdfTools) {
@@ -128,6 +128,24 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
     }
   };
 
+  const handleOpenLockFromEditor = () => {
+    if (onOpenPdfTools) {
+      onOpenPdfTools('lock');
+    } else {
+      setInternalPdfToolsTab('lock');
+      setInternalPdfToolsOpen(true);
+    }
+  };
+
+  const handleOpenUnlockFromEditor = () => {
+    if (onOpenPdfTools) {
+      onOpenPdfTools('unlock');
+    } else {
+      setInternalPdfToolsTab('unlock');
+      setInternalPdfToolsOpen(true);
+    }
+  };
+
   // Active Editor Tab & Document Source (PDFescape style tabs: insert | annotate | page | document | upload)
   const [activeTab, setActiveTab] = useState<PdfescapeTab>('insert');
   // Default to clean blank A4 file as requested
@@ -137,12 +155,6 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
   const [totalPages, setTotalPages] = useState<number>(1);
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
   const [rotations, setRotations] = useState<Record<number, number>>({});
-  const [watermarkText, setWatermarkText] = useState<string>('');
-  const [watermarkColor, setWatermarkColor] = useState<string>('#94a3b8');
-  const [watermarkOpacity, setWatermarkOpacity] = useState<number>(0.25);
-  const [watermarkRotation, setWatermarkRotation] = useState<number>(45);
-  const [watermarkFontSize, setWatermarkFontSize] = useState<number>(48);
-  const [watermarkLayout, setWatermarkLayout] = useState<'center' | 'tiled'>('center');
   const [deletePageIndices, setDeletePageIndices] = useState<number[]>([]);
   const [pageOrder, setPageOrder] = useState<number[]>([]);
 
@@ -528,32 +540,11 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
     };
   }, [isOpen, basePdfBytes, currentPageIndex, zoomScale]);
 
-  // Compile final PDF with all visual annotations, watermarks, stamps, text edits
+  // Compile final PDF with all visual annotations, stamps, text edits
   const compileFinalPdf = useCallback(async (): Promise<Uint8Array | null> => {
     if (!basePdfBytes) return null;
-    return await applyPdfAnnotations(basePdfBytes, annotations, {
-      watermarkText,
-      watermarkColor,
-      watermarkOpacity,
-      watermarkRotation,
-      watermarkFontSize,
-      watermarkLayout,
-    });
-  }, [
-    basePdfBytes,
-    annotations,
-    watermarkText,
-    watermarkColor,
-    watermarkOpacity,
-    watermarkRotation,
-    watermarkFontSize,
-    watermarkLayout,
-  ]);
-
-  const handleClearWatermark = () => {
-    setWatermarkText('');
-    showToast(isZh ? '水印已清除' : 'Watermark cleared');
-  };
+    return await applyPdfAnnotations(basePdfBytes, annotations);
+  }, [basePdfBytes, annotations]);
 
   // Handle external PDF file upload
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1666,29 +1657,6 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                 <span>{isZh ? '查找与替换' : 'Find & Replace'}</span>
               </button>
 
-              {/* Watermark Quick Access Button */}
-              <button
-                type="button"
-                onClick={() => setActiveTab(activeTab === 'watermark' ? 'annotate' : 'watermark')}
-                className={`px-2.5 py-1 rounded-lg border font-semibold flex items-center gap-1 text-[11px] transition-all cursor-pointer ${
-                  activeTab === 'watermark'
-                    ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-xs'
-                    : watermarkText
-                    ? 'bg-amber-950/40 text-amber-300 border-amber-500/30 hover:bg-amber-900/40'
-                    : 'bg-slate-200/80 dark:bg-white/10 text-slate-700 dark:text-neutral-300 border-transparent hover:bg-slate-300 dark:hover:bg-white/15'
-                }`}
-                title={isZh ? '添加或设置文档水印（实时预览与嵌入导出）' : 'Document watermark settings & live preview'}
-              >
-                <ShieldAlert className="w-3 h-3 text-amber-400" />
-                <span>{isZh ? '水印' : 'Watermark'}</span>
-                {watermarkText && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse ml-0.5"
-                    title={isZh ? `已启用: ${watermarkText}` : `Active: ${watermarkText}`}
-                  />
-                )}
-              </button>
-
               <label
                 className="px-2.5 py-1 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 font-semibold flex items-center gap-1 text-[11px] cursor-pointer"
                 title="Upload ANY external PDF file to edit"
@@ -1838,19 +1806,6 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                 onOpenPdfJoiner={handleOpenJoinerFromEditor}
                 onOpenPdfSplitter={handleOpenSplitterFromEditor}
                 onOpenImageConverter={onOpenImageConverter}
-                watermarkText={watermarkText}
-                onChangeWatermarkText={setWatermarkText}
-                watermarkColor={watermarkColor}
-                onChangeWatermarkColor={setWatermarkColor}
-                watermarkOpacity={watermarkOpacity}
-                onChangeWatermarkOpacity={setWatermarkOpacity}
-                watermarkRotation={watermarkRotation}
-                onChangeWatermarkRotation={setWatermarkRotation}
-                watermarkFontSize={watermarkFontSize}
-                onChangeWatermarkFontSize={setWatermarkFontSize}
-                watermarkLayout={watermarkLayout}
-                onChangeWatermarkLayout={setWatermarkLayout}
-                onClearWatermark={handleClearWatermark}
               />
 
               {/* TAB: STRUCTURED QUOTE FORM (when activeTab === 'document') */}
@@ -2505,12 +2460,6 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                     selectedStampId={selectedStampId}
                     customStampText={customStampText}
                     customStampColor={customStampColor}
-                    watermarkText={watermarkText}
-                    watermarkColor={watermarkColor}
-                    watermarkOpacity={watermarkOpacity}
-                    watermarkRotation={watermarkRotation}
-                    watermarkFontSize={watermarkFontSize}
-                    watermarkLayout={watermarkLayout}
                   />
                 </div>
               </div>

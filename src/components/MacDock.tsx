@@ -19,7 +19,7 @@ export interface MacDockProps {
   onOpenShapeModal?: () => void;
   onOpenDailySchedule?: () => void;
   onOpenPdfEditor?: () => void;
-  onOpenPdfTools?: (tab?: 'join' | 'split') => void;
+  onOpenPdfTools?: (tab?: 'join' | 'split' | 'organize' | 'watermark' | 'img2pdf' | 'lock' | 'unlock') => void;
   onOpenImageConverter?: () => void;
   shapeType?: 'horizontal' | 'vertical' | 'square' | 'invalid';
   shapeLabel?: string;
@@ -92,8 +92,8 @@ export const MacDock: React.FC<MacDockProps> = ({
       ? [
           {
             id: 'pdf-tools',
-            title: t.dock.pdfTools || (language === 'zh' ? '合并/拆分' : 'Join/Split'),
-            tooltip: language === 'zh' ? 'PDF 合并与拆分工具箱' : 'PDF Joiner & Splitter',
+            title: t.dock.pdfTools || (language === 'zh' ? 'PDF 工具' : 'PDF Tools'),
+            tooltip: language === 'zh' ? 'PDF 工具箱 (合并/拆分/旋转整理/水印/多图转PDF/加解密)' : 'PDF Tools (Merge/Split/Organize/Watermark/Images/Lock)',
             icon: <Layers className="w-4 h-4 sm:w-5 sm:h-5" />,
             gradient: 'from-cyan-600 via-blue-600 to-indigo-600',
             shadow: 'shadow-blue-500/30',

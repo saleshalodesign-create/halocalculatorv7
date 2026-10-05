@@ -349,9 +349,9 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
       />
 
       {/* Dynamic Waterdrop Ripple Clicks */}
-      {ripples.map(r => (
+      {ripples.map((r, idx) => (
         <span
-          key={r.id}
+          key={`ripple-${r.id}-${idx}`}
           className="liquid-ripple"
           style={{
             left: r.x,

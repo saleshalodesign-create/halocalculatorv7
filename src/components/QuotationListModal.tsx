@@ -1250,10 +1250,10 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                     <button
                       onClick={() => onOpenPdfTools('join')}
                       className="py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-[10px] sm:text-xs hover:brightness-110 transition-all flex items-center justify-center gap-1 shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
-                      title={language === 'zh' ? 'PDF 合并与拆分工具箱' : 'PDF Joiner & Splitter'}
+                      title={language === 'zh' ? 'PDF 工具箱 (合并/拆分/加锁/去锁)' : 'PDF Tools (Join/Split/Lock/Unlock)'}
                     >
                       <Layers className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                      <span className="truncate">{language === 'zh' ? '合并/拆分' : 'Join/Split'}</span>
+                      <span className="truncate">{language === 'zh' ? 'PDF 工具' : 'PDF Tools'}</span>
                     </button>
                   )}
                 </div>

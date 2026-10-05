@@ -127,7 +127,7 @@ export default function App() {
   const [pdfEditorCustomBytes, setPdfEditorCustomBytes] = useState<ArrayBuffer | null>(null);
   const [pdfEditorCustomName, setPdfEditorCustomName] = useState<string>('');
   const [pdfToolsOpen, setPdfToolsOpen] = useState(false);
-  const [pdfToolsInitialTab, setPdfToolsInitialTab] = useState<'join' | 'split'>('join');
+  const [pdfToolsInitialTab, setPdfToolsInitialTab] = useState<'join' | 'split' | 'organize' | 'watermark' | 'img2pdf' | 'lock' | 'unlock'>('join');
   const [imageConverterOpen, setImageConverterOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
@@ -157,7 +157,7 @@ export default function App() {
     setPdfEditorOpen(true);
   };
 
-  const handleOpenPdfTools = (tab: 'join' | 'split' = 'join') => {
+  const handleOpenPdfTools = (tab: 'join' | 'split' | 'organize' | 'watermark' | 'img2pdf' | 'lock' | 'unlock' = 'join') => {
     setPdfToolsInitialTab(tab);
     setPdfToolsOpen(true);
   };
@@ -404,7 +404,7 @@ export default function App() {
     },
     {
       id: 'pdf-tools',
-      label: t.dock.pdfTools || (language === 'zh' ? 'PDF 合并与拆分' : 'PDF Merge/Split'),
+      label: language === 'zh' ? 'PDF 工具箱 (合并/拆分/旋转整理/水印/多图转PDF/加解密)' : 'PDF Tools (Merge/Split/Organize/Watermark/Images/Lock)',
       icon: <Layers className="w-4 h-4 text-blue-400" />,
       onClick: () => handleOpenPdfTools('join'),
     },
@@ -761,9 +761,9 @@ export default function App() {
                     { key: 'neutral', label: language === 'zh' ? '4500K 自然' : '4500K Natural', color: 'bg-slate-100' },
                     { key: 'cool', label: language === 'zh' ? '6500K 冷白' : '6500K Cool', color: 'bg-cyan-400' },
                     { key: 'neon', label: language === 'zh' ? 'RGB 霓虹' : 'RGB Neon', color: 'bg-fuchsia-400' },
-                  ].map((ct) => (
+                  ].map((ct, idx) => (
                     <button
-                      key={ct.key}
+                      key={`lit-ct-${ct.key}-${idx}`}
                       type="button"
                       onClick={() => {
                         playSoftPop();

@@ -897,27 +897,27 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                       gridTemplateColumns: `repeat(${Math.min(slotCount, slotCount <= 4 ? slotCount : 5)}, minmax(0, 1fr))`
                     }}
                   >
-                    {Array.from({ length: slotCount }, (_, idx) => idx).map(idx => {
+                    {Array.from({ length: slotCount }, (_, idx) => idx).map((slotIdx, mapIdx) => {
                       const hasData =
-                        Boolean(entries[idx]?.companyName) ||
-                        Boolean(entries[idx]?.address) ||
-                        Boolean(entries[idx]?.descriptions);
+                        Boolean(entries[slotIdx]?.companyName) ||
+                        Boolean(entries[slotIdx]?.address) ||
+                        Boolean(entries[slotIdx]?.descriptions);
                       return (
                         <button
-                          key={`slot-btn-${idx}`}
+                          key={`slot-btn-${slotIdx}-${mapIdx}`}
                           type="button"
-                          onClick={() => setActiveSlot(idx)}
+                          onClick={() => setActiveSlot(slotIdx)}
                           className={`px-2 sm:px-3 py-2 rounded-xl text-xs font-bold transition-all border flex flex-col items-center justify-center relative ${
-                            activeSlot === idx
+                            activeSlot === slotIdx
                               ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white border-cyan-400 shadow-md shadow-cyan-500/25'
                               : 'bg-white dark:bg-[#0d1433] text-slate-700 dark:text-neutral-200 border-slate-200 dark:border-indigo-500/20 hover:bg-slate-100 dark:hover:bg-[#121c45]'
                           }`}
                         >
-                          <span>Slot {idx + 1}</span>
+                          <span>Slot {slotIdx + 1}</span>
                           {hasData && (
                             <span
                               className={`w-1.5 h-1.5 rounded-full mt-1 ${
-                                activeSlot === idx ? 'bg-white' : 'bg-emerald-400'
+                                activeSlot === slotIdx ? 'bg-white' : 'bg-emerald-400'
                               }`}
                             />
                           )}

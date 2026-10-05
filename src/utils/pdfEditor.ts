@@ -1020,3 +1020,341 @@ export const splitPdfByChunkSize = async (
 
   return results;
 };
+
+/**
+ * Options for locking/encrypting a PDF with passwords & permissions
+ */
+export interface LockPdfOptions {
+  userPassword: string;
+  ownerPassword?: string;
+  permissions?: {
+    printing?: boolean;
+    modifying?: boolean;
+    copying?: boolean;
+    annotating?: boolean;
+  };
+}
+
+/**
+ * Encrypts and locks a PDF document with user and optional owner password (AES-256)
+ */
+export const lockPdfDocument = async (
+  pdfBytes: ArrayBuffer | Uint8Array,
+  options: LockPdfOptions
+): Promise<Uint8Array> => {
+  if (!options.userPassword) {
+    throw new Error('User password is required to lock PDF.');
+  }
+
+  const { PDFDocument: CantooPDFDocument } = await import('@cantoo/pdf-lib');
+  const srcDoc = await CantooPDFDocument.load(pdfBytes, { ignoreEncryption: true });
+
+  const secureDoc = await CantooPDFDocument.create();
+  const pageIndices = srcDoc.getPageIndices();
+  const pages = await secureDoc.copyPages(srcDoc, pageIndices);
+  pages.forEach(p => secureDoc.addPage(p));
+
+  const allowPrint = options.permissions?.printing !== false;
+  const allowCopy = options.permissions?.copying !== false;
+  const allowAnnotate = options.permissions?.annotating !== false;
+  const allowModify = options.permissions?.modifying === true;
+
+  secureDoc.encrypt({
+    userPassword: options.userPassword,
+    ownerPassword: options.ownerPassword || options.userPassword,
+    permissions: {
+      printing: allowPrint ? 'highResolution' : false,
+      copying: allowCopy,
+      annotating: allowAnnotate,
+      modifying: allowModify,
+      fillingForms: true,
+      contentAccessibility: true,
+      documentAssembly: false,
+    },
+  });
+
+  return await secureDoc.save();
+};
+
+/**
+ * Decrypts and permanently unlocks a password-protected PDF document
+ */
+export const unlockPdfDocument = async (
+  pdfBytes: ArrayBuffer | Uint8Array,
+  password: string
+): Promise<Uint8Array> => {
+  if (!password) {
+    throw new Error('Password is required to unlock PDF.');
+  }
+
+  const { PDFDocument: CantooPDFDocument } = await import('@cantoo/pdf-lib');
+  const unlockedSource = await CantooPDFDocument.load(pdfBytes, { password });
+
+  // Clone into an unencrypted document to remove all passwords and security restrictions
+  const cleanDoc = await CantooPDFDocument.create();
+  const pageIndices = unlockedSource.getPageIndices();
+  const pages = await cleanDoc.copyPages(unlockedSource, pageIndices);
+  pages.forEach(p => cleanDoc.addPage(p));
+
+  return await cleanDoc.save();
+};
+
+/**
+ * Checks whether a given PDF file is encrypted / password-protected
+ */
+export const checkPdfEncryption = async (
+  pdfBytes: ArrayBuffer | Uint8Array
+): Promise<{ isEncrypted: boolean; pageCount?: number; error?: string }> => {
+  const { PDFDocument: CantooPDFDocument } = await import('@cantoo/pdf-lib');
+  try {
+    const doc = await CantooPDFDocument.load(pdfBytes);
+    return { isEncrypted: false, pageCount: doc.getPageCount() };
+  } catch (err: any) {
+    if (err?.name === 'EncryptedPDFError' || err?.message?.toLowerCase().includes('encrypt')) {
+      return { isEncrypted: true };
+    }
+    return { isEncrypted: false, error: err?.message };
+  }
+};
+
+/**
+ * Rotates specific or all pages of a PDF document
+ */
+export const rotatePdfDocument = async (
+  pdfBytes: ArrayBuffer | Uint8Array,
+  rotations: Record<number, number> | number
+): Promise<Uint8Array> => {
+  const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+  const pages = doc.getPages();
+
+  pages.forEach((page, idx) => {
+    let addAngle = 0;
+    if (typeof rotations === 'number') {
+      addAngle = rotations;
+    } else if (rotations[idx] !== undefined) {
+      addAngle = rotations[idx];
+    }
+    if (addAngle !== 0) {
+      const current = page.getRotation().angle;
+      const newAngle = ((current + addAngle) % 360 + 360) % 360;
+      page.setRotation(degrees(newAngle));
+    }
+  });
+
+  return await doc.save();
+};
+
+/**
+ * Reorders, rotates, and deletes pages in a PDF document
+ */
+export const organizePdfDocument = async (
+  pdfBytes: ArrayBuffer | Uint8Array,
+  pageOrder: number[], // 0-based indices to keep, in desired sequence
+  pageRotations?: Record<number, number> // 0-based original index -> added angle
+): Promise<Uint8Array> => {
+  const srcDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+  const newDoc = await PDFDocument.create();
+
+  if (pageOrder.length === 0) {
+    throw new Error('At least one page must remain in the document.');
+  }
+
+  const copiedPages = await newDoc.copyPages(srcDoc, pageOrder);
+  copiedPages.forEach((p, i) => {
+    const origIndex = pageOrder[i];
+    if (pageRotations && pageRotations[origIndex]) {
+      const curr = p.getRotation().angle;
+      const next = ((curr + pageRotations[origIndex]) % 360 + 360) % 360;
+      p.setRotation(degrees(next));
+    }
+    newDoc.addPage(p);
+  });
+
+  return await newDoc.save();
+};
+
+/**
+ * Options for watermarking a PDF
+ */
+export interface WatermarkOptions {
+  text: string;
+  fontSize?: number;
+  color?: string; // hex string e.g. '#ef4444'
+  opacity?: number; // 0.05 to 1
+  rotationDegrees?: number; // default -45
+  targetPages?: 'all' | 'first' | string; // 'all', 'first', or comma/dash range "1, 3-5"
+}
+
+/**
+ * Stamps a visual text watermark across specified pages
+ */
+export const watermarkPdfDocument = async (
+  pdfBytes: ArrayBuffer | Uint8Array,
+  options: WatermarkOptions
+): Promise<Uint8Array> => {
+  if (!options.text || !options.text.trim()) {
+    throw new Error('Watermark text cannot be empty.');
+  }
+
+  const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+  const font = await doc.embedFont(StandardFonts.HelveticaBold);
+  const total = doc.getPageCount();
+  const pages = doc.getPages();
+
+  let targetIndices: number[] = [];
+  if (options.targetPages === 'first') {
+    targetIndices = [0];
+  } else if (!options.targetPages || options.targetPages === 'all') {
+    targetIndices = pages.map((_, i) => i);
+  } else {
+    targetIndices = parsePageRange(options.targetPages, total);
+  }
+
+  const hex = (options.color || '#ef4444').replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16) / 255 || 0.8;
+  const g = parseInt(hex.substring(2, 4), 16) / 255 || 0.2;
+  const b = parseInt(hex.substring(4, 6), 16) / 255 || 0.2;
+  const size = options.fontSize || 46;
+  const opacity = options.opacity ?? 0.25;
+  const rotDeg = options.rotationDegrees ?? -45;
+  const rotRad = (rotDeg * Math.PI) / 180;
+
+  for (const idx of targetIndices) {
+    if (idx < 0 || idx >= total) continue;
+    const page = pages[idx];
+    const { width, height } = page.getSize();
+    const textWidth = font.widthOfTextAtSize(options.text, size);
+    const textHeight = font.heightAtSize(size);
+
+    // Compute center point coordinates under rotation
+    const cx = width / 2;
+    const cy = height / 2;
+    const drawX = cx - (textWidth / 2) * Math.cos(rotRad) + (textHeight / 2) * Math.sin(rotRad);
+    const drawY = cy - (textWidth / 2) * Math.sin(rotRad) - (textHeight / 2) * Math.cos(rotRad);
+
+    page.drawText(options.text, {
+      x: drawX,
+      y: drawY,
+      size,
+      font,
+      color: rgb(r, g, b),
+      opacity,
+      rotate: degrees(rotDeg),
+    });
+  }
+
+  return await doc.save();
+};
+
+/**
+ * Options for converting images to PDF
+ */
+export interface ImagesToPdfOptions {
+  pageSize: 'fit' | 'a4_portrait' | 'a4_landscape';
+  margin: 'none' | 'compact' | 'normal';
+}
+
+/**
+ * Converts multiple image files into a single structured PDF
+ */
+export const convertImagesToPdf = async (
+  images: { bytes: Uint8Array; mimeType: string }[],
+  options: ImagesToPdfOptions
+): Promise<Uint8Array> => {
+  if (!images || images.length === 0) {
+    throw new Error('At least one image is required to generate a PDF.');
+  }
+
+  const doc = await PDFDocument.create();
+
+  // A4 dimensions in points (72pt/inch: 595.28 x 841.89 pt)
+  const A4_W = 595.28;
+  const A4_H = 841.89;
+
+  let marginPt = 0;
+  if (options.margin === 'compact') marginPt = 24;
+  else if (options.margin === 'normal') marginPt = 48;
+
+  for (const img of images) {
+    let embeddedImg;
+    const isPng = img.mimeType.toLowerCase().includes('png');
+    if (isPng) {
+      embeddedImg = await doc.embedPng(img.bytes);
+    } else {
+      embeddedImg = await doc.embedJpg(img.bytes);
+    }
+
+    const imgDims = embeddedImg.scale(1);
+    let pWidth = imgDims.width;
+    let pHeight = imgDims.height;
+
+    if (options.pageSize === 'a4_portrait') {
+      pWidth = A4_W;
+      pHeight = A4_H;
+    } else if (options.pageSize === 'a4_landscape') {
+      pWidth = A4_H;
+      pHeight = A4_W;
+    } else {
+      pWidth = imgDims.width + marginPt * 2;
+      pHeight = imgDims.height + marginPt * 2;
+    }
+
+    const page = doc.addPage([pWidth, pHeight]);
+    const availW = Math.max(10, pWidth - marginPt * 2);
+    const availH = Math.max(10, pHeight - marginPt * 2);
+
+    const scale = Math.min(availW / imgDims.width, availH / imgDims.height, 1);
+    const drawW = imgDims.width * scale;
+    const drawH = imgDims.height * scale;
+    const drawX = marginPt + (availW - drawW) / 2;
+    const drawY = marginPt + (availH - drawH) / 2;
+
+    page.drawImage(embeddedImg, {
+      x: drawX,
+      y: drawY,
+      width: drawW,
+      height: drawH,
+    });
+  }
+
+  return await doc.save();
+};
+
+/**
+ * Normalizes any image file (JPG, PNG, WebP, etc.) to JPEG or PNG bytes for pdf-lib
+ */
+export const imageFileToBytes = async (
+  file: File
+): Promise<{ bytes: Uint8Array; mimeType: string }> => {
+  if (file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png') {
+    const buf = await file.arrayBuffer();
+    return { bytes: new Uint8Array(buf), mimeType: file.type };
+  }
+
+  // Convert WebP / GIF / SVG / other images to PNG via OffscreenCanvas / HTML5 Image
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas context could not be created'));
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob(blob => {
+          if (!blob) return reject(new Error('Blob conversion failed'));
+          blob.arrayBuffer().then(buf => {
+            resolve({ bytes: new Uint8Array(buf), mimeType: 'image/png' });
+          });
+        }, 'image/png');
+      };
+      img.onerror = () => reject(new Error('Failed to load image into browser canvas'));
+      img.src = reader.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+

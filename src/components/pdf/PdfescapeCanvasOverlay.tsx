@@ -46,13 +46,6 @@ interface PdfescapeCanvasOverlayProps {
   selectedStampId?: string;
   customStampText?: string;
   customStampColor?: string;
-  // Live Watermark preview options
-  watermarkText?: string;
-  watermarkColor?: string;
-  watermarkOpacity?: number;
-  watermarkRotation?: number;
-  watermarkFontSize?: number;
-  watermarkLayout?: 'center' | 'tiled';
   // Signature placement
   onPlaceSignatureAt?: (x: number, y: number) => void;
 }
@@ -87,12 +80,6 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
   selectedStampId = 'APPROVED',
   customStampText = 'APPROVED & VERIFIED',
   customStampColor = '#b91c1c',
-  watermarkText = '',
-  watermarkColor = '#94a3b8',
-  watermarkOpacity = 0.25,
-  watermarkRotation = 45,
-  watermarkFontSize = 48,
-  watermarkLayout = 'center',
   onPlaceSignatureAt,
 }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -601,55 +588,6 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
             height: `${Math.abs(dragCurrent.y - dragStart.y) * 100}%`,
           }}
         />
-      )}
-
-      {/* Live Document Watermark Layer (Real-time preview across page) */}
-      {watermarkText && watermarkText.trim() && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-[4]">
-          {watermarkLayout === 'tiled' ? (
-            <div className="w-full h-full grid grid-cols-2 sm:grid-cols-3 grid-rows-3 sm:grid-rows-4 gap-6 p-4 items-center justify-items-center">
-              {Array.from({ length: 12 }).map((_, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    transform: `rotate(${watermarkRotation}deg)`,
-                    color: watermarkColor,
-                    opacity: watermarkOpacity,
-                    fontSize: `${Math.max(13, (watermarkFontSize || 48) * 0.45 * zoomScale)}px`,
-                    fontWeight: 800,
-                    fontFamily: 'Arial, "Segoe UI", -apple-system, sans-serif',
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    whiteSpace: 'nowrap',
-                    textShadow: '0 0 1px rgba(0,0,0,0.1)',
-                  }}
-                >
-                  {watermarkText}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <div
-                style={{
-                  transform: `rotate(${watermarkRotation}deg)`,
-                  color: watermarkColor,
-                  opacity: watermarkOpacity,
-                  fontSize: `${(watermarkFontSize || 48) * zoomScale}px`,
-                  fontWeight: 800,
-                  fontFamily: 'Arial, "Segoe UI", -apple-system, sans-serif',
-                  letterSpacing: '0.15em',
-                  textTransform: 'uppercase',
-                  whiteSpace: 'nowrap',
-                  textShadow: '0 0 1px rgba(0,0,0,0.15)',
-                  padding: '12px 24px',
-                }}
-              >
-                {watermarkText}
-              </div>
-            </div>
-          )}
-        </div>
       )}
 
       {/* 1. EXTRACTED TEXT LAYER (Auto Detect Font & Click to Edit) */}

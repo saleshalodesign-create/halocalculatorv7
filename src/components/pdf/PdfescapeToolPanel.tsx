@@ -32,7 +32,7 @@ import {
   Plus,
 } from 'lucide-react';
 
-export type PdfescapeTab = 'insert' | 'annotate' | 'watermark' | 'page' | 'merge_split' | 'document' | 'upload';
+export type PdfescapeTab = 'insert' | 'annotate' | 'page' | 'merge_split' | 'document' | 'upload';
 
 interface PdfescapeToolPanelProps {
   activeTab: PdfescapeTab;
@@ -61,20 +61,6 @@ interface PdfescapeToolPanelProps {
   onOpenPdfSplitter?: () => void;
   // Image converter
   onOpenImageConverter?: () => void;
-  // Watermark controls
-  watermarkText?: string;
-  onChangeWatermarkText?: (t: string) => void;
-  watermarkColor?: string;
-  onChangeWatermarkColor?: (c: string) => void;
-  watermarkOpacity?: number;
-  onChangeWatermarkOpacity?: (o: number) => void;
-  watermarkRotation?: number;
-  onChangeWatermarkRotation?: (r: number) => void;
-  watermarkFontSize?: number;
-  onChangeWatermarkFontSize?: (s: number) => void;
-  watermarkLayout?: 'center' | 'tiled';
-  onChangeWatermarkLayout?: (l: 'center' | 'tiled') => void;
-  onClearWatermark?: () => void;
 }
 
 export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
@@ -99,24 +85,10 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
   onOpenPdfJoiner,
   onOpenPdfSplitter,
   onOpenImageConverter,
-  watermarkText = '',
-  onChangeWatermarkText = () => {},
-  watermarkColor = '#94a3b8',
-  onChangeWatermarkColor = () => {},
-  watermarkOpacity = 0.25,
-  onChangeWatermarkOpacity = () => {},
-  watermarkRotation = 45,
-  onChangeWatermarkRotation = () => {},
-  watermarkFontSize = 48,
-  onChangeWatermarkFontSize = () => {},
-  watermarkLayout = 'center',
-  onChangeWatermarkLayout = () => {},
-  onClearWatermark = () => {},
 }) => {
   const tabs: { id: PdfescapeTab; labelZh: string; labelEn: string }[] = [
     { id: 'insert', labelZh: '插入 (Insert)', labelEn: 'Insert' },
     { id: 'annotate', labelZh: '标注 (Annotate)', labelEn: 'Annotate' },
-    { id: 'watermark', labelZh: '水印 (Watermark)', labelEn: 'Watermark' },
     { id: 'page', labelZh: '页面 (Page)', labelEn: 'Page' },
     { id: 'merge_split', labelZh: '合并/拆分', labelEn: 'Merge & Split' },
     { id: 'document', labelZh: '单据明细', labelEn: 'Quote Form' },
@@ -336,251 +308,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
           </div>
         )}
 
-        {/* 3. WATERMARK TAB (Global Document Watermark) */}
-        {activeTab === 'watermark' && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isZh ? '全局文档水印设置' : 'Document Watermark'}</span>
-              </span>
-              {watermarkText && (
-                <button
-                  type="button"
-                  onClick={onClearWatermark}
-                  className="text-[10px] font-bold text-red-400 hover:text-red-300 cursor-pointer flex items-center gap-1 transition-colors px-2 py-0.5 rounded bg-red-950/40 border border-red-500/30"
-                >
-                  <Trash2 className="w-3 h-3" />
-                  <span>{isZh ? '清除水印' : 'Clear'}</span>
-                </button>
-              )}
-            </div>
-
-            {/* Watermark Layout Mode (Center Diagonal vs Tiled Grid) */}
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold text-slate-400">
-                {isZh ? '水印排版模式' : 'Layout Mode'}:
-              </span>
-              <div className="grid grid-cols-2 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => onChangeWatermarkLayout('center')}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                    watermarkLayout === 'center'
-                      ? 'border-amber-400 bg-amber-950/60 text-amber-300 shadow-xs'
-                      : 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
-                  }`}
-                >
-                  <span>{isZh ? '📐 单体居中倾斜' : '📐 Center Diagonal'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onChangeWatermarkLayout('tiled')}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                    watermarkLayout === 'tiled'
-                      ? 'border-amber-400 bg-amber-950/60 text-amber-300 shadow-xs'
-                      : 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
-                  }`}
-                >
-                  <span>{isZh ? '▦ 全页平铺网格' : '▦ Tiled Repeating Grid'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Presets Chips */}
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold text-slate-400">
-                {isZh ? '常用水印预设' : 'Quick Presets'}:
-              </span>
-              <div className="grid grid-cols-3 gap-1.5">
-                {[
-                  { text: 'CONFIDENTIAL', labelZh: '机密文件', color: '#ef4444' },
-                  { text: 'SAMPLE', labelZh: '样品样张', color: '#94a3b8' },
-                  { text: 'DRAFT', labelZh: '草稿文件', color: '#f59e0b' },
-                  { text: 'APPROVED', labelZh: '已批准', color: '#10b981' },
-                  { text: 'PAID', labelZh: '已付款', color: '#059669' },
-                  { text: 'FOR REVIEW ONLY', labelZh: '仅供审阅', color: '#3b82f6' },
-                  { text: 'VOID', labelZh: '作废无效', color: '#dc2626' },
-                  { text: 'INTERNAL ONLY', labelZh: '内部专用', color: '#8b5cf6' },
-                  { text: 'HALO DESIGN HUB', labelZh: '公司水印', color: '#6366f1' },
-                ].map((p, idx) => (
-                  <button
-                    key={`wm-txt-opt-${p.text}-${idx}`}
-                    type="button"
-                    onClick={() => {
-                      onChangeWatermarkText(p.text);
-                      onChangeWatermarkColor(p.color);
-                    }}
-                    className={`px-1.5 py-1 rounded-lg text-[11px] font-mono font-bold border transition-all cursor-pointer truncate ${
-                      watermarkText === p.text
-                        ? 'border-amber-400 bg-amber-950/70 text-amber-300 shadow-sm'
-                        : 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
-                    }`}
-                    title={p.text}
-                  >
-                    {isZh ? p.labelZh : p.text}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Custom Watermark Text Input */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 flex items-center justify-between">
-                <span>{isZh ? '自定义水印文字' : 'Watermark Text'}:</span>
-                {watermarkText && (
-                  <span className="text-[10px] text-amber-400/80 font-mono">
-                    {watermarkText.length} {isZh ? '字' : 'chars'}
-                  </span>
-                )}
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={watermarkText}
-                  onChange={e => onChangeWatermarkText(e.target.value)}
-                  placeholder={isZh ? '例如: CONFIDENTIAL / 绝密 / 样品...' : 'e.g. CONFIDENTIAL / DRAFT...'}
-                  className="w-full p-2 pr-7 rounded-xl border border-slate-700 bg-slate-800 text-slate-100 font-mono text-xs outline-none focus:border-amber-400"
-                />
-                {watermarkText && (
-                  <button
-                    type="button"
-                    onClick={() => onChangeWatermarkText('')}
-                    className="absolute right-2 top-2.5 text-slate-400 hover:text-white cursor-pointer"
-                    title={isZh ? '清空' : 'Clear'}
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Color Swatches */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400">
-                {isZh ? '水印颜色' : 'Color'}:
-              </label>
-              <div className="flex items-center gap-2">
-                {['#94a3b8', '#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#334155'].map((c, idx) => (
-                  <button
-                    key={`wm-color-opt-${c}-${idx}`}
-                    type="button"
-                    onClick={() => onChangeWatermarkColor(c)}
-                    className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer ${
-                      watermarkColor === c ? 'scale-115 border-white shadow-md' : 'border-transparent hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: c }}
-                  />
-                ))}
-                <input
-                  type="color"
-                  value={watermarkColor}
-                  onChange={e => onChangeWatermarkColor(e.target.value)}
-                  className="w-6 h-6 rounded border border-slate-700 cursor-pointer bg-transparent"
-                  title="Custom color"
-                />
-              </div>
-            </div>
-
-            {/* Opacity Selection */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400">
-                {isZh ? '透明度 (Opacity)' : 'Opacity'}: {(watermarkOpacity * 100).toFixed(0)}%
-              </label>
-              <div className="grid grid-cols-4 gap-1.5">
-                {[0.12, 0.22, 0.35, 0.5].map((op, idx) => (
-                  <button
-                    key={`wm-opacity-opt-${op}-${idx}`}
-                    type="button"
-                    onClick={() => onChangeWatermarkOpacity(op)}
-                    className={`py-1 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer ${
-                      watermarkOpacity === op
-                        ? 'border-amber-400 bg-amber-950/60 text-amber-300'
-                        : 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
-                    }`}
-                  >
-                    {(op * 100).toFixed(0)}%
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Rotation Selection */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400">
-                {isZh ? '倾斜角度 (Angle)' : 'Angle'}:
-              </label>
-              <div className="grid grid-cols-4 gap-1.5">
-                {[
-                  { angle: 45, label: '45°' },
-                  { angle: 30, label: '30°' },
-                  { angle: 0, label: '0°' },
-                  { angle: -45, label: '-45°' },
-                ].map((r, idx) => (
-                  <button
-                    key={`wm-rot-opt-${r.angle}-${idx}`}
-                    type="button"
-                    onClick={() => onChangeWatermarkRotation(r.angle)}
-                    className={`py-1 text-center rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
-                      watermarkRotation === r.angle
-                        ? 'border-amber-400 bg-amber-950/60 text-amber-300'
-                        : 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
-                    }`}
-                  >
-                    {r.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Font Size Selection */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400">
-                {isZh ? '字号大小 (Font Size)' : 'Size'}: {watermarkFontSize}pt
-              </label>
-              <div className="grid grid-cols-4 gap-1.5">
-                {[32, 44, 56, 72].map((sz, idx) => (
-                  <button
-                    key={`wm-font-sz-${sz}-${idx}`}
-                    type="button"
-                    onClick={() => onChangeWatermarkFontSize(sz)}
-                    className={`py-1 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer ${
-                      watermarkFontSize === sz
-                        ? 'border-amber-400 bg-amber-950/60 text-amber-300'
-                        : 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
-                    }`}
-                  >
-                    {sz}pt
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Live Indicator */}
-            <div className={`p-2.5 rounded-xl border text-[11px] leading-relaxed transition-all ${
-              watermarkText
-                ? 'bg-amber-950/40 border-amber-500/30 text-amber-300'
-                : 'bg-slate-800/40 border-slate-700 text-slate-400'
-            }`}>
-              {watermarkText ? (
-                <div className="flex items-center gap-1.5">
-                  <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>
-                    {isZh
-                      ? `水印实时生效中：“${watermarkText}” (${watermarkLayout === 'tiled' ? '全页平铺' : '单体居中'} · ${watermarkRotation}° · ${(watermarkOpacity * 100).toFixed(0)}%透明度)，下载与打印将完整嵌入。`
-                      : `Watermark active: "${watermarkText}" (${watermarkLayout === 'tiled' ? 'Tiled Grid' : 'Center'} · ${watermarkRotation}°), embedded in exports & prints.`}
-                  </span>
-                </div>
-              ) : (
-                <span>
-                  💡 {isZh ? '选择预设或输入自定义文字，即可在文档页面实时生成水印，导出与打印自动同步。' : 'Select a preset or enter text to preview watermarks in real-time.'}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* 4. PAGE TAB (Rotate, Delete, Add page, Move page) */}
+        {/* PAGE TAB (Rotate, Delete, Add page, Move page) */}
         {activeTab === 'page' && (
           <div className="space-y-3">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
