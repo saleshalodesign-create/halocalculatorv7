@@ -7,6 +7,9 @@ import {
   Trash2,
   MoveLeft,
   MoveRight,
+  ChevronsLeft,
+  ChevronsRight,
+  ArrowLeftRight,
   FileText,
   ExternalLink,
   CheckCircle2,
@@ -181,6 +184,34 @@ export const PdfOrganizeTab: React.FC<PdfOrganizeTabProps> = ({
       updated[targetIndex] = temp;
       return updated;
     });
+  };
+
+  const movePageToFirst = (index: number) => {
+    if (index === 0) return;
+    setPages(prev => {
+      const updated = [...prev];
+      const [item] = updated.splice(index, 1);
+      updated.unshift(item);
+      return updated;
+    });
+    showToast(isZh ? `已将第 ${index + 1} 页移至最前 (第一页)` : `Moved page ${index + 1} to first`);
+  };
+
+  const movePageToLast = (index: number) => {
+    if (index === pages.length - 1) return;
+    setPages(prev => {
+      const updated = [...prev];
+      const [item] = updated.splice(index, 1);
+      updated.push(item);
+      return updated;
+    });
+    showToast(isZh ? `已将第 ${index + 1} 页移至末尾` : `Moved page ${index + 1} to last`);
+  };
+
+  const reverseAllPages = () => {
+    if (pages.length <= 1) return;
+    setPages(prev => [...prev].reverse());
+    showToast(isZh ? '已倒转所有页面顺序' : 'Reversed page order');
   };
 
   // Delete / restore actions
@@ -363,6 +394,17 @@ export const PdfOrganizeTab: React.FC<PdfOrganizeTabProps> = ({
               >
                 <span>{isZh ? '复原角度' : 'Reset'}</span>
               </button>
+              {pages.length > 1 && (
+                <button
+                  type="button"
+                  onClick={reverseAllPages}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-cyan-300 border border-slate-700 flex items-center gap-1 cursor-pointer transition-all"
+                  title={isZh ? '倒转所有页面前后顺序' : 'Reverse all pages order'}
+                >
+                  <ArrowLeftRight className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>{isZh ? '倒转前后顺序' : 'Reverse Order'}</span>
+                </button>
+              )}
             </div>
 
             <div className="text-xs text-slate-300 font-bold px-2">
@@ -432,6 +474,21 @@ export const PdfOrganizeTab: React.FC<PdfOrganizeTabProps> = ({
                     <RotateCw className="w-3.5 h-3.5" />
                   </button>
 
+                  {/* Move to First */}
+                  <button
+                    type="button"
+                    disabled={idx === 0}
+                    onClick={() => movePageToFirst(idx)}
+                    title={isZh ? '移至最前 (第一页)' : 'Move to First'}
+                    className={`p-1 rounded-md transition-colors ${
+                      idx === 0
+                        ? 'opacity-30 cursor-not-allowed bg-slate-900 text-slate-600'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-400 cursor-pointer'
+                    }`}
+                  >
+                    <ChevronsLeft className="w-3.5 h-3.5" />
+                  </button>
+
                   {/* Move Left */}
                   <button
                     type="button"
@@ -460,6 +517,21 @@ export const PdfOrganizeTab: React.FC<PdfOrganizeTabProps> = ({
                     }`}
                   >
                     <MoveRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Move to Last */}
+                  <button
+                    type="button"
+                    disabled={idx === pages.length - 1}
+                    onClick={() => movePageToLast(idx)}
+                    title={isZh ? '移至最后 (末尾)' : 'Move to Last'}
+                    className={`p-1 rounded-md transition-colors ${
+                      idx === pages.length - 1
+                        ? 'opacity-30 cursor-not-allowed bg-slate-900 text-slate-600'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-400 cursor-pointer'
+                    }`}
+                  >
+                    <ChevronsRight className="w-3.5 h-3.5" />
                   </button>
 
                   {/* Delete */}

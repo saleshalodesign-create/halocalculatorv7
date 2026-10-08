@@ -6,6 +6,9 @@ import {
   Trash2,
   MoveUp,
   MoveDown,
+  ChevronsUp,
+  ChevronsDown,
+  ArrowUpDown,
   ExternalLink,
   RefreshCw,
   Plus,
@@ -101,6 +104,34 @@ export const PdfImagesToPdfTab: React.FC<PdfImagesToPdfTabProps> = ({
       updated[targetIdx] = temp;
       return updated;
     });
+  };
+
+  const moveImageToFirst = (index: number) => {
+    if (index === 0) return;
+    setImages(prev => {
+      const updated = [...prev];
+      const [item] = updated.splice(index, 1);
+      updated.unshift(item);
+      return updated;
+    });
+    showToast(isZh ? `已将第 ${index + 1} 张图片移至最前` : `Moved image ${index + 1} to top`);
+  };
+
+  const moveImageToLast = (index: number) => {
+    if (index === images.length - 1) return;
+    setImages(prev => {
+      const updated = [...prev];
+      const [item] = updated.splice(index, 1);
+      updated.push(item);
+      return updated;
+    });
+    showToast(isZh ? `已将第 ${index + 1} 张图片移至末尾` : `Moved image ${index + 1} to bottom`);
+  };
+
+  const reverseImagesOrder = () => {
+    if (images.length <= 1) return;
+    setImages(prev => [...prev].reverse());
+    showToast(isZh ? '已倒转所有图片排列顺序' : 'Reversed image sequence');
   };
 
   const removeImage = (index: number) => {
@@ -215,6 +246,20 @@ export const PdfImagesToPdfTab: React.FC<PdfImagesToPdfTabProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Images Queue List */}
           <div className="lg:col-span-7 space-y-2 max-h-[50vh] overflow-y-auto mac-scrollbar pr-1">
+            <div className="flex items-center justify-between pb-1 px-1 text-xs text-slate-400">
+              <span className="font-semibold">{isZh ? `已选图片 (${images.length})` : `Selected Images (${images.length})`}</span>
+              {images.length > 1 && (
+                <button
+                  type="button"
+                  onClick={reverseImagesOrder}
+                  className="flex items-center gap-1 text-[11px] text-teal-400 hover:text-teal-300 px-2 py-0.5 rounded bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 transition-all cursor-pointer"
+                  title={isZh ? '倒转所有图片排列顺序' : 'Reverse image sequence'}
+                >
+                  <ArrowUpDown className="w-3 h-3 text-teal-400" />
+                  <span>{isZh ? '倒序排列' : 'Reverse'}</span>
+                </button>
+              )}
+            </div>
             {images.map((img, idx) => (
               <div
                 key={`img-item-${img.id}-${idx}`}
@@ -238,10 +283,26 @@ export const PdfImagesToPdfTab: React.FC<PdfImagesToPdfTabProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1 shrink-0">
+                  {/* Move to First */}
+                  <button
+                    type="button"
+                    disabled={idx === 0}
+                    onClick={() => moveImageToFirst(idx)}
+                    title={isZh ? '移至最前 (第一张)' : 'Move to Top'}
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      idx === 0
+                        ? 'opacity-25 text-slate-600 cursor-not-allowed'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-teal-400 cursor-pointer'
+                    }`}
+                  >
+                    <ChevronsUp className="w-3.5 h-3.5" />
+                  </button>
+                  {/* Move Up */}
                   <button
                     type="button"
                     disabled={idx === 0}
                     onClick={() => moveImage(idx, 'up')}
+                    title={isZh ? '向前移一位' : 'Move Up'}
                     className={`p-1.5 rounded-lg transition-colors ${
                       idx === 0
                         ? 'opacity-25 text-slate-600 cursor-not-allowed'
@@ -250,10 +311,12 @@ export const PdfImagesToPdfTab: React.FC<PdfImagesToPdfTabProps> = ({
                   >
                     <MoveUp className="w-3.5 h-3.5" />
                   </button>
+                  {/* Move Down */}
                   <button
                     type="button"
                     disabled={idx === images.length - 1}
                     onClick={() => moveImage(idx, 'down')}
+                    title={isZh ? '向后移一位' : 'Move Down'}
                     className={`p-1.5 rounded-lg transition-colors ${
                       idx === images.length - 1
                         ? 'opacity-25 text-slate-600 cursor-not-allowed'
@@ -262,9 +325,24 @@ export const PdfImagesToPdfTab: React.FC<PdfImagesToPdfTabProps> = ({
                   >
                     <MoveDown className="w-3.5 h-3.5" />
                   </button>
+                  {/* Move to Last */}
+                  <button
+                    type="button"
+                    disabled={idx === images.length - 1}
+                    onClick={() => moveImageToLast(idx)}
+                    title={isZh ? '移至末尾 (最后一张)' : 'Move to Bottom'}
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      idx === images.length - 1
+                        ? 'opacity-25 text-slate-600 cursor-not-allowed'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-teal-400 cursor-pointer'
+                    }`}
+                  >
+                    <ChevronsDown className="w-3.5 h-3.5" />
+                  </button>
                   <button
                     type="button"
                     onClick={() => removeImage(idx)}
+                    title={isZh ? '移除此图' : 'Remove Image'}
                     className="p-1.5 rounded-lg bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

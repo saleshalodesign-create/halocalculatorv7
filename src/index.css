@@ -326,6 +326,16 @@
   background-attachment: fixed;
 }
 
+.wallpaper-blue {
+  background: 
+    radial-gradient(ellipse 75% 65% at 10% 12%, rgba(147, 197, 253, 0.95) 0%, rgba(96, 165, 250, 0.5) 32%, transparent 68%),
+    radial-gradient(ellipse 70% 60% at 90% 15%, rgba(186, 230, 253, 0.9) 0%, rgba(56, 189, 248, 0.45) 35%, transparent 68%),
+    radial-gradient(ellipse 80% 65% at 50% 85%, rgba(59, 130, 246, 0.55) 0%, rgba(37, 99, 235, 0.35) 45%, transparent 75%),
+    radial-gradient(ellipse 65% 55% at 75% 65%, rgba(14, 165, 233, 0.45) 0%, transparent 65%),
+    linear-gradient(145deg, #eff6ff 0%, #dbeafe 30%, #bfdbfe 65%, #93c5fd 100%);
+  background-attachment: fixed;
+}
+
 .wallpaper-silver {
   background: radial-gradient(circle at 12% 18%, rgba(191, 219, 254, 0.8) 0%, transparent 45%),
               radial-gradient(circle at 88% 15%, rgba(254, 215, 215, 0.65) 0%, transparent 42%),

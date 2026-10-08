@@ -45,6 +45,12 @@ import {
   Printer,
   FileSpreadsheet,
   Layers,
+  GripVertical,
+  ChevronsUp,
+  ChevronsDown,
+  ChevronUp,
+  ChevronDown,
+  ArrowUpDown,
 } from 'lucide-react';
 
 export const PRESET_ITEMS: Array<{ name: string; price: number }> = [
@@ -74,6 +80,7 @@ interface QuotationListModalProps {
   onClearAll: () => void;
   onAddCustomItem: (item: QuoteItem) => void;
   onUpdateItem: (id: string, updates: Partial<QuoteItem>) => void;
+  onReorderItems?: (items: QuoteItem[]) => void;
   auth: AuthContextType;
   onLoadQuoteRecord: (record: QuoteRecord) => void;
   onOpenDailySchedule?: (customerName?: string, customerAddress?: string) => void;
@@ -90,6 +97,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
   onClearAll,
   onAddCustomItem,
   onUpdateItem,
+  onReorderItems,
   auth,
   onLoadQuoteRecord,
   onOpenDailySchedule,
@@ -107,6 +115,128 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
   const [recordSearch, setRecordSearch] = useState('');
   const [isSavingCloud, setIsSavingCloud] = useState(false);
   const [confirmClearQuotes, setConfirmClearQuotes] = useState(false);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 2500);
+  };
+
+  // Drag-and-drop reorder state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'BUTTON' ||
+      target.closest('button') ||
+      target.closest('input')
+    ) {
+      return;
+    }
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const newItems = [...items];
+    const [movedItem] = newItems.splice(draggedIndex, 1);
+    newItems.splice(targetIndex, 0, movedItem);
+
+    if (onReorderItems) {
+      onReorderItems(newItems);
+    }
+
+    const fromNum = draggedIndex + 1;
+    const toNum = targetIndex + 1;
+    showToast(
+      language === 'zh'
+        ? `✓ 已调整顺序：第 ${fromNum} 项移至第 ${toNum} 项`
+        : `✓ Reordered: Item #${fromNum} moved to #${toNum}`
+    );
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleMoveToFirst = (index: number) => {
+    if (index === 0) return;
+    const newItems = [...items];
+    const [movedItem] = newItems.splice(index, 1);
+    newItems.unshift(movedItem);
+    if (onReorderItems) onReorderItems(newItems);
+    showToast(
+      language === 'zh'
+        ? `✓ 已将第 ${index + 1} 项置顶 (首位)`
+        : `✓ Moved item #${index + 1} to first`
+    );
+  };
+
+  const handleMoveToLast = (index: number) => {
+    if (index === items.length - 1) return;
+    const newItems = [...items];
+    const [movedItem] = newItems.splice(index, 1);
+    newItems.push(movedItem);
+    if (onReorderItems) onReorderItems(newItems);
+    showToast(
+      language === 'zh'
+        ? `✓ 已将第 ${index + 1} 项移至末尾`
+        : `✓ Moved item #${index + 1} to last`
+    );
+  };
+
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return;
+    const newItems = [...items];
+    const temp = newItems[index];
+    newItems[index] = newItems[index - 1];
+    newItems[index - 1] = temp;
+    if (onReorderItems) onReorderItems(newItems);
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (index >= items.length - 1) return;
+    const newItems = [...items];
+    const temp = newItems[index];
+    newItems[index] = newItems[index + 1];
+    newItems[index + 1] = temp;
+    if (onReorderItems) onReorderItems(newItems);
+  };
+
+  const handleReverseOrder = () => {
+    if (items.length <= 1) return;
+    const newItems = [...items].reverse();
+    if (onReorderItems) onReorderItems(newItems);
+    showToast(
+      language === 'zh' ? '✓ 已倒转所有报价项目顺序' : '✓ Reversed order of all quote items'
+    );
+  };
 
   const handleClearAllQuotes = () => {
     if (!confirmClearQuotes) {
@@ -182,11 +312,6 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
   const { user, cloudQuotes, saveQuoteToCloud, deleteQuoteFromCloud, setAuthModalOpen } = auth || {};
 
   if (!isOpen) return null;
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(''), 2500);
-  };
 
   const handleSaveToCloud = async () => {
     if (items.length === 0) {
@@ -917,12 +1042,31 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
               {/* Themed Table Column Header Bar */}
               {items.length > 0 && (
                 <div className="px-3 sm:px-4 py-1.5 bg-slate-100/90 dark:bg-[#080d22] border-b border-slate-200/90 dark:border-indigo-500/20 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-cyan-300 flex items-center justify-between gap-2 shrink-0 select-none">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="w-5 text-center font-mono">#</span>
-                    <span className="flex-1">{language === 'zh' ? '项目名称与尺寸' : 'Item Description & Size'}</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+                    <span className="w-14 sm:w-16 text-center font-mono flex items-center justify-center gap-1 text-slate-500 dark:text-cyan-400/80">
+                      <GripVertical className="w-3 h-3 text-slate-400 dark:text-cyan-400/60" />
+                      <span>#</span>
+                    </span>
+                    <span className="flex-1 flex items-center gap-2">
+                      <span>{language === 'zh' ? '项目名称与尺寸' : 'Item Description & Size'}</span>
+                      <span className="hidden md:inline-flex items-center gap-1 text-[9px] lowercase font-normal text-slate-500 dark:text-cyan-400/80 bg-slate-200/60 dark:bg-cyan-950/40 px-1.5 py-0.5 rounded border border-slate-300/60 dark:border-cyan-500/30">
+                        {language === 'zh' ? '按住左侧图标拖拽调整顺序' : 'drag icon to reorder'}
+                      </span>
+                    </span>
                     <span className="hidden sm:inline-block w-28 text-center">{language === 'zh' ? '单价' : 'Unit Price'}</span>
                   </div>
-                  <div className="flex items-center gap-2 sm:gap-3 shrink-0 text-right">
+                  <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 text-right">
+                    {items.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={handleReverseOrder}
+                        title={language === 'zh' ? '首尾倒转排序' : 'Reverse order'}
+                        className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-slate-600 dark:text-cyan-300 hover:text-cyan-500 bg-white/70 dark:bg-cyan-900/30 hover:bg-slate-200 dark:hover:bg-cyan-800/40 border border-slate-300/70 dark:border-cyan-500/30 transition-all font-semibold normal-case cursor-pointer"
+                      >
+                        <ArrowUpDown className="w-3 h-3 text-cyan-500" />
+                        <span className="hidden sm:inline">{language === 'zh' ? '倒序' : 'Reverse'}</span>
+                      </button>
+                    )}
                     <span className="w-16 sm:w-20 text-center">{language === 'zh' ? '数量' : 'Qty'}</span>
                     <span className="w-16 sm:w-20 text-right">{language === 'zh' ? '小计' : 'Total'}</span>
                     <span className="w-14 sm:w-16 text-center">{language === 'zh' ? '操作' : 'Action'}</span>
@@ -947,110 +1091,211 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                     </p>
                   </div>
                 ) : (
-                  items.map((item, index) => (
-                    <div
-                      key={`${item.id || 'quote-item'}-${index}`}
-                      className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white dark:bg-[#0d1433]/85 hover:dark:bg-[#121c45] border border-slate-200/80 dark:border-indigo-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3 shadow-sm hover:border-cyan-500/40 transition-all group"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                          <span className="w-5 text-center text-xs font-mono text-slate-400 dark:text-cyan-400/80 font-bold">{index + 1}.</span>
-                          <input
-                            type="text"
-                            value={item.title}
-                            onChange={e => onUpdateItem(item.id, { title: e.target.value })}
-                            className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white bg-transparent outline-none border-b border-transparent focus:border-cyan-500 flex-1 min-w-0"
-                          />
-                        </div>
-                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-slate-500 dark:text-neutral-400 font-mono mt-0.5 sm:mt-1 ml-3 sm:ml-5">
-                          {item.originalWidth > 0 && (
-                            <span className="px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/40 text-[10px] sm:text-xs font-semibold">
-                              {item.originalWidth} × {item.originalHeight} {item.unit}
+                  items.map((item, index) => {
+                    const isDragging = draggedIndex === index;
+                    const isDropTarget = dragOverIndex === index && draggedIndex !== index;
+
+                    return (
+                      <div
+                        key={`${item.id || 'quote-item'}-${index}`}
+                        draggable
+                        onDragStart={e => handleDragStart(e, index)}
+                        onDragOver={e => handleDragOver(e, index)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={e => handleDrop(e, index)}
+                        onDragEnd={handleDragEnd}
+                        className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white dark:bg-[#0d1433]/85 hover:dark:bg-[#121c45] border transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3 shadow-sm ${
+                          isDragging
+                            ? 'opacity-40 scale-[0.99] border-dashed border-cyan-400 bg-cyan-50/20 dark:bg-cyan-950/30 ring-2 ring-cyan-500/40'
+                            : isDropTarget
+                            ? 'border-t-2 border-t-cyan-500 border-slate-200/80 dark:border-cyan-400 bg-cyan-50/40 dark:bg-cyan-950/30 shadow-md shadow-cyan-500/10'
+                            : 'border-slate-200/80 dark:border-indigo-500/25 hover:border-cyan-500/40'
+                        }`}
+                      >
+                        <div className="flex-1 min-w-0 flex items-start sm:items-center gap-1.5 sm:gap-2">
+                          {/* Drag Handle & Order Controls */}
+                          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 pt-0.5 sm:pt-0">
+                            {/* Drag handle */}
+                            <div
+                              className="p-1 rounded cursor-grab active:cursor-grabbing text-slate-400 hover:text-cyan-500 dark:text-slate-500 dark:hover:text-cyan-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                              title={language === 'zh' ? '拖拽调整顺序 (按住拖动到任意位置)' : 'Drag to reorder (hold and move to any position)'}
+                            >
+                              <GripVertical className="w-4 h-4" />
+                            </div>
+
+                            {/* Item index */}
+                            <span className="w-5 text-center text-xs font-mono text-slate-400 dark:text-cyan-400/80 font-bold">
+                              {index + 1}.
                             </span>
-                          )}
-                          <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-[#050817] px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-indigo-500/25 hover:border-cyan-500/50 focus-within:border-cyan-500 transition-colors">
-                            <span className="text-slate-500 dark:text-cyan-400/80 font-bold text-[10px] sm:text-xs">$</span>
+
+                            {/* Quick Move to First / Up / Down / Last Buttons */}
+                            <div className="flex items-center gap-0.5 bg-slate-100/70 dark:bg-[#050817] p-0.5 rounded-md border border-slate-200/60 dark:border-indigo-500/20">
+                              <button
+                                type="button"
+                                disabled={index === 0}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleMoveToFirst(index);
+                                }}
+                                className={`p-0.5 sm:p-1 rounded transition-colors ${
+                                  index === 0
+                                    ? 'opacity-20 cursor-not-allowed text-slate-400'
+                                    : 'text-slate-400 hover:text-cyan-500 hover:bg-white dark:hover:bg-white/10 cursor-pointer'
+                                }`}
+                                title={language === 'zh' ? '置顶 (移到第一位)' : 'Move to top (first)'}
+                              >
+                                <ChevronsUp className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={index === 0}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleMoveUp(index);
+                                }}
+                                className={`p-0.5 sm:p-1 rounded transition-colors ${
+                                  index === 0
+                                    ? 'opacity-20 cursor-not-allowed text-slate-400'
+                                    : 'text-slate-400 hover:text-cyan-500 hover:bg-white dark:hover:bg-white/10 cursor-pointer'
+                                }`}
+                                title={language === 'zh' ? '向上移一位' : 'Move up'}
+                              >
+                                <ChevronUp className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={index === items.length - 1}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleMoveDown(index);
+                                }}
+                                className={`p-0.5 sm:p-1 rounded transition-colors ${
+                                  index === items.length - 1
+                                    ? 'opacity-20 cursor-not-allowed text-slate-400'
+                                    : 'text-slate-400 hover:text-cyan-500 hover:bg-white dark:hover:bg-white/10 cursor-pointer'
+                                }`}
+                                title={language === 'zh' ? '向下移一位' : 'Move down'}
+                              >
+                                <ChevronDown className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={index === items.length - 1}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleMoveToLast(index);
+                                }}
+                                className={`p-0.5 sm:p-1 rounded transition-colors ${
+                                  index === items.length - 1
+                                    ? 'opacity-20 cursor-not-allowed text-slate-400'
+                                    : 'text-slate-400 hover:text-cyan-500 hover:bg-white dark:hover:bg-white/10 cursor-pointer'
+                                }`}
+                                title={language === 'zh' ? '移至末尾 (最后一位)' : 'Move to bottom (last)'}
+                              >
+                                <ChevronsDown className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Item Title & Dimensions & Price */}
+                          <div className="flex-1 min-w-0">
+                            <input
+                              type="text"
+                              value={item.title}
+                              onChange={e => onUpdateItem(item.id, { title: e.target.value })}
+                              className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white bg-transparent outline-none border-b border-transparent focus:border-cyan-500 w-full"
+                            />
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-slate-500 dark:text-neutral-400 font-mono mt-0.5 sm:mt-1">
+                              {item.originalWidth > 0 && (
+                                <span className="px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/40 text-[10px] sm:text-xs font-semibold">
+                                  {item.originalWidth} × {item.originalHeight} {item.unit}
+                                </span>
+                              )}
+                              <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-[#050817] px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-indigo-500/25 hover:border-cyan-500/50 focus-within:border-cyan-500 transition-colors">
+                                <span className="text-slate-500 dark:text-cyan-400/80 font-bold text-[10px] sm:text-xs">$</span>
+                                <input
+                                  type="number"
+                                  step="any"
+                                  min="0"
+                                  value={item.totalPrice === 0 ? '' : item.totalPrice}
+                                  placeholder="0.00"
+                                  onChange={e => {
+                                    const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                    onUpdateItem(item.id, { totalPrice: isNaN(val) ? 0 : val });
+                                  }}
+                                  className="w-12 sm:w-16 bg-transparent text-[10px] sm:text-xs font-mono font-bold text-slate-900 dark:text-white outline-none"
+                                  title="Click to edit unit price"
+                                />
+                                <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-neutral-400">/unit</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-3 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-indigo-500/15">
+                          {/* Qty */}
+                          <div className="flex items-center gap-0.5 sm:gap-1 bg-slate-100/60 dark:bg-[#050817] p-0.5 rounded-lg border border-slate-200/60 dark:border-indigo-500/20">
+                            <button
+                              onClick={() => onUpdateQuantity(item.id, -1)}
+                              className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-white dark:bg-white/10 flex items-center justify-center font-bold hover:bg-neutral-200 text-xs text-neutral-800 dark:text-neutral-200 active:scale-95"
+                            >
+                              -
+                            </button>
                             <input
                               type="number"
-                              step="any"
-                              min="0"
-                              value={item.totalPrice === 0 ? '' : item.totalPrice}
-                              placeholder="0.00"
+                              min="1"
+                              value={item.quantity}
                               onChange={e => {
-                                const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                                onUpdateItem(item.id, { totalPrice: isNaN(val) ? 0 : val });
+                                const q = parseInt(e.target.value);
+                                onUpdateItem(item.id, { quantity: isNaN(q) || q < 1 ? 1 : q });
                               }}
-                              className="w-12 sm:w-16 bg-transparent text-[10px] sm:text-xs font-mono font-bold text-slate-900 dark:text-white outline-none"
-                              title="Click to edit unit price"
+                              className="w-6 sm:w-7 text-center font-mono font-bold text-xs text-neutral-900 dark:text-white bg-transparent outline-none border-b border-transparent focus:border-cyan-500"
+                              title="Edit quantity"
                             />
-                            <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-neutral-400">/unit</span>
+                            <button
+                              onClick={() => onUpdateQuantity(item.id, 1)}
+                              className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-white dark:bg-white/10 flex items-center justify-center font-bold hover:bg-neutral-200 text-xs text-neutral-800 dark:text-neutral-200 active:scale-95"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          {/* Line Total */}
+                          <div className="text-right min-w-[60px] sm:w-20">
+                            <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-cyan-300">
+                              ${(item.totalPrice * item.quantity).toFixed(2)}
+                            </span>
+                          </div>
+
+                          {/* Action Buttons: Copy Item & Delete */}
+                          <div className="flex items-center gap-0.5 sm:gap-1">
+                            <button
+                              onClick={() => handleCopySingleItem(item, index)}
+                              className={`p-1 sm:p-1.5 rounded-md border transition-all ${
+                                copiedItemId === item.id
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                  : 'text-neutral-400 hover:text-cyan-400 border-transparent hover:bg-neutral-100 dark:hover:bg-white/10'
+                              }`}
+                              title="Copy this line item"
+                            >
+                              {copiedItemId === item.id ? (
+                                <Check className="w-3.5 h-3.5" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                            <button
+                              onClick={() => onRemoveItem(item.id)}
+                              className="text-neutral-400 hover:text-red-400 p-1 sm:p-1.5 rounded-md hover:bg-neutral-100 dark:hover:bg-white/10 transition-all"
+                              title="Delete item"
+                            >
+                              <Trash className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </div>
                       </div>
-
-                      <div className="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-3 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-indigo-500/15">
-                        {/* Qty */}
-                        <div className="flex items-center gap-0.5 sm:gap-1 bg-slate-100/60 dark:bg-[#050817] p-0.5 rounded-lg border border-slate-200/60 dark:border-indigo-500/20">
-                          <button
-                            onClick={() => onUpdateQuantity(item.id, -1)}
-                            className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-white dark:bg-white/10 flex items-center justify-center font-bold hover:bg-neutral-200 text-xs text-neutral-800 dark:text-neutral-200 active:scale-95"
-                          >
-                            -
-                          </button>
-                          <input
-                            type="number"
-                            min="1"
-                            value={item.quantity}
-                            onChange={e => {
-                              const q = parseInt(e.target.value);
-                              onUpdateItem(item.id, { quantity: isNaN(q) || q < 1 ? 1 : q });
-                            }}
-                            className="w-6 sm:w-7 text-center font-mono font-bold text-xs text-neutral-900 dark:text-white bg-transparent outline-none border-b border-transparent focus:border-cyan-500"
-                            title="Edit quantity"
-                          />
-                          <button
-                            onClick={() => onUpdateQuantity(item.id, 1)}
-                            className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-white dark:bg-white/10 flex items-center justify-center font-bold hover:bg-neutral-200 text-xs text-neutral-800 dark:text-neutral-200 active:scale-95"
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        {/* Line Total */}
-                        <div className="text-right min-w-[60px] sm:w-20">
-                          <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-cyan-300">
-                            ${(item.totalPrice * item.quantity).toFixed(2)}
-                          </span>
-                        </div>
-
-                        {/* Action Buttons: Copy Item & Delete */}
-                        <div className="flex items-center gap-0.5 sm:gap-1">
-                          <button
-                            onClick={() => handleCopySingleItem(item, index)}
-                            className={`p-1 sm:p-1.5 rounded-md border transition-all ${
-                              copiedItemId === item.id
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                : 'text-neutral-400 hover:text-cyan-400 border-transparent hover:bg-neutral-100 dark:hover:bg-white/10'
-                            }`}
-                            title="Copy this line item"
-                          >
-                            {copiedItemId === item.id ? (
-                              <Check className="w-3.5 h-3.5" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                          <button
-                            onClick={() => onRemoveItem(item.id)}
-                            className="text-neutral-400 hover:text-red-400 p-1 sm:p-1.5 rounded-md hover:bg-neutral-100 dark:hover:bg-white/10 transition-all"
-                            title="Delete item"
-                          >
-                            <Trash className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
 

@@ -43,9 +43,17 @@ import { playSuccessChime, playSoftPop, isSoundEnabled, toggleSound } from './ut
 
 export default function App() {
   const { language, t, toggleLanguage } = useLanguage();
-  const [theme, setTheme] = useState<ThemeType>(Theme.DARK);
+  const [theme, setTheme] = useState<ThemeType>(() => {
+    return (localStorage.getItem('halo_theme') as ThemeType) || Theme.DARK;
+  });
   const [wallpaper, setWallpaper] = useState<string>(() => {
-    return localStorage.getItem('halo_wallpaper') || 'cyber-midnight';
+    const savedTheme = (localStorage.getItem('halo_theme') as ThemeType) || Theme.DARK;
+    const saved = localStorage.getItem('halo_wallpaper');
+    if (savedTheme === Theme.LIGHT) {
+      if (!saved || saved === 'silver' || saved === 'cyber-midnight') return 'blue';
+    }
+    if (saved) return saved;
+    return savedTheme === Theme.LIGHT ? 'blue' : 'cyber-midnight';
   });
 
   // Window states (Traffic lights: compact mode, maximize)
@@ -199,6 +207,11 @@ export default function App() {
     const savedTheme = (localStorage.getItem('halo_theme') as ThemeType) || Theme.DARK;
     setTheme(savedTheme);
     applyThemeClass(savedTheme);
+    const savedWallpaper = localStorage.getItem('halo_wallpaper');
+    // If lightmode is active and no custom wallpaper was chosen, or was legacy 'silver', default to 'blue'
+    if (savedTheme === Theme.LIGHT && (!savedWallpaper || savedWallpaper === 'silver')) {
+      setWallpaper('blue');
+    }
   }, []);
 
   const applyThemeClass = (currentTheme: ThemeType) => {
@@ -213,13 +226,13 @@ export default function App() {
   const handleSetTheme = (newTheme: ThemeType) => {
     setTheme(newTheme);
     if (newTheme === Theme.LIGHT) {
-      setWallpaper('silver');
+      setWallpaper('blue');
     } else if (newTheme === Theme.DARK) {
       setWallpaper('cyber-midnight');
     }
   };
 
-  const wallpapersList = ['cyber-midnight', 'sequoia', 'sonoma', 'dark', 'silver'];
+  const wallpapersList = ['blue', 'cyber-midnight', 'sequoia', 'sonoma', 'dark', 'silver'];
   const handleNextWallpaper = () => {
     const idx = wallpapersList.indexOf(wallpaper);
     const next = wallpapersList[(idx + 1) % wallpapersList.length];
@@ -344,6 +357,8 @@ export default function App() {
 
   const getWallpaperClass = () => {
     switch (wallpaper) {
+      case 'blue':
+        return 'wallpaper-blue';
       case 'cyber-midnight':
         return 'wallpaper-cyber-midnight';
       case 'sequoia':
@@ -355,7 +370,7 @@ export default function App() {
       case 'silver':
         return 'wallpaper-silver';
       default:
-        return 'wallpaper-cyber-midnight';
+        return theme === Theme.LIGHT ? 'wallpaper-blue' : 'wallpaper-cyber-midnight';
     }
   };
 
@@ -976,6 +991,7 @@ export default function App() {
         onUpdateItem={(id, updates) =>
           setQuoteItems(prev => prev.map(item => (item.id === id ? { ...item, ...updates } : item)))
         }
+        onReorderItems={setQuoteItems}
         auth={auth}
         onLoadQuoteRecord={handleLoadQuoteRecord}
         onOpenDailySchedule={handleOpenDailySchedule}
