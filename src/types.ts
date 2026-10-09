@@ -11,9 +11,18 @@ export type UnitType = typeof Unit[keyof typeof Unit];
 export const Theme = {
   DARK: 'dark',
   LIGHT: 'light',
+  CYBERPUNK: 'cyberpunk',
+  FOREST: 'forest',
+  SUNSET: 'sunset',
+  NORDIC: 'nordic',
+  RETRO: 'retro',
+  NEBULA: 'nebula',
+  ROSE: 'rose',
 } as const;
 
 export type ThemeType = typeof Theme[keyof typeof Theme];
+
+export type IconStyleType = 'auto' | 'classic' | 'aqua' | 'cyber' | 'nature' | 'sunset' | 'nordic' | 'retro' | 'cosmic' | 'rose';
 
 export interface RatesConfig {
   LIGHTBOX: number;

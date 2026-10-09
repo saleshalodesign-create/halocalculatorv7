@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
-import {
-  FileText,
-  RectangleHorizontal,
-  RectangleVertical,
-  Square,
-  FileSpreadsheet,
-  FileCheck,
-  Layers,
-  Image as ImageIcon,
-} from 'lucide-react';
 import { HaloLogo } from './HaloLogo';
 import { useLanguage } from '../context/LanguageContext';
 import { playHoverTick, playSoftPop } from '../utils/soundEffects';
+import { Theme, ThemeType } from '../types';
+import { getThemeIconsConfig } from '../utils/themeIcons';
 
 export interface MacDockProps {
   quoteCount: number;
@@ -23,8 +15,7 @@ export interface MacDockProps {
   onOpenImageConverter?: () => void;
   shapeType?: 'horizontal' | 'vertical' | 'square' | 'invalid';
   shapeLabel?: string;
-  // Optional legacy props kept for caller compatibility
-  theme?: any;
+  theme?: ThemeType;
   setTheme?: any;
   wallpaper?: any;
   setWallpaper?: any;
@@ -44,18 +35,24 @@ export const MacDock: React.FC<MacDockProps> = ({
   onOpenImageConverter,
   shapeType = 'horizontal',
   shapeLabel = 'Horizontal',
+  theme = Theme.DARK,
 }) => {
   const { language, t } = useLanguage();
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+
+  const themedIcons = getThemeIconsConfig(theme, shapeType);
 
   const dockItems = [
     {
       id: 'quotes',
       title: `${t.dock.quotes} (${quoteCount})`,
-      tooltip: t.dock.quotes,
-      icon: <FileText className="w-4 h-4 sm:w-5 sm:h-5" />,
-      gradient: 'from-rose-600 via-pink-500 to-amber-500',
-      shadow: 'shadow-rose-500/30',
+      tooltip: `${t.dock.quotes} - ${themedIcons.quotes.themeBadgeText}`,
+      icon: themedIcons.quotes.icon,
+      gradient: themedIcons.quotes.gradient,
+      shadow: themedIcons.quotes.shadow,
+      borderStyle: themedIcons.quotes.borderStyle,
+      glowAura: themedIcons.quotes.glowAura,
+      subLabel: themedIcons.quotes.themeBadgeText,
       badge: quoteCount > 0 ? quoteCount : undefined,
       onClick: onOpenQuoteList,
       hasDot: quoteCount > 0,
@@ -66,9 +63,12 @@ export const MacDock: React.FC<MacDockProps> = ({
             id: 'schedule',
             title: t.dock.schedule,
             tooltip: t.dailySchedule.title,
-            icon: <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5" />,
-            gradient: 'from-emerald-600 via-teal-500 to-cyan-500',
-            shadow: 'shadow-emerald-500/30',
+            icon: themedIcons.schedule.icon,
+            gradient: themedIcons.schedule.gradient,
+            shadow: themedIcons.schedule.shadow,
+            borderStyle: themedIcons.schedule.borderStyle,
+            glowAura: themedIcons.schedule.glowAura,
+            subLabel: themedIcons.schedule.themeBadgeText,
             onClick: onOpenDailySchedule,
             hasDot: false,
           },
@@ -80,9 +80,12 @@ export const MacDock: React.FC<MacDockProps> = ({
             id: 'pdf-editor',
             title: t.dock.pdfEditor || 'Edit PDF',
             tooltip: t.nav.pdfEditor || 'Edit PDF',
-            icon: <FileCheck className="w-4 h-4 sm:w-5 sm:h-5" />,
-            gradient: 'from-purple-600 via-indigo-600 to-blue-500',
-            shadow: 'shadow-purple-500/30',
+            icon: themedIcons['pdf-editor'].icon,
+            gradient: themedIcons['pdf-editor'].gradient,
+            shadow: themedIcons['pdf-editor'].shadow,
+            borderStyle: themedIcons['pdf-editor'].borderStyle,
+            glowAura: themedIcons['pdf-editor'].glowAura,
+            subLabel: themedIcons['pdf-editor'].themeBadgeText,
             onClick: onOpenPdfEditor,
             hasDot: false,
           },
@@ -94,9 +97,12 @@ export const MacDock: React.FC<MacDockProps> = ({
             id: 'pdf-tools',
             title: t.dock.pdfTools || (language === 'zh' ? 'PDF 工具' : 'PDF Tools'),
             tooltip: language === 'zh' ? 'PDF 工具箱 (合并/拆分/旋转整理/水印/多图转PDF/加解密)' : 'PDF Tools (Merge/Split/Organize/Watermark/Images/Lock)',
-            icon: <Layers className="w-4 h-4 sm:w-5 sm:h-5" />,
-            gradient: 'from-cyan-600 via-blue-600 to-indigo-600',
-            shadow: 'shadow-blue-500/30',
+            icon: themedIcons['pdf-tools'].icon,
+            gradient: themedIcons['pdf-tools'].gradient,
+            shadow: themedIcons['pdf-tools'].shadow,
+            borderStyle: themedIcons['pdf-tools'].borderStyle,
+            glowAura: themedIcons['pdf-tools'].glowAura,
+            subLabel: themedIcons['pdf-tools'].themeBadgeText,
             onClick: () => onOpenPdfTools('join'),
             hasDot: false,
           },
@@ -108,9 +114,12 @@ export const MacDock: React.FC<MacDockProps> = ({
             id: 'converter',
             title: t.dock.imageConverter || (language === 'zh' ? '图片转换' : 'Converter'),
             tooltip: language === 'zh' ? '图片格式转换工作台' : 'Image File Converter',
-            icon: <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />,
-            gradient: 'from-teal-600 via-cyan-600 to-sky-500',
-            shadow: 'shadow-cyan-500/30',
+            icon: themedIcons.converter.icon,
+            gradient: themedIcons.converter.gradient,
+            shadow: themedIcons.converter.shadow,
+            borderStyle: themedIcons.converter.borderStyle,
+            glowAura: themedIcons.converter.glowAura,
+            subLabel: themedIcons.converter.themeBadgeText,
             onClick: onOpenImageConverter,
             hasDot: false,
           },
@@ -122,17 +131,12 @@ export const MacDock: React.FC<MacDockProps> = ({
             id: 'shape',
             title: t.dock.shape,
             tooltip: `${t.dock.shape} (${shapeLabel})`,
-            icon:
-              shapeType === 'horizontal' ? (
-                <RectangleHorizontal className="w-4 h-4 sm:w-5 sm:h-5" />
-              ) : shapeType === 'vertical' ? (
-                <RectangleVertical className="w-4 h-4 sm:w-5 sm:h-5" />
-              ) : (
-                <Square className="w-4 h-4 sm:w-5 sm:h-5" />
-              ),
-            subLabel: shapeType === 'horizontal' ? 'HORIZ' : shapeType === 'vertical' ? 'VERT' : 'SQR',
-            gradient: 'from-blue-600 via-indigo-600 to-cyan-500',
-            shadow: 'shadow-blue-500/30',
+            icon: themedIcons.shape.icon,
+            subLabel: themedIcons.shape.themeBadgeText,
+            gradient: themedIcons.shape.gradient,
+            shadow: themedIcons.shape.shadow,
+            borderStyle: themedIcons.shape.borderStyle,
+            glowAura: themedIcons.shape.glowAura,
             onClick: onOpenShapeModal,
             hasDot: false,
           },
@@ -180,12 +184,12 @@ export const MacDock: React.FC<MacDockProps> = ({
                 {/* Dynamic Aura Glow on Hover */}
                 {isHovered && (
                   <div
-                    className={`absolute -inset-1 rounded-2xl bg-gradient-to-tr ${item.gradient} opacity-40 blur-md pointer-events-none animate-pulse`}
+                    className={`absolute -inset-1 rounded-2xl bg-gradient-to-tr ${item.glowAura || item.gradient} opacity-50 blur-md pointer-events-none animate-pulse`}
                   />
                 )}
 
                 <div
-                  className={`w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr ${item.gradient} flex items-center justify-center text-white shadow-md ${item.shadow} border border-white/40 relative overflow-hidden transition-all group-hover:shadow-xl group-hover:brightness-105`}
+                  className={`w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr ${item.gradient} flex items-center justify-center text-white shadow-md ${item.shadow} ${item.borderStyle || 'border border-white/40'} relative overflow-hidden transition-all group-hover:shadow-xl group-hover:brightness-105`}
                 >
                   {/* Subtle glass reflection highlight */}
                   <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-transparent to-black/10 pointer-events-none" />

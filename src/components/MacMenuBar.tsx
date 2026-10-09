@@ -1,10 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { UserProfile, Theme, ThemeType } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { UserProfile, ThemeType } from '../types';
 import { GoogleIcon } from './GoogleIcon';
 import { HaloLogo } from './HaloLogo';
-import { Moon, Sun, Smartphone, Calculator, Globe, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import {
+  Palette,
+  Check,
+  ChevronDown,
+  Smartphone,
+  Calculator,
+  Globe,
+  Sparkles,
+  Volume2,
+  VolumeX,
+  Layers,
+} from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { isSoundEnabled, toggleSound, playSoftPop } from '../utils/soundEffects';
+import { THEME_REGISTRY, ThemeMeta } from '../utils/themeIcons';
 
 interface MacMenuBarProps {
   quoteCount?: number;
@@ -41,13 +53,27 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
   const { language, toggleLanguage, t } = useLanguage();
   const [timeString, setTimeString] = useState('');
   const [soundOn, setSoundOn] = useState<boolean>(() => isSoundEnabled());
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const themeMenuRef = useRef<HTMLDivElement>(null);
+
+  const themeOptions: ThemeMeta[] = Object.values(THEME_REGISTRY);
+  const currentThemeMeta = THEME_REGISTRY[theme] || themeOptions[0];
+
+  useEffect(() => {
+    if (!showThemeMenu) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
+        setShowThemeMenu(false);
+      }
+    };
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => window.removeEventListener('mousedown', handleClickOutside);
+  }, [showThemeMenu]);
 
   const cycleTheme = () => {
-    if (theme === Theme.DARK) {
-      setTheme(Theme.LIGHT);
-    } else {
-      setTheme(Theme.DARK);
-    }
+    const list = themeOptions.map(o => o.id);
+    const nextIdx = (list.indexOf(theme) + 1) % list.length;
+    setTheme(list[nextIdx]);
   };
 
   useEffect(() => {
@@ -181,19 +207,93 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
           {user && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>}
         </button>
 
-        {/* Quick Theme Switcher Pill */}
-        <button
-          onClick={cycleTheme}
-          className="flex items-center gap-1 px-1.5 xs:px-2 sm:px-2.5 py-0.5 rounded-md sm:rounded-lg bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 border border-slate-200 dark:border-white/10 text-[10px] xs:text-[11px] font-bold transition-all shadow-sm active:scale-95"
-          title={`Theme: ${theme.toUpperCase()} (Click to toggle)`}
-        >
-          {theme === Theme.DARK ? (
-            <Moon className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-indigo-400" />
-          ) : (
-            <Sun className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-amber-500" />
+        {/* Quick Theme Switcher Pill with Popover */}
+        <div className="relative" ref={themeMenuRef}>
+          <button
+            onClick={() => {
+              playSoftPop();
+              setShowThemeMenu(prev => !prev);
+            }}
+            className="flex items-center gap-1 px-1.5 xs:px-2 sm:px-2.5 py-0.5 rounded-md sm:rounded-lg bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 border border-slate-200 dark:border-white/10 text-[10px] xs:text-[11px] font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+            title={`Theme: ${currentThemeMeta.enLabel || currentThemeMeta.label} (${themeOptions.length} themes)`}
+          >
+            {currentThemeMeta.icon}
+            <span className="capitalize hidden sm:inline">{currentThemeMeta.enLabel || currentThemeMeta.label}</span>
+            <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showThemeMenu ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Theme Dropdown Popover */}
+          {showThemeMenu && (
+            <div className="absolute right-0 top-full mt-1.5 w-72 sm:w-80 rounded-xl bg-white/95 dark:bg-[#0a0f26]/95 backdrop-blur-xl border border-slate-200 dark:border-indigo-500/30 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 max-h-[75vh] overflow-y-auto mac-scrollbar">
+              <div className="px-2.5 py-1.5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between sticky top-0 bg-white/90 dark:bg-[#0a0f26]/90 backdrop-blur-md z-10">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-cyan-400 flex items-center gap-1.5">
+                  <Palette className="w-3 h-3 text-cyan-500" />
+                  Themes & Icons
+                </span>
+                <span className="text-[9px] text-slate-500 dark:text-slate-400 font-mono font-medium">
+                  {themeOptions.length} Themes
+                </span>
+              </div>
+              <div className="py-1 space-y-1">
+                {themeOptions.map(opt => {
+                  const isActive = opt.id === theme;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => {
+                        playSoftPop();
+                        setTheme(opt.id);
+                        setShowThemeMenu(false);
+                      }}
+                      className={`w-full flex flex-col p-2 rounded-lg text-left transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-500/10 dark:bg-cyan-500/15 border border-blue-500/30 dark:border-cyan-500/30 shadow-xs'
+                          : 'hover:bg-slate-100 dark:hover:bg-white/10 border border-transparent'
+                      }`}
+                    >
+                      <div className="w-full flex items-center justify-between">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${opt.colorDot} text-white shadow-xs`}>
+                            {opt.icon}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-800 dark:text-white truncate">
+                              {opt.enLabel || opt.label}
+                            </p>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate font-normal">
+                              {opt.enDescription || opt.description}
+                            </p>
+                          </div>
+                        </div>
+                        {isActive && (
+                          <Check className="w-4 h-4 text-blue-500 dark:text-cyan-400 shrink-0 ml-1.5" />
+                        )}
+                      </div>
+
+                      {/* Themed Icon Set Preview Badges */}
+                      <div className="flex items-center justify-between mt-1.5 pt-1 border-t border-slate-200/50 dark:border-white/5">
+                        <span className="text-[9px] text-slate-500 dark:text-slate-400 font-mono font-semibold truncate">
+                          ✦ {opt.iconSetEn || opt.iconSetName}
+                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {opt.previewIcons.map((ic, i) => (
+                            <span
+                              key={`preview-ic-${opt.id}-${i}`}
+                              className="w-5 h-5 rounded flex items-center justify-center bg-slate-200/60 dark:bg-white/10"
+                            >
+                              {ic}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
-          <span className="capitalize hidden sm:inline">{theme === Theme.DARK ? t.nav.dark : t.nav.light}</span>
-        </button>
+        </div>
 
         {/* WiFi & Battery icon */}
         <div className="hidden sm:flex items-center gap-2 text-slate-600 dark:text-neutral-300">

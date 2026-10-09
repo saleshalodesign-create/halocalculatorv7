@@ -8,6 +8,7 @@ import { useLanguage } from './context/LanguageContext';
 import { MacMenuBar } from './components/MacMenuBar';
 import { MacDock } from './components/MacDock';
 import { MacPricingCard } from './components/MacPricingCard';
+import { THEME_REGISTRY } from './utils/themeIcons';
 import { QuotationModal } from './components/QuotationModal';
 import { QuotationListModal } from './components/QuotationListModal';
 import { GoogleAccountModal } from './components/GoogleAccountModal';
@@ -20,6 +21,7 @@ import { DailyOutsideScheduleModal } from './components/DailyOutsideScheduleModa
 import { PdfEditorModal } from './components/PdfEditorModal';
 import { PdfToolsModal } from './components/PdfToolsModal';
 import { ImageConverterModal } from './components/ImageConverterModal';
+import { AiHelpModal } from './components/AiHelpModal';
 import {
   RotateCcw,
   Lightbulb,
@@ -37,6 +39,7 @@ import {
   Sun,
   Moon,
   Calculator,
+  Palette,
 } from 'lucide-react';
 import { MacDesktopContextMenu, ContextMenuItem } from './components/MacDesktopContextMenu';
 import { playSuccessChime, playSoftPop, isSoundEnabled, toggleSound } from './utils/soundEffects';
@@ -49,11 +52,22 @@ export default function App() {
   const [wallpaper, setWallpaper] = useState<string>(() => {
     const savedTheme = (localStorage.getItem('halo_theme') as ThemeType) || Theme.DARK;
     const saved = localStorage.getItem('halo_wallpaper');
-    if (savedTheme === Theme.LIGHT) {
-      if (!saved || saved === 'silver' || saved === 'cyber-midnight') return 'blue';
-    }
     if (saved) return saved;
-    return savedTheme === Theme.LIGHT ? 'blue' : 'cyber-midnight';
+    switch (savedTheme) {
+      case Theme.LIGHT:
+        return 'blue';
+      case Theme.CYBERPUNK:
+        return 'cyberpunk';
+      case Theme.FOREST:
+        return 'forest';
+      case Theme.SUNSET:
+        return 'sunset';
+      case Theme.NORDIC:
+        return 'nordic';
+      case Theme.DARK:
+      default:
+        return 'cyber-midnight';
+    }
   });
 
   // Window states (Traffic lights: compact mode, maximize)
@@ -137,6 +151,7 @@ export default function App() {
   const [pdfToolsOpen, setPdfToolsOpen] = useState(false);
   const [pdfToolsInitialTab, setPdfToolsInitialTab] = useState<'join' | 'split' | 'organize' | 'watermark' | 'img2pdf' | 'lock' | 'unlock'>('join');
   const [imageConverterOpen, setImageConverterOpen] = useState(false);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   const handleOpenPdfEditor = (
@@ -208,31 +223,109 @@ export default function App() {
     setTheme(savedTheme);
     applyThemeClass(savedTheme);
     const savedWallpaper = localStorage.getItem('halo_wallpaper');
-    // If lightmode is active and no custom wallpaper was chosen, or was legacy 'silver', default to 'blue'
-    if (savedTheme === Theme.LIGHT && (!savedWallpaper || savedWallpaper === 'silver')) {
-      setWallpaper('blue');
+    if (!savedWallpaper || savedWallpaper === 'silver') {
+      switch (savedTheme) {
+        case Theme.LIGHT:
+          setWallpaper('blue');
+          break;
+        case Theme.CYBERPUNK:
+          setWallpaper('cyberpunk');
+          break;
+        case Theme.FOREST:
+          setWallpaper('forest');
+          break;
+        case Theme.SUNSET:
+          setWallpaper('sunset');
+          break;
+        case Theme.NORDIC:
+          setWallpaper('nordic');
+          break;
+        case Theme.RETRO:
+          setWallpaper('retro');
+          break;
+        case Theme.NEBULA:
+          setWallpaper('nebula');
+          break;
+        case Theme.ROSE:
+          setWallpaper('rose');
+          break;
+        case Theme.DARK:
+        default:
+          setWallpaper('cyber-midnight');
+          break;
+      }
     }
   }, []);
 
   const applyThemeClass = (currentTheme: ThemeType) => {
-    document.documentElement.classList.remove('dark', 'light');
-    if (currentTheme === Theme.DARK) {
-      document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove(
+      'dark',
+      'light',
+      'theme-dark',
+      'theme-light',
+      'theme-cyberpunk',
+      'theme-forest',
+      'theme-sunset',
+      'theme-nordic',
+      'theme-retro',
+      'theme-nebula',
+      'theme-rose'
+    );
+    if (currentTheme === Theme.LIGHT) {
+      document.documentElement.classList.add('light', 'theme-light');
     } else {
-      document.documentElement.classList.add('light');
+      document.documentElement.classList.add('dark', `theme-${currentTheme}`);
     }
   };
 
   const handleSetTheme = (newTheme: ThemeType) => {
     setTheme(newTheme);
-    if (newTheme === Theme.LIGHT) {
-      setWallpaper('blue');
-    } else if (newTheme === Theme.DARK) {
-      setWallpaper('cyber-midnight');
+    switch (newTheme) {
+      case Theme.LIGHT:
+        setWallpaper('blue');
+        break;
+      case Theme.CYBERPUNK:
+        setWallpaper('cyberpunk');
+        break;
+      case Theme.FOREST:
+        setWallpaper('forest');
+        break;
+      case Theme.SUNSET:
+        setWallpaper('sunset');
+        break;
+      case Theme.NORDIC:
+        setWallpaper('nordic');
+        break;
+      case Theme.RETRO:
+        setWallpaper('retro');
+        break;
+      case Theme.NEBULA:
+        setWallpaper('nebula');
+        break;
+      case Theme.ROSE:
+        setWallpaper('rose');
+        break;
+      case Theme.DARK:
+      default:
+        setWallpaper('cyber-midnight');
+        break;
     }
   };
 
-  const wallpapersList = ['blue', 'cyber-midnight', 'sequoia', 'sonoma', 'dark', 'silver'];
+  const wallpapersList = [
+    'cyber-midnight',
+    'blue',
+    'cyberpunk',
+    'forest',
+    'sunset',
+    'nordic',
+    'retro',
+    'nebula',
+    'rose',
+    'sequoia',
+    'sonoma',
+    'silver',
+  ];
   const handleNextWallpaper = () => {
     const idx = wallpapersList.indexOf(wallpaper);
     const next = wallpapersList[(idx + 1) % wallpapersList.length];
@@ -361,6 +454,20 @@ export default function App() {
         return 'wallpaper-blue';
       case 'cyber-midnight':
         return 'wallpaper-cyber-midnight';
+      case 'cyberpunk':
+        return 'wallpaper-cyberpunk';
+      case 'forest':
+        return 'wallpaper-forest';
+      case 'sunset':
+        return 'wallpaper-sunset';
+      case 'nordic':
+        return 'wallpaper-nordic';
+      case 'retro':
+        return 'wallpaper-retro';
+      case 'nebula':
+        return 'wallpaper-nebula';
+      case 'rose':
+        return 'wallpaper-rose';
       case 'sequoia':
         return 'wallpaper-sequoia';
       case 'sonoma':
@@ -370,7 +477,27 @@ export default function App() {
       case 'silver':
         return 'wallpaper-silver';
       default:
-        return theme === Theme.LIGHT ? 'wallpaper-blue' : 'wallpaper-cyber-midnight';
+        switch (theme) {
+          case Theme.LIGHT:
+            return 'wallpaper-blue';
+          case Theme.CYBERPUNK:
+            return 'wallpaper-cyberpunk';
+          case Theme.FOREST:
+            return 'wallpaper-forest';
+          case Theme.SUNSET:
+            return 'wallpaper-sunset';
+          case Theme.NORDIC:
+            return 'wallpaper-nordic';
+          case Theme.RETRO:
+            return 'wallpaper-retro';
+          case Theme.NEBULA:
+            return 'wallpaper-nebula';
+          case Theme.ROSE:
+            return 'wallpaper-rose';
+          case Theme.DARK:
+          default:
+            return 'wallpaper-cyber-midnight';
+        }
     }
   };
 
@@ -450,9 +577,24 @@ export default function App() {
     },
     {
       id: 'theme',
-      label: theme === Theme.DARK ? (language === 'zh' ? '切换为浅色模式' : 'Light Mode') : (language === 'zh' ? '切换为深色模式' : 'Dark Mode'),
-      icon: theme === Theme.DARK ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />,
-      onClick: () => handleSetTheme(theme === Theme.DARK ? Theme.LIGHT : Theme.DARK),
+      label: `Theme: ${THEME_REGISTRY[theme]?.enLabel || THEME_REGISTRY[theme]?.label || 'Dark'}`,
+      icon: <Palette className="w-4 h-4 text-pink-400" />,
+      onClick: () => {
+        playSoftPop();
+        const themesList: ThemeType[] = [
+          Theme.DARK,
+          Theme.LIGHT,
+          Theme.CYBERPUNK,
+          Theme.FOREST,
+          Theme.SUNSET,
+          Theme.NORDIC,
+          Theme.RETRO,
+          Theme.NEBULA,
+          Theme.ROSE,
+        ];
+        const nextIdx = (themesList.indexOf(theme) + 1) % themesList.length;
+        handleSetTheme(themesList[nextIdx]);
+      },
       dividerAbove: true,
     },
     {
@@ -509,6 +651,7 @@ export default function App() {
         onOpenAuth={() => auth.setAuthModalOpen(true)}
         onOpenMobileApp={() => setMobileModalOpen(true)}
         onOpenMathCalc={() => setMathCalcOpen(true)}
+        onOpenAiModal={() => setAiModalOpen(true)}
       />
 
       {/* Top Mobile Quick Install Strip */}
@@ -954,6 +1097,7 @@ export default function App() {
 
       {/* Bottom macOS Dock */}
       <MacDock
+        theme={theme}
         quoteCount={quoteItems.reduce((sum, item) => sum + item.quantity, 0)}
         onOpenQuoteList={() => setQuoteListOpen(true)}
         onOpenShapeModal={() => setShapeModalOpen(true)}
@@ -1089,6 +1233,12 @@ export default function App() {
           }}
         />
       )}
+
+      {/* Gemini AI Assistant Modal */}
+      <AiHelpModal
+        isOpen={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+      />
 
       {/* macOS Desktop Right-Click Context Menu */}
       <MacDesktopContextMenu
