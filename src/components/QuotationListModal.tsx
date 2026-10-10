@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { QuoteItem, QuoteRecord, Unit, UnitType } from '../types';
+import { QuoteItem, QuoteRecord, Unit, UnitType, Theme, ThemeType } from '../types';
 import { AuthContextType } from '../hooks/useFirebaseAuth';
 import { useLanguage } from '../context/LanguageContext';
+import { getThemeTableHeaderStyle, getColumnTheme, ProductColumnKey } from '../utils/columnThemes';
 import { GoogleIcon } from './GoogleIcon';
 import { copyToClipboard, formatQuotationText } from '../utils/clipboard';
 import {
@@ -86,6 +87,7 @@ interface QuotationListModalProps {
   onOpenDailySchedule?: (customerName?: string, customerAddress?: string) => void;
   onOpenPdfEditor?: (items?: QuoteItem[], data?: Partial<QuoteRecord>, docType?: DocumentType) => void;
   onOpenPdfTools?: (tab?: 'join' | 'split') => void;
+  theme?: ThemeType;
 }
 
 export const QuotationListModal: React.FC<QuotationListModalProps> = ({
@@ -103,8 +105,10 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
   onOpenDailySchedule,
   onOpenPdfEditor,
   onOpenPdfTools,
+  theme = Theme.DARK,
 }) => {
   const { language, t } = useLanguage();
+  const tableHeaderTheme = getThemeTableHeaderStyle(theme);
   const [activeSubTab, setActiveSubTab] = useState<'active' | 'cloudRecords'>('active');
   const [formMode, setFormMode] = useState<'quote' | 'invoice' | 'receipt' | 'textPreview' | null>(null);
   const [showCustomForm, setShowCustomForm] = useState(true);
@@ -741,7 +745,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
     const finalPrice = isNaN(price) || price < 0 ? 0 : price;
 
     onAddCustomItem({
-      id: Date.now().toString(),
+      id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       timestamp: Date.now(),
       quantity: qty,
       title: finalTitle,
@@ -1041,15 +1045,15 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
 
               {/* Themed Table Column Header Bar */}
               {items.length > 0 && (
-                <div className="px-3 sm:px-4 py-1.5 bg-slate-100/90 dark:bg-[#080d22] border-b border-slate-200/90 dark:border-indigo-500/20 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-cyan-300 flex items-center justify-between gap-2 shrink-0 select-none">
+                <div className={`px-3 sm:px-4 py-1.5 ${tableHeaderTheme.headerBg} border-b ${tableHeaderTheme.headerBorder} text-[10px] sm:text-xs font-bold uppercase tracking-wider ${tableHeaderTheme.headerText} flex items-center justify-between gap-2 shrink-0 select-none`}>
                   <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
-                    <span className="w-14 sm:w-16 text-center font-mono flex items-center justify-center gap-1 text-slate-500 dark:text-cyan-400/80">
-                      <GripVertical className="w-3 h-3 text-slate-400 dark:text-cyan-400/60" />
+                    <span className="w-14 sm:w-16 text-center font-mono flex items-center justify-center gap-1 opacity-80">
+                      <GripVertical className="w-3 h-3 opacity-60" />
                       <span>#</span>
                     </span>
                     <span className="flex-1 flex items-center gap-2">
                       <span>{language === 'zh' ? '项目名称与尺寸' : 'Item Description & Size'}</span>
-                      <span className="hidden md:inline-flex items-center gap-1 text-[9px] lowercase font-normal text-slate-500 dark:text-cyan-400/80 bg-slate-200/60 dark:bg-cyan-950/40 px-1.5 py-0.5 rounded border border-slate-300/60 dark:border-cyan-500/30">
+                      <span className={`hidden md:inline-flex items-center gap-1 text-[9px] lowercase font-normal ${tableHeaderTheme.accentBadge} px-1.5 py-0.5 rounded border`}>
                         {language === 'zh' ? '按住左侧图标拖拽调整顺序' : 'drag icon to reorder'}
                       </span>
                     </span>
@@ -1061,7 +1065,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                         type="button"
                         onClick={handleReverseOrder}
                         title={language === 'zh' ? '首尾倒转排序' : 'Reverse order'}
-                        className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-slate-600 dark:text-cyan-300 hover:text-cyan-500 bg-white/70 dark:bg-cyan-900/30 hover:bg-slate-200 dark:hover:bg-cyan-800/40 border border-slate-300/70 dark:border-cyan-500/30 transition-all font-semibold normal-case cursor-pointer"
+                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] ${tableHeaderTheme.headerText} bg-white/70 dark:bg-black/30 hover:bg-slate-200 dark:hover:bg-white/10 border ${tableHeaderTheme.headerBorder} transition-all font-semibold normal-case cursor-pointer`}
                       >
                         <ArrowUpDown className="w-3 h-3 text-cyan-500" />
                         <span className="hidden sm:inline">{language === 'zh' ? '倒序' : 'Reverse'}</span>
@@ -1094,6 +1098,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   items.map((item, index) => {
                     const isDragging = draggedIndex === index;
                     const isDropTarget = dragOverIndex === index && draggedIndex !== index;
+                    const itemCol = item.priceKey ? getColumnTheme(theme, item.priceKey as ProductColumnKey) : null;
 
                     return (
                       <div
@@ -1109,7 +1114,9 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                             ? 'opacity-40 scale-[0.99] border-dashed border-cyan-400 bg-cyan-50/20 dark:bg-cyan-950/30 ring-2 ring-cyan-500/40'
                             : isDropTarget
                             ? 'border-t-2 border-t-cyan-500 border-slate-200/80 dark:border-cyan-400 bg-cyan-50/40 dark:bg-cyan-950/30 shadow-md shadow-cyan-500/10'
-                            : 'border-slate-200/80 dark:border-indigo-500/25 hover:border-cyan-500/40'
+                            : itemCol
+                            ? `border-slate-200/80 dark:${itemCol.border} hover:${itemCol.border}`
+                            : `border-slate-200/80 dark:${tableHeaderTheme.headerBorder}`
                         }`}
                       >
                         <div className="flex-1 min-w-0 flex items-start sm:items-center gap-1.5 sm:gap-2">
@@ -1203,15 +1210,15 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                               type="text"
                               value={item.title}
                               onChange={e => onUpdateItem(item.id, { title: e.target.value })}
-                              className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white bg-transparent outline-none border-b border-transparent focus:border-cyan-500 w-full"
+                              className={`font-bold text-xs sm:text-sm ${itemCol ? itemCol.selectedTitleText : 'text-slate-900 dark:text-white'} bg-transparent outline-none border-b border-transparent focus:border-cyan-500 w-full`}
                             />
                             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-slate-500 dark:text-neutral-400 font-mono mt-0.5 sm:mt-1">
                               {item.originalWidth > 0 && (
-                                <span className="px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/40 text-[10px] sm:text-xs font-semibold">
+                                <span className={`px-1.5 py-0.5 rounded-md text-[10px] sm:text-xs font-semibold border ${itemCol ? itemCol.badge : 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-800/40'}`}>
                                   {item.originalWidth} × {item.originalHeight} {item.unit}
                                 </span>
                               )}
-                              <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-[#050817] px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-indigo-500/25 hover:border-cyan-500/50 focus-within:border-cyan-500 transition-colors">
+                              <div className={`flex items-center gap-1 bg-slate-100/80 dark:bg-[#050817] px-1.5 py-0.5 rounded-md border ${itemCol ? itemCol.border : 'border-slate-200 dark:border-indigo-500/25'} hover:border-cyan-500/50 focus-within:border-cyan-500 transition-colors`}>
                                 <span className="text-slate-500 dark:text-cyan-400/80 font-bold text-[10px] sm:text-xs">$</span>
                                 <input
                                   type="number"
@@ -1223,7 +1230,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                                     const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
                                     onUpdateItem(item.id, { totalPrice: isNaN(val) ? 0 : val });
                                   }}
-                                  className="w-12 sm:w-16 bg-transparent text-[10px] sm:text-xs font-mono font-bold text-slate-900 dark:text-white outline-none"
+                                  className={`w-12 sm:w-16 bg-transparent text-[10px] sm:text-xs font-mono font-bold ${itemCol ? itemCol.selectedPriceText : 'text-slate-900 dark:text-white'} outline-none`}
                                   title="Click to edit unit price"
                                 />
                                 <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-neutral-400">/unit</span>
@@ -1262,7 +1269,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
 
                           {/* Line Total */}
                           <div className="text-right min-w-[60px] sm:w-20">
-                            <span className="font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-cyan-300">
+                            <span className={`font-mono font-bold text-xs sm:text-sm ${itemCol ? itemCol.selectedPriceText : 'text-slate-900 dark:text-cyan-300'}`}>
                               ${(item.totalPrice * item.quantity).toFixed(2)}
                             </span>
                           </div>

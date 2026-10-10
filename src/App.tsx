@@ -21,7 +21,6 @@ import { DailyOutsideScheduleModal } from './components/DailyOutsideScheduleModa
 import { PdfEditorModal } from './components/PdfEditorModal';
 import { PdfToolsModal } from './components/PdfToolsModal';
 import { ImageConverterModal } from './components/ImageConverterModal';
-import { AiHelpModal } from './components/AiHelpModal';
 import {
   RotateCcw,
   Lightbulb,
@@ -151,7 +150,6 @@ export default function App() {
   const [pdfToolsOpen, setPdfToolsOpen] = useState(false);
   const [pdfToolsInitialTab, setPdfToolsInitialTab] = useState<'join' | 'split' | 'organize' | 'watermark' | 'img2pdf' | 'lock' | 'unlock'>('join');
   const [imageConverterOpen, setImageConverterOpen] = useState(false);
-  const [aiModalOpen, setAiModalOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   const handleOpenPdfEditor = (
@@ -416,7 +414,7 @@ export default function App() {
     const itemTitle = title;
 
     setModalData({
-      id: Date.now().toString(),
+      id: `modal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       title: itemTitle,
       totalPrice: prices[priceKey] || 0,
       widthInches: dimensions.w_in,
@@ -444,7 +442,14 @@ export default function App() {
 
   const handleLoadQuoteRecord = (record: QuoteRecord) => {
     if (record && Array.isArray(record.items)) {
-      setQuoteItems(record.items);
+      const seen = new Set<string>();
+      const sanitized = record.items.map((it, idx) => {
+        const rawId = it.id || `quote-rec-${idx}`;
+        const id = seen.has(rawId) ? `${rawId}-${idx}-${Math.random().toString(36).slice(2, 6)}` : rawId;
+        seen.add(id);
+        return { ...it, id };
+      });
+      setQuoteItems(sanitized);
     }
   };
 
@@ -651,7 +656,6 @@ export default function App() {
         onOpenAuth={() => auth.setAuthModalOpen(true)}
         onOpenMobileApp={() => setMobileModalOpen(true)}
         onOpenMathCalc={() => setMathCalcOpen(true)}
-        onOpenAiModal={() => setAiModalOpen(true)}
       />
 
       {/* Top Mobile Quick Install Strip */}
@@ -952,7 +956,7 @@ export default function App() {
                   rate={rates.LIGHTBOX}
                   rateUnit={t.products.lightbox.unit}
                   iconType="lightbox"
-                  iconBg="bg-gradient-to-tr from-amber-600 to-yellow-500"
+                  theme={theme}
                   isSelected={modalOpen && modalData?.priceKey === 'lightbox'}
                   onClick={() => handleCardClick(t.products.lightbox.title, 'lightbox')}
                   onRateChange={(val) => handleRateChange('LIGHTBOX', val)}
@@ -969,7 +973,7 @@ export default function App() {
                   rate={rates.LIGHTBOX_W_BACKLIT}
                   rateUnit={t.products.lightboxBacklit.unit}
                   iconType="lightboxBacklit"
-                  iconBg="bg-gradient-to-tr from-rose-600 to-pink-500"
+                  theme={theme}
                   isSelected={modalOpen && modalData?.priceKey === 'lightboxBacklit'}
                   onClick={() => handleCardClick(t.products.lightboxBacklit.title, 'lightboxBacklit')}
                   onRateChange={(val) => handleRateChange('LIGHTBOX_W_BACKLIT', val)}
@@ -986,7 +990,7 @@ export default function App() {
                   rate={rates.BACKLIT}
                   rateUnit={t.products.backlit.unit}
                   iconType="backlit"
-                  iconBg="bg-gradient-to-tr from-blue-600 to-cyan-500"
+                  theme={theme}
                   isSelected={modalOpen && modalData?.priceKey === 'backlit'}
                   onClick={() => handleCardClick(t.products.backlit.title, 'backlit')}
                   onRateChange={(val) => handleRateChange('BACKLIT', val)}
@@ -1003,7 +1007,7 @@ export default function App() {
                   rate={rates.TRANS}
                   rateUnit={t.products.trans.unit}
                   iconType="trans"
-                  iconBg="bg-gradient-to-tr from-indigo-600 to-violet-500"
+                  theme={theme}
                   isSelected={modalOpen && modalData?.priceKey === 'trans'}
                   onClick={() => handleCardClick(t.products.trans.title, 'trans')}
                   onRateChange={(val) => handleRateChange('TRANS', val)}
@@ -1020,7 +1024,7 @@ export default function App() {
                   rate={rates.PRINTED_3D}
                   rateUnit={t.products.printed3d.unit}
                   iconType="printed3d"
-                  iconBg="bg-gradient-to-tr from-orange-600 to-amber-500"
+                  theme={theme}
                   isSelected={modalOpen && modalData?.priceKey === 'printed3d'}
                   onClick={() => handleCardClick(t.products.printed3d.title, 'printed3d')}
                   onRateChange={(val) => handleRateChange('PRINTED_3D', val)}
@@ -1037,7 +1041,7 @@ export default function App() {
                   rate={rates.VINYL_STICKER}
                   rateUnit={t.products.vinylSticker.unit}
                   iconType="vinylSticker"
-                  iconBg="bg-gradient-to-tr from-purple-600 to-fuchsia-500"
+                  theme={theme}
                   isSelected={modalOpen && modalData?.priceKey === 'vinylSticker'}
                   onClick={() => handleCardClick(t.products.vinylSticker.title, 'vinylSticker')}
                   onRateChange={(val) => handleRateChange('VINYL_STICKER', val)}
@@ -1054,7 +1058,7 @@ export default function App() {
                   rate={rates.LED_STRIP}
                   rateUnit={t.products.ledStrip.unit}
                   iconType="ledStrip"
-                  iconBg="bg-gradient-to-tr from-emerald-600 to-teal-500"
+                  theme={theme}
                   isSelected={modalOpen && modalData?.priceKey === 'ledStrip'}
                   onClick={() => handleCardClick(t.products.ledStrip.title, 'ledStrip')}
                   onRateChange={(val) => handleRateChange('LED_STRIP', val)}
@@ -1071,7 +1075,7 @@ export default function App() {
                   rate={rates.ACRYLIC}
                   rateUnit={t.products.acrylic.unit}
                   iconType="acrylic"
-                  iconBg="bg-gradient-to-tr from-teal-600 to-cyan-500"
+                  theme={theme}
                   isSelected={modalOpen && modalData?.priceKey === 'acrylic'}
                   onClick={() => handleCardClick(t.products.acrylic.title, 'acrylic')}
                   onRateChange={(val) => handleRateChange('ACRYLIC', val)}
@@ -1116,12 +1120,14 @@ export default function App() {
         onClose={() => setModalOpen(false)}
         onAddToQuote={handleAddToQuote}
         rates={rates}
+        theme={theme}
       />
 
       <QuotationListModal
         isOpen={quoteListOpen}
         onClose={() => setQuoteListOpen(false)}
         items={quoteItems}
+        theme={theme}
         onRemoveItem={id => setQuoteItems(prev => prev.filter(item => item.id !== id))}
         onUpdateQuantity={(id, delta) =>
           setQuoteItems(prev =>
@@ -1233,12 +1239,6 @@ export default function App() {
           }}
         />
       )}
-
-      {/* Gemini AI Assistant Modal */}
-      <AiHelpModal
-        isOpen={aiModalOpen}
-        onClose={() => setAiModalOpen(false)}
-      />
 
       {/* macOS Desktop Right-Click Context Menu */}
       <MacDesktopContextMenu

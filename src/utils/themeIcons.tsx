@@ -91,10 +91,10 @@ export const THEME_REGISTRY: Record<ThemeType, ThemeMeta> = {
     defaultWallpaper: 'cyber-midnight',
     accentColor: 'indigo',
     previewIcons: [
-      <FileText key="1" className="w-3.5 h-3.5 text-rose-400" />,
-      <FileSpreadsheet key="2" className="w-3.5 h-3.5 text-emerald-400" />,
-      <FileCheck key="3" className="w-3.5 h-3.5 text-purple-400" />,
-      <Layers key="4" className="w-3.5 h-3.5 text-cyan-400" />,
+      <FileText key="prev-dark-0" className="w-3.5 h-3.5 text-rose-400" />,
+      <FileSpreadsheet key="prev-dark-1" className="w-3.5 h-3.5 text-emerald-400" />,
+      <FileCheck key="prev-dark-2" className="w-3.5 h-3.5 text-purple-400" />,
+      <Layers key="prev-dark-3" className="w-3.5 h-3.5 text-cyan-400" />,
     ],
   },
   [Theme.LIGHT]: {
@@ -110,10 +110,10 @@ export const THEME_REGISTRY: Record<ThemeType, ThemeMeta> = {
     defaultWallpaper: 'blue',
     accentColor: 'blue',
     previewIcons: [
-      <ReceiptText key="1" className="w-3.5 h-3.5 text-rose-500" />,
-      <CalendarClock key="2" className="w-3.5 h-3.5 text-teal-500" />,
-      <FileSignature key="3" className="w-3.5 h-3.5 text-indigo-500" />,
-      <Boxes key="4" className="w-3.5 h-3.5 text-sky-500" />,
+      <ReceiptText key="prev-light-0" className="w-3.5 h-3.5 text-rose-500" />,
+      <CalendarClock key="prev-light-1" className="w-3.5 h-3.5 text-teal-500" />,
+      <FileSignature key="prev-light-2" className="w-3.5 h-3.5 text-indigo-500" />,
+      <Boxes key="prev-light-3" className="w-3.5 h-3.5 text-sky-500" />,
     ],
   },
   [Theme.CYBERPUNK]: {
@@ -129,10 +129,10 @@ export const THEME_REGISTRY: Record<ThemeType, ThemeMeta> = {
     defaultWallpaper: 'cyberpunk',
     accentColor: 'pink',
     previewIcons: [
-      <Terminal key="1" className="w-3.5 h-3.5 text-pink-400" />,
-      <Cpu key="2" className="w-3.5 h-3.5 text-emerald-400" />,
-      <FileCode2 key="3" className="w-3.5 h-3.5 text-cyan-400" />,
-      <Binary key="4" className="w-3.5 h-3.5 text-amber-400" />,
+      <Terminal key="prev-cyber-0" className="w-3.5 h-3.5 text-pink-400" />,
+      <Cpu key="prev-cyber-1" className="w-3.5 h-3.5 text-emerald-400" />,
+      <FileCode2 key="prev-cyber-2" className="w-3.5 h-3.5 text-cyan-400" />,
+      <Binary key="prev-cyber-3" className="w-3.5 h-3.5 text-amber-400" />,
     ],
   },
   [Theme.FOREST]: {
@@ -148,10 +148,10 @@ export const THEME_REGISTRY: Record<ThemeType, ThemeMeta> = {
     defaultWallpaper: 'forest',
     accentColor: 'emerald',
     previewIcons: [
-      <Scroll key="1" className="w-3.5 h-3.5 text-amber-400" />,
-      <Compass key="2" className="w-3.5 h-3.5 text-emerald-400" />,
-      <Feather key="3" className="w-3.5 h-3.5 text-teal-400" />,
-      <TreePine key="4" className="w-3.5 h-3.5 text-lime-400" />,
+      <Scroll key="prev-forest-0" className="w-3.5 h-3.5 text-amber-400" />,
+      <Compass key="prev-forest-1" className="w-3.5 h-3.5 text-emerald-400" />,
+      <Feather key="prev-forest-2" className="w-3.5 h-3.5 text-teal-400" />,
+      <TreePine key="prev-forest-3" className="w-3.5 h-3.5 text-lime-400" />,
     ],
   },
   [Theme.SUNSET]: {
@@ -167,10 +167,10 @@ export const THEME_REGISTRY: Record<ThemeType, ThemeMeta> = {
     defaultWallpaper: 'sunset',
     accentColor: 'orange',
     previewIcons: [
-      <Coins key="1" className="w-3.5 h-3.5 text-amber-400" />,
-      <Hourglass key="2" className="w-3.5 h-3.5 text-orange-400" />,
-      <Flame key="3" className="w-3.5 h-3.5 text-rose-400" />,
-      <Aperture key="4" className="w-3.5 h-3.5 text-yellow-400" />,
+      <Coins key="prev-sunset-0" className="w-3.5 h-3.5 text-amber-400" />,
+      <Hourglass key="prev-sunset-1" className="w-3.5 h-3.5 text-orange-400" />,
+      <Flame key="prev-sunset-2" className="w-3.5 h-3.5 text-rose-400" />,
+      <Aperture key="prev-sunset-3" className="w-3.5 h-3.5 text-yellow-400" />,
     ],
   },
   [Theme.NORDIC]: {
@@ -186,10 +186,10 @@ export const THEME_REGISTRY: Record<ThemeType, ThemeMeta> = {
     defaultWallpaper: 'nordic',
     accentColor: 'sky',
     previewIcons: [
-      <Files key="1" className="w-3.5 h-3.5 text-sky-300" />,
-      <Timer key="2" className="w-3.5 h-3.5 text-cyan-300" />,
-      <CheckSquare2 key="3" className="w-3.5 h-3.5 text-indigo-300" />,
-      <Grid key="4" className="w-3.5 h-3.5 text-blue-300" />,
+      <Files key="prev-nordic-0" className="w-3.5 h-3.5 text-sky-300" />,
+      <Timer key="prev-nordic-1" className="w-3.5 h-3.5 text-cyan-300" />,
+      <CheckSquare2 key="prev-nordic-2" className="w-3.5 h-3.5 text-indigo-300" />,
+      <Grid key="prev-nordic-3" className="w-3.5 h-3.5 text-blue-300" />,
     ],
   },
   [Theme.RETRO]: {
@@ -205,10 +205,10 @@ export const THEME_REGISTRY: Record<ThemeType, ThemeMeta> = {
     defaultWallpaper: 'retro',
     accentColor: 'stone',
     previewIcons: [
-      <Printer key="1" className="w-3.5 h-3.5 text-stone-300" />,
-      <AlarmClock key="2" className="w-3.5 h-3.5 text-amber-300" />,
-      <Pencil key="3" className="w-3.5 h-3.5 text-sky-300" />,
-      <Wrench key="4" className="w-3.5 h-3.5 text-emerald-300" />,
+      <Printer key="prev-retro-0" className="w-3.5 h-3.5 text-stone-300" />,
+      <AlarmClock key="prev-retro-1" className="w-3.5 h-3.5 text-amber-300" />,
+      <Pencil key="prev-retro-2" className="w-3.5 h-3.5 text-sky-300" />,
+      <Wrench key="prev-retro-3" className="w-3.5 h-3.5 text-emerald-300" />,
     ],
   },
   [Theme.NEBULA]: {
@@ -224,10 +224,10 @@ export const THEME_REGISTRY: Record<ThemeType, ThemeMeta> = {
     defaultWallpaper: 'nebula',
     accentColor: 'violet',
     previewIcons: [
-      <Rocket key="1" className="w-3.5 h-3.5 text-violet-400" />,
-      <Orbit key="2" className="w-3.5 h-3.5 text-cyan-400" />,
-      <Telescope key="3" className="w-3.5 h-3.5 text-fuchsia-400" />,
-      <Sparkles key="4" className="w-3.5 h-3.5 text-pink-300" />,
+      <Rocket key="prev-nebula-0" className="w-3.5 h-3.5 text-violet-400" />,
+      <Orbit key="prev-nebula-1" className="w-3.5 h-3.5 text-cyan-400" />,
+      <Telescope key="prev-nebula-2" className="w-3.5 h-3.5 text-fuchsia-400" />,
+      <Sparkles key="prev-nebula-3" className="w-3.5 h-3.5 text-pink-300" />,
     ],
   },
   [Theme.ROSE]: {
@@ -243,10 +243,10 @@ export const THEME_REGISTRY: Record<ThemeType, ThemeMeta> = {
     defaultWallpaper: 'rose',
     accentColor: 'rose',
     previewIcons: [
-      <Sparkle key="1" className="w-3.5 h-3.5 text-rose-300" />,
-      <CalendarHeart key="2" className="w-3.5 h-3.5 text-pink-300" />,
-      <PenTool key="3" className="w-3.5 h-3.5 text-amber-300" />,
-      <Layers2 key="4" className="w-3.5 h-3.5 text-purple-300" />,
+      <Sparkle key="prev-rose-0" className="w-3.5 h-3.5 text-rose-300" />,
+      <CalendarHeart key="prev-rose-1" className="w-3.5 h-3.5 text-pink-300" />,
+      <PenTool key="prev-rose-2" className="w-3.5 h-3.5 text-amber-300" />,
+      <Layers2 key="prev-rose-3" className="w-3.5 h-3.5 text-purple-300" />,
     ],
   },
 };

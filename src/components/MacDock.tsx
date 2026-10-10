@@ -168,7 +168,7 @@ export const MacDock: React.FC<MacDockProps> = ({
             const isHovered = hoveredIdx === idx;
             return (
               <button
-                key={`${item.id}-${idx}`}
+                key={`dock-item-${item.id}-${idx}`}
                 onClick={() => {
                   playSoftPop();
                   item.onClick();
@@ -228,7 +228,7 @@ export const MacDock: React.FC<MacDockProps> = ({
         <div className="apple-dock-reflection flex items-center justify-center gap-1.5 sm:gap-3 px-3 sm:px-5 pointer-events-none">
           {dockItems.map((item, idx) => (
             <div
-              key={`refl-${item.id}-${idx}`}
+              key={`dock-refl-${item.id}-${idx}`}
               className={`w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr ${item.gradient} opacity-30`}
             />
           ))}

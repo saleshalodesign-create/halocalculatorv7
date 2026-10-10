@@ -34,7 +34,6 @@ interface MacMenuBarProps {
   onOpenPdfEditor?: () => void;
   onOpenPdfTools?: (tab?: 'join' | 'split') => void;
   onOpenImageConverter?: () => void;
-  onOpenAiModal?: () => void;
   shapeType?: 'horizontal' | 'vertical' | 'square' | 'invalid';
   shapeLabel?: string;
 }
@@ -48,7 +47,6 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
   onOpenAuth,
   onOpenMobileApp,
   onOpenMathCalc,
-  onOpenAiModal,
 }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const [timeString, setTimeString] = useState('');
@@ -120,16 +118,6 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
               >
                 <Calculator className="w-3.5 h-3.5 text-amber-500" />
                 <span>{t.nav.calculatorBtn}</span>
-              </button>
-            )}
-            {onOpenAiModal && (
-              <button
-                onClick={onOpenAiModal}
-                className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors flex items-center gap-1 font-semibold text-purple-600 dark:text-purple-400 text-[11px] sm:text-xs cursor-pointer"
-                title="Gemini AI Assistant & Multi-turn Chat"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-purple-500 animate-pulse" />
-                <span>{language === 'zh' ? 'Gemini 智能助手' : 'Gemini AI'}</span>
               </button>
             )}
           </div>
@@ -235,11 +223,11 @@ export const MacMenuBar: React.FC<MacMenuBarProps> = ({
                 </span>
               </div>
               <div className="py-1 space-y-1">
-                {themeOptions.map(opt => {
+                {themeOptions.map((opt, optIdx) => {
                   const isActive = opt.id === theme;
                   return (
                     <button
-                      key={opt.id}
+                      key={`theme-opt-${opt.id}-${optIdx}`}
                       type="button"
                       onClick={() => {
                         playSoftPop();

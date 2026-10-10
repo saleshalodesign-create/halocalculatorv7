@@ -10,6 +10,8 @@ import {
   Edit2,
 } from 'lucide-react';
 import { playGlassTap } from '../utils/soundEffects';
+import { Theme, ThemeType } from '../types';
+import { getColumnTheme, ProductColumnKey } from '../utils/columnThemes';
 
 interface MacPricingCardProps {
   title: string;
@@ -17,7 +19,7 @@ interface MacPricingCardProps {
   price: number;
   rate?: number;
   rateUnit?: string;
-  iconType: 'lightbox' | 'lightboxBacklit' | 'backlit' | 'trans' | 'printed3d' | 'vinylSticker' | 'ledStrip' | 'acrylic';
+  iconType: ProductColumnKey;
   iconBg?: string;
   isSelected?: boolean;
   onClick: () => void;
@@ -25,162 +27,8 @@ interface MacPricingCardProps {
   editTooltip?: string;
   isNightLit?: boolean;
   litColor?: 'warm' | 'neutral' | 'cool' | 'neon';
+  theme?: ThemeType;
 }
-
-const cardThemes: Record<MacPricingCardProps['iconType'], {
-  selectedDarkBg: string;
-  selectedDarkBorder: string;
-  selectedDarkShadow: string;
-  selectedPriceText: string;
-  selectedTitleText: string;
-  selectedLightBg: string;
-  selectedLightBorder: string;
-  hoverBorder: string;
-  hoverPriceText: string;
-  hoverTitleText: string;
-  hoverBgDark: string;
-  hoverBgLight: string;
-  lightBg: string;
-  lightBorder: string;
-  lightRateBadge: string;
-}> = {
-  lightbox: {
-    selectedDarkBg: 'dark:bg-amber-950/40',
-    selectedDarkBorder: 'dark:border-amber-400',
-    selectedDarkShadow: 'dark:shadow-[0_0_24px_rgba(245,158,11,0.35)]',
-    selectedPriceText: 'text-amber-600 dark:text-amber-400',
-    selectedTitleText: 'text-amber-700 dark:text-amber-300',
-    selectedLightBg: 'bg-amber-50/95',
-    selectedLightBorder: 'border-amber-400',
-    hoverBorder: 'hover:border-amber-500/70 dark:hover:border-amber-400/70',
-    hoverPriceText: 'group-hover:text-amber-600 dark:group-hover:text-amber-400',
-    hoverTitleText: 'group-hover:text-amber-700 dark:group-hover:text-amber-300',
-    hoverBgDark: 'dark:hover:bg-[#141224]',
-    hoverBgLight: 'hover:bg-amber-50/60',
-    lightBg: 'bg-slate-100/95',
-    lightBorder: 'border-slate-200/90',
-    lightRateBadge: 'bg-slate-200/85 hover:bg-amber-100/80 border-slate-300/90 hover:border-amber-300',
-  },
-  lightboxBacklit: {
-    selectedDarkBg: 'dark:bg-rose-950/40',
-    selectedDarkBorder: 'dark:border-rose-400',
-    selectedDarkShadow: 'dark:shadow-[0_0_24px_rgba(244,63,94,0.35)]',
-    selectedPriceText: 'text-rose-600 dark:text-rose-400',
-    selectedTitleText: 'text-rose-700 dark:text-rose-300',
-    selectedLightBg: 'bg-rose-50/95',
-    selectedLightBorder: 'border-rose-400',
-    hoverBorder: 'hover:border-rose-500/70 dark:hover:border-rose-400/70',
-    hoverPriceText: 'group-hover:text-rose-600 dark:group-hover:text-rose-400',
-    hoverTitleText: 'group-hover:text-rose-700 dark:group-hover:text-rose-300',
-    hoverBgDark: 'dark:hover:bg-[#1a0f2b]',
-    hoverBgLight: 'hover:bg-rose-50/60',
-    lightBg: 'bg-slate-100/95',
-    lightBorder: 'border-slate-200/90',
-    lightRateBadge: 'bg-slate-200/85 hover:bg-rose-100/80 border-slate-300/90 hover:border-rose-300',
-  },
-  backlit: {
-    selectedDarkBg: 'dark:bg-blue-950/40',
-    selectedDarkBorder: 'dark:border-blue-400',
-    selectedDarkShadow: 'dark:shadow-[0_0_24px_rgba(59,130,246,0.35)]',
-    selectedPriceText: 'text-blue-600 dark:text-blue-400',
-    selectedTitleText: 'text-blue-700 dark:text-blue-300',
-    selectedLightBg: 'bg-blue-50/95',
-    selectedLightBorder: 'border-blue-400',
-    hoverBorder: 'hover:border-blue-500/70 dark:hover:border-blue-400/70',
-    hoverPriceText: 'group-hover:text-blue-600 dark:group-hover:text-blue-400',
-    hoverTitleText: 'group-hover:text-blue-700 dark:group-hover:text-blue-300',
-    hoverBgDark: 'dark:hover:bg-[#0b1536]',
-    hoverBgLight: 'hover:bg-blue-50/60',
-    lightBg: 'bg-slate-100/95',
-    lightBorder: 'border-slate-200/90',
-    lightRateBadge: 'bg-slate-200/85 hover:bg-blue-100/80 border-slate-300/90 hover:border-blue-300',
-  },
-  trans: {
-    selectedDarkBg: 'dark:bg-indigo-950/40',
-    selectedDarkBorder: 'dark:border-indigo-400',
-    selectedDarkShadow: 'dark:shadow-[0_0_24px_rgba(99,102,241,0.35)]',
-    selectedPriceText: 'text-indigo-600 dark:text-indigo-400',
-    selectedTitleText: 'text-indigo-700 dark:text-indigo-300',
-    selectedLightBg: 'bg-indigo-50/95',
-    selectedLightBorder: 'border-indigo-400',
-    hoverBorder: 'hover:border-indigo-500/70 dark:hover:border-indigo-400/70',
-    hoverPriceText: 'group-hover:text-indigo-600 dark:group-hover:text-indigo-400',
-    hoverTitleText: 'group-hover:text-indigo-700 dark:group-hover:text-indigo-300',
-    hoverBgDark: 'dark:hover:bg-[#0f143a]',
-    hoverBgLight: 'hover:bg-indigo-50/60',
-    lightBg: 'bg-slate-100/95',
-    lightBorder: 'border-slate-200/90',
-    lightRateBadge: 'bg-slate-200/85 hover:bg-indigo-100/80 border-slate-300/90 hover:border-indigo-300',
-  },
-  printed3d: {
-    selectedDarkBg: 'dark:bg-orange-950/40',
-    selectedDarkBorder: 'dark:border-orange-400',
-    selectedDarkShadow: 'dark:shadow-[0_0_24px_rgba(249,115,22,0.35)]',
-    selectedPriceText: 'text-orange-600 dark:text-orange-400',
-    selectedTitleText: 'text-orange-700 dark:text-orange-300',
-    selectedLightBg: 'bg-orange-50/95',
-    selectedLightBorder: 'border-orange-400',
-    hoverBorder: 'hover:border-orange-500/70 dark:hover:border-orange-400/70',
-    hoverPriceText: 'group-hover:text-orange-600 dark:group-hover:text-orange-400',
-    hoverTitleText: 'group-hover:text-orange-700 dark:group-hover:text-orange-300',
-    hoverBgDark: 'dark:hover:bg-[#171328]',
-    hoverBgLight: 'hover:bg-orange-50/60',
-    lightBg: 'bg-slate-100/95',
-    lightBorder: 'border-slate-200/90',
-    lightRateBadge: 'bg-slate-200/85 hover:bg-orange-100/80 border-slate-300/90 hover:border-orange-300',
-  },
-  vinylSticker: {
-    selectedDarkBg: 'dark:bg-fuchsia-950/40',
-    selectedDarkBorder: 'dark:border-fuchsia-400',
-    selectedDarkShadow: 'dark:shadow-[0_0_24px_rgba(217,70,239,0.35)]',
-    selectedPriceText: 'text-fuchsia-600 dark:text-fuchsia-400',
-    selectedTitleText: 'text-fuchsia-700 dark:text-fuchsia-300',
-    selectedLightBg: 'bg-fuchsia-50/95',
-    selectedLightBorder: 'border-fuchsia-400',
-    hoverBorder: 'hover:border-fuchsia-500/70 dark:hover:border-fuchsia-400/70',
-    hoverPriceText: 'group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400',
-    hoverTitleText: 'group-hover:text-fuchsia-700 dark:group-hover:text-fuchsia-300',
-    hoverBgDark: 'dark:hover:bg-[#1b0d2e]',
-    hoverBgLight: 'hover:bg-fuchsia-50/60',
-    lightBg: 'bg-slate-100/95',
-    lightBorder: 'border-slate-200/90',
-    lightRateBadge: 'bg-slate-200/85 hover:bg-fuchsia-100/80 border-slate-300/90 hover:border-fuchsia-300',
-  },
-  ledStrip: {
-    selectedDarkBg: 'dark:bg-emerald-950/40',
-    selectedDarkBorder: 'dark:border-emerald-400',
-    selectedDarkShadow: 'dark:shadow-[0_0_24px_rgba(16,185,129,0.35)]',
-    selectedPriceText: 'text-emerald-600 dark:text-emerald-400',
-    selectedTitleText: 'text-emerald-700 dark:text-emerald-300',
-    selectedLightBg: 'bg-emerald-50/95',
-    selectedLightBorder: 'border-emerald-400',
-    hoverBorder: 'hover:border-emerald-500/70 dark:hover:border-emerald-400/70',
-    hoverPriceText: 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400',
-    hoverTitleText: 'group-hover:text-emerald-700 dark:group-hover:text-emerald-300',
-    hoverBgDark: 'dark:hover:bg-[#081829]',
-    hoverBgLight: 'hover:bg-emerald-50/60',
-    lightBg: 'bg-slate-100/95',
-    lightBorder: 'border-slate-200/90',
-    lightRateBadge: 'bg-slate-200/85 hover:bg-emerald-100/80 border-slate-300/90 hover:border-emerald-300',
-  },
-  acrylic: {
-    selectedDarkBg: 'dark:bg-teal-950/40',
-    selectedDarkBorder: 'dark:border-teal-400',
-    selectedDarkShadow: 'dark:shadow-[0_0_24px_rgba(20,184,166,0.35)]',
-    selectedPriceText: 'text-teal-600 dark:text-teal-400',
-    selectedTitleText: 'text-teal-700 dark:text-teal-300',
-    selectedLightBg: 'bg-teal-50/95',
-    selectedLightBorder: 'border-teal-400',
-    hoverBorder: 'hover:border-teal-500/70 dark:hover:border-teal-400/70',
-    hoverPriceText: 'group-hover:text-teal-600 dark:group-hover:text-teal-400',
-    hoverTitleText: 'group-hover:text-teal-700 dark:group-hover:text-teal-300',
-    hoverBgDark: 'dark:hover:bg-[#07192e]',
-    hoverBgLight: 'hover:bg-teal-50/60',
-    lightBg: 'bg-slate-100/95',
-    lightBorder: 'border-slate-200/90',
-    lightRateBadge: 'bg-slate-200/85 hover:bg-teal-100/80 border-slate-300/90 hover:border-teal-300',
-  },
-};
 
 const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
   title,
@@ -189,13 +37,14 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
   rate,
   rateUnit = '/SQ FT',
   iconType,
-  iconBg = "bg-gradient-to-tr from-blue-600 to-indigo-500",
+  iconBg,
   isSelected = false,
   onClick,
   onRateChange,
   editTooltip = "Click to edit rate",
   isNightLit = false,
   litColor = 'warm',
+  theme: activeTheme = Theme.DARK,
 }) => {
   const [localRate, setLocalRate] = useState<string>(rate !== undefined ? rate.toString() : '');
   const [isClicked, setIsClicked] = useState<boolean>(false);
@@ -204,7 +53,10 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [ripples, setRipples] = useState<Array<{ id: string; x: number; y: number }>>([]);
   const cardRef = useRef<HTMLDivElement>(null);
-  const theme = cardThemes[iconType] || cardThemes.lightbox;
+
+  // Column theme styling dynamically derived from the active theme
+  const colTheme = getColumnTheme(activeTheme, iconType);
+  const effectiveIconBg = iconBg || colTheme.iconBg;
 
   const isLit = isSelected || isClicked;
 
@@ -336,10 +188,17 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
         isNightLit
           ? `${getLitAuraClasses()} border-2 text-white`
           : isLit
-          ? `${theme.selectedLightBg} ${theme.selectedDarkBg} border-2 ${theme.selectedLightBorder} ${theme.selectedDarkBorder} ${theme.selectedDarkShadow} glass-rainbow-rim ring-2 ring-current/20 shadow-lg`
-          : `apple-card-glass ${theme.hoverBorder}`
+          ? `${colTheme.selectedLightBg} ${colTheme.selectedDarkBg} border-2 ${colTheme.selectedLightBorder} ${colTheme.selectedDarkBorder} ${colTheme.selectedDarkShadow} glass-rainbow-rim ring-2 ring-current/20 shadow-lg`
+          : `apple-card-glass border ${colTheme.border} ${colTheme.hoverBorder} ${colTheme.hoverBgDark} ${colTheme.hoverBgLight} shadow-sm`
       }`}
     >
+      {/* Subtle Ambient Theme Column Glow */}
+      {!isNightLit && (
+        <div
+          className={`pointer-events-none absolute -right-6 -bottom-6 w-24 h-24 rounded-full opacity-15 dark:opacity-25 blur-2xl transition-all ${effectiveIconBg}`}
+        />
+      )}
+
       {/* Interactive Cursor Spotlight Sheen */}
       <div
         className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[inherit] z-0"
@@ -368,7 +227,7 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
       <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 min-w-0 relative z-10">
         <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-1">
           <div
-            className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 rounded-lg ${iconBg} text-white flex items-center justify-center shadow-sm shrink-0 transition-all ${
+            className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-9 lg:h-9 rounded-lg ${effectiveIconBg} text-white flex items-center justify-center shadow-sm shrink-0 transition-all ${
               isNightLit
                 ? 'scale-110 shadow-lg ring-2 ring-white/60 drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] animate-pulse'
                 : isLit
@@ -383,16 +242,14 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
               className={`font-extrabold text-[11px] sm:text-xs lg:text-sm tracking-tight leading-snug truncate transition-colors ${
                 isNightLit
                   ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                  : isLit
-                  ? `${theme.selectedTitleText}`
-                  : `text-black dark:text-white ${theme.hoverTitleText}`
+                  : `${colTheme.selectedTitleText}`
               }`}
             >
               {title}
             </h4>
             {subtitle && (
-              <span className={`block text-[8px] sm:text-[9px] font-bold tracking-wider uppercase truncate ${
-                isNightLit ? 'text-white/80' : 'text-slate-500 dark:text-neutral-400'
+              <span className={`block text-[8px] sm:text-[9px] font-bold tracking-wider uppercase truncate opacity-75 ${
+                isNightLit ? 'text-white/80' : `${colTheme.selectedTitleText}`
               }`}>
                 {subtitle}
               </span>
@@ -405,15 +262,15 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
       </div>
 
       {/* Bottom Row: Rate Badge & Total Price */}
-      <div className="mt-1.5 sm:mt-2 pt-1 sm:pt-1.5 flex items-center justify-between gap-1 flex-nowrap border-t border-black/5 dark:border-indigo-500/15">
+      <div className={`mt-1.5 sm:mt-2 pt-1 sm:pt-1.5 flex items-center justify-between gap-1 flex-nowrap border-t border-black/10 dark:border-white/10 ${colTheme.border}`}>
         {/* Editable Rate Pill ($ 35 /SQ FT) */}
         {rate !== undefined ? (
           <div
             onClick={e => e.stopPropagation()}
-            className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-md ${theme.lightRateBadge} dark:bg-[#050817] border dark:border-indigo-500/25 hover:border-cyan-400/60 focus-within:border-cyan-500 shadow-sm shrink-0 transition-colors group/rate cursor-text`}
+            className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 rounded-md ${colTheme.badge} border shadow-xs shrink-0 transition-colors group/rate cursor-text`}
             title={editTooltip}
           >
-            <span className="text-[8px] sm:text-[10px] font-bold text-slate-800 dark:text-neutral-400 select-none">$</span>
+            <span className="text-[8px] sm:text-[10px] font-bold opacity-80 select-none">$</span>
             {onRateChange ? (
               <input
                 type="number"
@@ -433,14 +290,14 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
                   width: `${Math.max(2, (localRate || '').length) + 0.5}ch`,
                   minWidth: '18px',
                 }}
-                className="text-center text-[9px] sm:text-[11px] font-black text-black dark:text-white bg-transparent outline-none border-b border-transparent focus:border-blue-500 hover:border-slate-400 dark:hover:border-white/30 transition-colors font-mono p-0"
+                className="text-center text-[9px] sm:text-[11px] font-black text-current bg-transparent outline-none border-b border-transparent focus:border-current hover:border-current/40 transition-colors font-mono p-0"
                 title={editTooltip}
               />
             ) : (
-              <span className="text-[9px] sm:text-[11px] font-black text-black dark:text-white font-mono">{rate}</span>
+              <span className="text-[9px] sm:text-[11px] font-black text-current font-mono">{rate}</span>
             )}
-            <span className="text-[7.5px] sm:text-[9px] font-bold text-slate-700 dark:text-neutral-400 tracking-tight uppercase select-none">{rateUnit}</span>
-            <Edit2 className="w-2 h-2 text-slate-500 dark:text-neutral-500 group-hover/rate:text-blue-600 dark:group-hover/rate:text-blue-400 opacity-75 group-hover/rate:opacity-100 transition-opacity hidden sm:inline shrink-0" />
+            <span className="text-[7.5px] sm:text-[9px] font-bold opacity-85 tracking-tight uppercase select-none">{rateUnit}</span>
+            <Edit2 className="w-2 h-2 opacity-75 group-hover/rate:opacity-100 transition-opacity hidden sm:inline shrink-0" />
           </div>
         ) : (
           <div />
@@ -451,9 +308,7 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
           className={`font-black font-mono tracking-tight transition-colors whitespace-nowrap shrink-0 text-right ${
             isNightLit
               ? 'text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]'
-              : isLit
-              ? `${theme.selectedPriceText}`
-              : `text-black dark:text-white ${theme.hoverPriceText}`
+              : `${colTheme.selectedPriceText}`
           } ${
             formattedPrice.length > 7
               ? 'text-xs sm:text-sm lg:text-base'

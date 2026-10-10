@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { QuoteItem, RatesConfig } from '../types';
+import { QuoteItem, RatesConfig, Theme, ThemeType } from '../types';
 import { copyToClipboard } from '../utils/clipboard';
 import { useLanguage } from '../context/LanguageContext';
 import { Check, Plus, Copy, ChevronDown, ChevronUp, Calculator } from 'lucide-react';
+import { getColumnTheme, ProductColumnKey } from '../utils/columnThemes';
 
 interface QuotationModalProps {
   isOpen: boolean;
@@ -10,18 +11,8 @@ interface QuotationModalProps {
   onClose: () => void;
   onAddToQuote: (item?: QuoteItem) => void;
   rates?: RatesConfig;
+  theme?: ThemeType;
 }
-
-const itemColorMap: Record<string, { badge: string; border: string }> = {
-  lightbox: { badge: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30', border: 'border-amber-500/30' },
-  lightboxBacklit: { badge: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30', border: 'border-rose-500/30' },
-  backlit: { badge: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30', border: 'border-blue-500/30' },
-  trans: { badge: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30', border: 'border-indigo-500/30' },
-  printed3d: { badge: 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30', border: 'border-orange-500/30' },
-  vinylSticker: { badge: 'bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/30', border: 'border-fuchsia-500/30' },
-  ledStrip: { badge: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30', border: 'border-emerald-500/30' },
-  acrylic: { badge: 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30', border: 'border-teal-500/30' },
-};
 
 export const QuotationModal: React.FC<QuotationModalProps> = ({
   isOpen,
@@ -29,6 +20,7 @@ export const QuotationModal: React.FC<QuotationModalProps> = ({
   onClose,
   onAddToQuote,
   rates,
+  theme = Theme.DARK,
 }) => {
   const { language, t } = useLanguage();
   const [isAdded, setIsAdded] = useState(false);
@@ -48,7 +40,7 @@ export const QuotationModal: React.FC<QuotationModalProps> = ({
 
   if (!isOpen || !data) return null;
 
-  const itemColor = data.priceKey ? itemColorMap[data.priceKey] : null;
+  const itemColor = data.priceKey ? getColumnTheme(theme, data.priceKey as ProductColumnKey) : null;
 
   const currentPrice = parseFloat(editedPrice);
   const finalPrice = isNaN(currentPrice) ? 0 : currentPrice;

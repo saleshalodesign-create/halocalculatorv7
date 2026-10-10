@@ -367,7 +367,7 @@ export const GoogleAccountModal: React.FC<GoogleAccountModalProps> = ({
                       const isSelected = selectedEmail === acc.email;
                       return (
                         <div
-                          key={`${acc.email || 'acc'}-${acc.uid || idx}`}
+                          key={`acc-item-${acc.email || 'acc'}-${acc.uid || 'uid'}-${idx}`}
                           onClick={() => {
                             setSelectedEmail(acc.email);
                             setErrorMessage('');
