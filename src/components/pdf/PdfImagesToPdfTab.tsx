@@ -15,6 +15,8 @@ import {
   FileCheck,
   CheckCircle2,
 } from 'lucide-react';
+import { Theme, ThemeType } from '../../types';
+import { getModalThemeStyle } from '../../utils/columnThemes';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   convertImagesToPdf,
@@ -27,6 +29,7 @@ export interface PdfImagesToPdfTabProps {
   onOpenInEditor?: (pdfBytes: ArrayBuffer | Uint8Array, fileName: string) => void;
   onCloseModal: () => void;
   showToast: (msg: string) => void;
+  theme?: ThemeType;
 }
 
 interface ImageItem {
@@ -48,9 +51,11 @@ export const PdfImagesToPdfTab: React.FC<PdfImagesToPdfTabProps> = ({
   onOpenInEditor,
   onCloseModal,
   showToast,
+  theme = Theme.DARK,
 }) => {
   const { language } = useLanguage();
   const isZh = language === 'zh';
+  const modalTheme = getModalThemeStyle(theme);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<ImageItem[]>([]);
@@ -468,7 +473,7 @@ export const PdfImagesToPdfTab: React.FC<PdfImagesToPdfTabProps> = ({
                 type="button"
                 disabled={isProcessing}
                 onClick={() => handleGeneratePdf(false)}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-teal-500/25 flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all"
+                className={`w-full py-2.5 rounded-xl ${modalTheme.activeTabGradient} flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all text-white font-bold text-xs sm:text-sm`}
               >
                 {isProcessing ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />

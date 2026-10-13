@@ -3,7 +3,7 @@ import { QuoteItem, RatesConfig, Theme, ThemeType } from '../types';
 import { copyToClipboard } from '../utils/clipboard';
 import { useLanguage } from '../context/LanguageContext';
 import { Check, Plus, Copy, ChevronDown, ChevronUp, Calculator } from 'lucide-react';
-import { getColumnTheme, ProductColumnKey } from '../utils/columnThemes';
+import { getColumnTheme, getModalThemeStyle, ProductColumnKey } from '../utils/columnThemes';
 
 interface QuotationModalProps {
   isOpen: boolean;
@@ -23,6 +23,7 @@ export const QuotationModal: React.FC<QuotationModalProps> = ({
   theme = Theme.DARK,
 }) => {
   const { language, t } = useLanguage();
+  const modalTheme = getModalThemeStyle(theme);
   const [isAdded, setIsAdded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedFormula, setCopiedFormula] = useState(false);
@@ -127,8 +128,8 @@ export const QuotationModal: React.FC<QuotationModalProps> = ({
           itemColor ? itemColor.border : 'border-slate-200/90 dark:border-indigo-500/25'
         } overflow-hidden flex flex-col max-h-[90dvh] transition-all`}
       >
-        {/* Ambient Cyber Neon Crown Accent */}
-        <div className="h-[2px] w-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 opacity-90 shrink-0"></div>
+        {/* Ambient Theme Crown Accent */}
+        <div className={`h-[2px] w-full ${modalTheme.crownGradient} opacity-90 shrink-0`}></div>
 
         {/* macOS Modal Titlebar */}
         <div className="h-9 sm:h-10 px-3 sm:px-4 bg-slate-50 dark:bg-[#0c122c] border-b border-slate-200/90 dark:border-indigo-500/20 flex items-center justify-between shrink-0">
@@ -319,20 +320,20 @@ export const QuotationModal: React.FC<QuotationModalProps> = ({
           </div>
 
           {/* Unit Price Input */}
-          <div className="p-2.5 sm:p-3.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 flex items-center justify-between">
+          <div className="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 flex items-center justify-between">
             <div>
               <span className="text-xs font-bold text-slate-800 dark:text-neutral-300">{t.quotationModal.unitPrice}</span>
               <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-neutral-400">{t.quotationModal.editable}</p>
             </div>
-            <div className="flex items-center gap-1 bg-white dark:bg-[#070b19] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-blue-300/80 dark:border-indigo-500/30 shadow-sm">
-              <span className="text-base sm:text-lg font-bold font-mono text-blue-600 dark:text-cyan-400">$</span>
+            <div className="flex items-center gap-1 bg-white dark:bg-[#070b19] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-slate-300/80 dark:border-white/15 shadow-sm">
+              <span className={`text-base sm:text-lg font-bold font-mono ${modalTheme.accentText}`}>$</span>
               <input
                 type="number"
                 step="any"
                 min="0"
                 value={editedPrice}
                 onChange={e => setEditedPrice(e.target.value)}
-                className="w-20 sm:w-24 text-base sm:text-xl font-black font-mono text-blue-600 dark:text-cyan-300 bg-transparent outline-none"
+                className={`w-20 sm:w-24 text-base sm:text-xl font-black font-mono ${modalTheme.accentText} bg-transparent outline-none`}
                 placeholder="0.00"
               />
             </div>
@@ -342,8 +343,8 @@ export const QuotationModal: React.FC<QuotationModalProps> = ({
           <div className="grid grid-cols-2 gap-2 pt-1 sm:pt-2 shrink-0">
             <button
               onClick={handleAdd}
-              className={`py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 ${
-                isAdded ? 'bg-emerald-600 text-white' : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-blue-500/25'
+              className={`py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
+                isAdded ? 'bg-emerald-600 text-white' : modalTheme.addBtn
               }`}
             >
               {isAdded ? (

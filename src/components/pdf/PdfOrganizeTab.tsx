@@ -17,6 +17,8 @@ import {
   Eye,
   Layers,
 } from 'lucide-react';
+import { Theme, ThemeType } from '../../types';
+import { getModalThemeStyle } from '../../utils/columnThemes';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   organizePdfDocument,
@@ -31,6 +33,7 @@ export interface PdfOrganizeTabProps {
   onOpenInEditor?: (pdfBytes: ArrayBuffer | Uint8Array, fileName: string) => void;
   onCloseModal: () => void;
   showToast: (msg: string) => void;
+  theme?: ThemeType;
 }
 
 interface PageItem {
@@ -51,9 +54,11 @@ export const PdfOrganizeTab: React.FC<PdfOrganizeTabProps> = ({
   onOpenInEditor,
   onCloseModal,
   showToast,
+  theme = Theme.DARK,
 }) => {
   const { language } = useLanguage();
   const isZh = language === 'zh';
+  const modalTheme = getModalThemeStyle(theme);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileBytes, setFileBytes] = useState<Uint8Array | null>(null);
@@ -576,7 +581,7 @@ export const PdfOrganizeTab: React.FC<PdfOrganizeTabProps> = ({
                 type="button"
                 disabled={isProcessing}
                 onClick={() => handleExport(false)}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-500/25 flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
+                className={`px-5 py-2 rounded-xl ${modalTheme.activeTabGradient} flex items-center gap-2 cursor-pointer active:scale-95 transition-all text-white font-bold text-xs sm:text-sm`}
               >
                 {isProcessing ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />

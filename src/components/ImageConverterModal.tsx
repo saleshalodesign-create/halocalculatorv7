@@ -48,12 +48,15 @@ import {
   copyImageBlobToClipboard,
   copyTextToClipboard,
 } from '../utils/imageConverter';
+import { Theme, ThemeType } from '../types';
+import { getModalThemeStyle } from '../utils/columnThemes';
 import { useLanguage } from '../context/LanguageContext';
 
 export interface ImageConverterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenInEditor?: (bytes: ArrayBuffer | Uint8Array, fileName: string) => void;
+  theme?: ThemeType;
 }
 
 interface QueuedImageItem {
@@ -72,9 +75,11 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
   isOpen,
   onClose,
   onOpenInEditor,
+  theme = Theme.DARK,
 }) => {
   const { language } = useLanguage();
   const isZh = language === 'zh';
+  const modalTheme = getModalThemeStyle(theme);
 
   // Active view: 'batch' or 'compare'
   const [activeView, setActiveView] = useState<'batch' | 'compare'>('batch');
@@ -508,8 +513,11 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="apple-liquid-glass relative w-full max-w-6xl max-h-[94vh] flex flex-col rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden text-slate-100"
+          className={`apple-liquid-glass relative w-full max-w-6xl max-h-[94vh] flex flex-col rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden text-slate-100 border border-slate-700/60 dark:${modalTheme.modalBorder}`}
         >
+          {/* Theme Crown Top Accent */}
+          <div className={`h-[2.5px] w-full ${modalTheme.crownGradient} opacity-90 shrink-0`}></div>
+
           {/* macOS Style Window Titlebar */}
           <div className="flex items-center justify-between px-4 py-3 bg-white/40 dark:bg-white/[0.04] backdrop-blur-xl border-b border-white/50 dark:border-white/10 select-none">
             {/* Traffic Lights */}
@@ -528,7 +536,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
 
             {/* Window Title */}
             <div className="flex items-center gap-2 font-bold text-sm sm:text-base text-white">
-              <span className="p-1.5 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-500/25">
+              <span className={`p-1.5 rounded-lg ${modalTheme.iconBgGradient} text-white shadow-md`}>
                 <ImageIcon className="w-4 h-4" />
               </span>
               <span>
@@ -556,7 +564,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                 onClick={() => setActiveView('batch')}
                 className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                   activeView === 'batch'
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md'
+                    ? `${modalTheme.activeTabGradient} shadow-md`
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
@@ -574,7 +582,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                 onClick={() => setActiveView('compare')}
                 className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                   activeView === 'compare'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                    ? `${modalTheme.activeTabGradient} shadow-md`
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
@@ -584,12 +592,12 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-cyan-400/90 font-mono hidden sm:flex items-center gap-1">
-                <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
+              <span className={`text-[11px] ${modalTheme.accentText} font-mono hidden sm:flex items-center gap-1`}>
+                <Smartphone className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                 <span>{isZh ? '支持 iPhone HEIC / HEIF 原图解析' : 'iPhone HEIC / HEIF supported'}</span>
               </span>
               {toastMsg && (
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-500/40 animate-pulse">
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-900 ${modalTheme.accentText} border ${modalTheme.modalBorder} animate-pulse`}>
                   {toastMsg}
                 </span>
               )}
@@ -607,7 +615,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                   onClick={() => setSidebarTab('format_resize')}
                   className={`flex-1 py-1.5 rounded-lg font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                     sidebarTab === 'format_resize'
-                      ? 'bg-cyan-600 text-white shadow-xs'
+                      ? `${modalTheme.primaryBtn} shadow-xs`
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -619,7 +627,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                   onClick={() => setSidebarTab('effects')}
                   className={`flex-1 py-1.5 rounded-lg font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                     sidebarTab === 'effects'
-                      ? 'bg-cyan-600 text-white shadow-xs'
+                      ? `${modalTheme.primaryBtn} shadow-xs`
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -631,7 +639,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                   onClick={() => setSidebarTab('watermark')}
                   className={`flex-1 py-1.5 rounded-lg font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                     sidebarTab === 'watermark'
-                      ? 'bg-cyan-600 text-white shadow-xs'
+                      ? `${modalTheme.primaryBtn} shadow-xs`
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -1302,7 +1310,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md shadow-cyan-600/25 cursor-pointer active:scale-95 transition-all"
+                        className={`px-3.5 py-2 rounded-xl ${modalTheme.activeTabGradient} hover:brightness-110 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all`}
                       >
                         <Plus className="w-4 h-4" />
                         <span>{isZh ? '选择图片添加...' : 'Add Images...'}</span>
@@ -1328,12 +1336,12 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                           type="button"
                           disabled={isProcessingAll}
                           onClick={handleConvertAll}
-                          className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md shadow-blue-600/30 cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+                          className={`px-4 py-2 rounded-xl ${modalTheme.primaryBtn} text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all disabled:opacity-50`}
                         >
                           {isProcessingAll ? (
                             <RefreshCw className="w-4 h-4 animate-spin" />
                           ) : (
-                            <Sparkles className="w-4 h-4 text-cyan-300" />
+                            <Sparkles className="w-4 h-4" />
                           )}
                           <span>{isZh ? '一键转换全部' : 'Convert All'}</span>
                         </button>

@@ -47,6 +47,8 @@ import {
   unlockPdfDocument,
   checkPdfEncryption,
 } from '../utils/pdfEditor';
+import { Theme, ThemeType } from '../types';
+import { getModalThemeStyle } from '../utils/columnThemes';
 import { useLanguage } from '../context/LanguageContext';
 import { PdfOrganizeTab } from './pdf/PdfOrganizeTab';
 import { PdfWatermarkTab } from './pdf/PdfWatermarkTab';
@@ -61,6 +63,7 @@ export interface PdfToolsModalProps {
   currentActivePdfBytes?: ArrayBuffer | Uint8Array | null;
   currentActivePdfName?: string;
   onOpenInEditor?: (pdfBytes: ArrayBuffer | Uint8Array, fileName: string) => void;
+  theme?: ThemeType;
 }
 
 const formatFileSize = (bytes: number): string => {
@@ -76,9 +79,11 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
   currentActivePdfBytes,
   currentActivePdfName = 'Current_Document.pdf',
   onOpenInEditor,
+  theme = Theme.DARK,
 }) => {
   const { language } = useLanguage();
   const isZh = language === 'zh';
+  const modalTheme = getModalThemeStyle(theme);
 
   const [activeTab, setActiveTab] = useState<PdfToolTab>(initialTab);
 
@@ -564,8 +569,11 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
           initial={{ opacity: 0, scale: 0.96, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 15 }}
-          className="apple-liquid-glass relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden text-slate-100"
+          className={`apple-liquid-glass relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden text-slate-100 border border-slate-700/60 dark:${modalTheme.modalBorder}`}
         >
+          {/* Theme Crown Gradient Accent */}
+          <div className={`h-[2.5px] w-full ${modalTheme.crownGradient} opacity-90 shrink-0`}></div>
+
           {/* macOS Style Window Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-white/40 dark:bg-white/[0.04] backdrop-blur-xl border-b border-white/50 dark:border-white/10 select-none">
             {/* Traffic Lights */}
@@ -584,21 +592,21 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
 
             {/* Modal Title */}
             <div className="flex items-center gap-2 font-bold text-sm sm:text-base text-white">
-              <span className="p-1 rounded-md bg-indigo-500/20 text-indigo-400">
+              <span className={`p-1.5 rounded-lg ${modalTheme.iconBgGradient} text-white shadow-xs`}>
                 {activeTab === 'join' ? (
-                  <Layers className="w-4 h-4 text-blue-400" />
+                  <Layers className="w-4 h-4" />
                 ) : activeTab === 'split' ? (
-                  <Scissors className="w-4 h-4 text-purple-400" />
+                  <Scissors className="w-4 h-4" />
                 ) : activeTab === 'organize' ? (
-                  <RotateCw className="w-4 h-4 text-indigo-400" />
+                  <RotateCw className="w-4 h-4" />
                 ) : activeTab === 'watermark' ? (
-                  <Stamp className="w-4 h-4 text-pink-400" />
+                  <Stamp className="w-4 h-4" />
                 ) : activeTab === 'img2pdf' ? (
-                  <ImageIcon className="w-4 h-4 text-teal-400" />
+                  <ImageIcon className="w-4 h-4" />
                 ) : activeTab === 'lock' ? (
-                  <Lock className="w-4 h-4 text-amber-400" />
+                  <Lock className="w-4 h-4" />
                 ) : (
-                  <Unlock className="w-4 h-4 text-emerald-400" />
+                  <Unlock className="w-4 h-4" />
                 )}
               </span>
               <span>
@@ -636,7 +644,7 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 onClick={() => setActiveTab('join')}
                 className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === 'join'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                    ? modalTheme.activeTabGradient
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
@@ -654,7 +662,7 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 onClick={() => setActiveTab('split')}
                 className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === 'split'
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                    ? modalTheme.activeTabGradient
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
@@ -667,11 +675,11 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 onClick={() => setActiveTab('organize')}
                 className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === 'organize'
-                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md'
+                    ? modalTheme.activeTabGradient
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
-                <RotateCw className="w-4 h-4 text-indigo-300" />
+                <RotateCw className="w-4 h-4" />
                 <span>{isZh ? '旋转/整理' : 'Organize'}</span>
               </button>
 
@@ -680,11 +688,11 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 onClick={() => setActiveTab('watermark')}
                 className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === 'watermark'
-                    ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-md'
+                    ? modalTheme.activeTabGradient
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
-                <Stamp className="w-4 h-4 text-pink-300" />
+                <Stamp className="w-4 h-4" />
                 <span>{isZh ? '加水印' : 'Watermark'}</span>
               </button>
 
@@ -693,11 +701,11 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 onClick={() => setActiveTab('img2pdf')}
                 className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === 'img2pdf'
-                    ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md'
+                    ? modalTheme.activeTabGradient
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
-                <ImageIcon className="w-4 h-4 text-teal-300" />
+                <ImageIcon className="w-4 h-4" />
                 <span>{isZh ? '图片转PDF' : 'Images to PDF'}</span>
               </button>
 
@@ -706,11 +714,11 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 onClick={() => setActiveTab('lock')}
                 className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === 'lock'
-                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md'
+                    ? modalTheme.activeTabGradient
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
-                <Lock className="w-4 h-4 text-amber-300" />
+                <Lock className="w-4 h-4" />
                 <span>{isZh ? '加密加锁' : 'Lock'}</span>
               </button>
 
@@ -719,11 +727,11 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 onClick={() => setActiveTab('unlock')}
                 className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === 'unlock'
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                    ? modalTheme.activeTabGradient
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
-                <Unlock className="w-4 h-4 text-emerald-300" />
+                <Unlock className="w-4 h-4" />
                 <span>{isZh ? '解密去锁' : 'Unlock'}</span>
               </button>
             </div>
@@ -928,7 +936,7 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                         type="button"
                         disabled={isMerging}
                         onClick={() => handleExecuteMerge(false)}
-                        className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-indigo-600/30 cursor-pointer disabled:opacity-50 active:scale-95 transition-all"
+                        className={`px-5 py-2 rounded-xl ${modalTheme.activeTabGradient} text-white font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95 transition-all`}
                       >
                         {isMerging ? (
                           <RefreshCw className="w-4 h-4 animate-spin" />
@@ -1208,7 +1216,7 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                           type="button"
                           disabled={isSplitting}
                           onClick={() => handleExecuteSplit(false)}
-                          className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-purple-600/30 cursor-pointer disabled:opacity-50 active:scale-95 transition-all"
+                          className={`px-5 py-2 rounded-xl ${modalTheme.activeTabGradient} text-white font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95 transition-all`}
                         >
                           {isSplitting ? (
                             <RefreshCw className="w-4 h-4 animate-spin" />
@@ -1755,6 +1763,7 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 onOpenInEditor={onOpenInEditor}
                 onCloseModal={onClose}
                 showToast={showToast}
+                theme={theme}
               />
             )}
 
@@ -1768,6 +1777,7 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 onOpenInEditor={onOpenInEditor}
                 onCloseModal={onClose}
                 showToast={showToast}
+                theme={theme}
               />
             )}
 
@@ -1779,6 +1789,7 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 onOpenInEditor={onOpenInEditor}
                 onCloseModal={onClose}
                 showToast={showToast}
+                theme={theme}
               />
             )}
           </div>

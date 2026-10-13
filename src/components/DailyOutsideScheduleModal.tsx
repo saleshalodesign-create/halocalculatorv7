@@ -27,7 +27,8 @@ import {
   generateDailyOutsideSchedulePDF,
   DailyScheduleEntry,
 } from '../utils/pdfGenerator';
-import { QuoteItem } from '../types';
+import { QuoteItem, Theme, ThemeType } from '../types';
+import { getModalThemeStyle } from '../utils/columnThemes';
 
 interface DailyOutsideScheduleModalProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ interface DailyOutsideScheduleModalProps {
   quoteItems?: QuoteItem[];
   currentCustomerName?: string;
   currentCustomerAddress?: string;
+  theme?: ThemeType;
 }
 
 type ViewMode = 'sheet' | 'editor' | 'split';
@@ -45,9 +47,11 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
   quoteItems = [],
   currentCustomerName = '',
   currentCustomerAddress = '',
+  theme = Theme.DARK,
 }) => {
   const { language, t } = useLanguage();
   const ds = t.dailySchedule;
+  const modalTheme = getModalThemeStyle(theme);
 
   // Format today's date in Singapore/standard DD/MM/YYYY
   const getTodayFormatted = () => {
@@ -351,10 +355,10 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
     <>
       {/* 1. Modal Dialog for App Screen */}
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-2 sm:p-4 print:hidden overflow-hidden">
-        <div className="relative w-full max-w-6xl h-[94vh] sm:h-[90vh] bg-white dark:bg-[#0a0f24] border border-slate-200/90 dark:border-indigo-500/25 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className={`relative w-full max-w-6xl h-[94vh] sm:h-[90vh] bg-white dark:bg-[#0a0f24] border border-slate-200/90 dark:${modalTheme.modalBorder} rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150`}>
           
-          {/* Ambient Cyber Neon Crown Accent */}
-          <div className="h-[2px] w-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 opacity-90 shrink-0"></div>
+          {/* Ambient Theme Crown Accent */}
+          <div className={`h-[2px] w-full ${modalTheme.crownGradient} opacity-90 shrink-0`}></div>
 
           {/* Floating Toast Notification */}
           {toastMessage && (
@@ -392,7 +396,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
               </div>
 
               <div className="flex items-center gap-1.5 ml-1 font-bold text-xs sm:text-sm text-slate-800 dark:text-neutral-100">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <FileSpreadsheet className={`w-4 h-4 ${modalTheme.accentText}`} />
                 <span>{ds.title}</span>
               </div>
             </div>
@@ -404,12 +408,12 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                 onClick={() => setViewMode('sheet')}
                 className={`px-3 py-1 rounded-md transition-all flex items-center gap-1.5 ${
                   viewMode === 'sheet'
-                    ? 'bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm font-bold'
+                    ? `bg-white dark:bg-white/20 ${modalTheme.activeTabText} shadow-sm font-bold`
                     : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
                 title="View full A4 printable sheet"
               >
-                <Eye className="w-3.5 h-3.5 text-blue-500" />
+                <Eye className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                 <span>{ds.fullSheet || 'Full Sheet (A4)'}</span>
               </button>
 
@@ -418,12 +422,12 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                 onClick={() => setViewMode('editor')}
                 className={`px-3 py-1 rounded-md transition-all flex items-center gap-1.5 ${
                   viewMode === 'editor'
-                    ? 'bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm font-bold'
+                    ? `bg-white dark:bg-white/20 ${modalTheme.activeTabText} shadow-sm font-bold`
                     : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
                 title="Edit field by field"
               >
-                <Edit3 className="w-3.5 h-3.5 text-emerald-500" />
+                <Edit3 className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                 <span>{ds.formEditor || 'Form Fields'}</span>
               </button>
 
@@ -432,12 +436,12 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                 onClick={() => setViewMode('split')}
                 className={`hidden lg:flex px-3 py-1 rounded-md transition-all items-center gap-1.5 ${
                   viewMode === 'split'
-                    ? 'bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm font-bold'
+                    ? `bg-white dark:bg-white/20 ${modalTheme.activeTabText} shadow-sm font-bold`
                     : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
                 title="Side by side view"
               >
-                <Columns className="w-3.5 h-3.5 text-purple-500" />
+                <Columns className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                 <span>{ds.splitView || 'Side-by-Side'}</span>
               </button>
             </div>
@@ -447,7 +451,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
               <button
                 type="button"
                 onClick={() => handlePrint(false)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-lg shadow-sm transition-all"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold ${modalTheme.primaryBtn} rounded-lg shadow-sm transition-all`}
                 title="Print or view A4 schedule in new tab"
               >
                 <Printer className="w-3.5 h-3.5" />
@@ -489,7 +493,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
             {/* Left: Date & Day controls */}
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="flex items-center bg-white dark:bg-[#050817] border border-slate-300 dark:border-indigo-500/25 rounded-lg px-2 py-1 shadow-xs">
-                <Calendar className="w-3.5 h-3.5 text-blue-500 mr-1.5 shrink-0" />
+                <Calendar className={`w-3.5 h-3.5 ${modalTheme.accentText} mr-1.5 shrink-0`} />
                 <input
                   type="text"
                   value={date}
@@ -506,7 +510,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
               <select
                 value={currentDay}
                 onChange={e => setDayOverride(e.target.value)}
-                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-blue-50 hover:bg-blue-100/80 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-cyan-300 border border-blue-200 dark:border-cyan-800/60 outline-none cursor-pointer transition-colors shadow-xs"
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg ${modalTheme.pillActive} outline-none cursor-pointer transition-colors shadow-xs`}
                 title="Day of week (Monday, Tuesday, Wednesday...)"
               >
                 <option value="">-- Day --</option>
@@ -572,7 +576,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                   -
                 </button>
                 <span className="px-2 text-xs font-bold text-slate-800 dark:text-neutral-200 min-w-[56px] text-center select-none flex items-center justify-center gap-1">
-                  <Layers className="w-3 h-3 text-blue-500" />
+                  <Layers className={`w-3 h-3 ${modalTheme.accentText}`} />
                   <span>{slotCount} Slots</span>
                 </span>
                 <button
@@ -622,7 +626,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                     onClick={() => handleZoomChange('fit')}
                     className={`px-2 py-0.5 text-xs font-bold rounded-md transition-all flex items-center gap-1 ${
                       zoomMode === 'fit'
-                        ? 'bg-white dark:bg-white/20 text-blue-600 dark:text-cyan-400 shadow-xs'
+                        ? `bg-white dark:bg-white/20 ${modalTheme.activeTabText} shadow-xs`
                         : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                     title="Fit page"
@@ -657,10 +661,10 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                 <button
                   type="button"
                   onClick={() => handleImportActiveQuote(activeSlot)}
-                  className="px-2.5 py-1 text-xs font-bold rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-cyan-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200/80 dark:border-cyan-800/50 flex items-center gap-1.5 transition-colors shadow-xs shrink-0"
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg ${modalTheme.pillActive} flex items-center gap-1.5 transition-colors shadow-xs shrink-0`}
                   title="Fill active quotation details into Slot 1"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                  <Sparkles className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                   <span>{justCopied ? (language === 'zh' ? '已填入 Slot 1！' : 'Filled Slot 1!') : ds.importActive}</span>
                 </button>
               )}
@@ -909,7 +913,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                           onClick={() => setActiveSlot(slotIdx)}
                           className={`px-2 sm:px-3 py-2 rounded-xl text-xs font-bold transition-all border flex flex-col items-center justify-center relative ${
                             activeSlot === slotIdx
-                              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white border-cyan-400 shadow-md shadow-cyan-500/25'
+                              ? `${modalTheme.activeTabGradient} border-white/20 shadow-md`
                               : 'bg-white dark:bg-[#0d1433] text-slate-700 dark:text-neutral-200 border-slate-200 dark:border-indigo-500/20 hover:bg-slate-100 dark:hover:bg-[#121c45]'
                           }`}
                         >
@@ -930,7 +934,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                   <div className="bg-white dark:bg-[#0d1433] p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-indigo-500/20 shadow-xs flex flex-col gap-4">
                     <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-black uppercase text-blue-600 dark:text-cyan-400 tracking-wider">
+                        <span className={`text-xs font-black uppercase ${modalTheme.accentText} tracking-wider`}>
                           Task #{activeSlot + 1}
                         </span>
                         {entries[activeSlot].companyName && (
@@ -955,7 +959,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                     {/* Company Name */}
                     <div>
                       <label className="text-xs font-bold text-slate-700 dark:text-neutral-300 mb-1.5 flex items-center gap-1.5">
-                        <Building className="w-3.5 h-3.5 text-blue-500" />
+                        <Building className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                         {ds.companyName}
                       </label>
                       <input
@@ -963,14 +967,14 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                         value={entries[activeSlot].companyName}
                         onChange={e => updateEntry(activeSlot, 'companyName', e.target.value)}
                         placeholder="e.g. ABC Pte Ltd / John Tan"
-                        className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-[#050817] border border-slate-200 dark:border-indigo-500/25 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                        className={`w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-[#050817] border border-slate-200 dark:border-indigo-500/25 text-slate-900 dark:text-white focus:ring-2 ${modalTheme.focusRing} outline-none`}
                       />
                     </div>
 
                     {/* Address (Add:) */}
                     <div>
                       <label className="text-xs font-bold text-slate-700 dark:text-neutral-300 mb-1.5 flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+                        <MapPin className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                         {ds.address}
                       </label>
                       <textarea
@@ -978,14 +982,14 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                         value={entries[activeSlot].address}
                         onChange={e => updateEntry(activeSlot, 'address', e.target.value)}
                         placeholder="e.g. 10 Ubi Crescent, #01-20 Singapore 408564"
-                        className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-[#050817] border border-slate-200 dark:border-indigo-500/25 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                        className={`w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-[#050817] border border-slate-200 dark:border-indigo-500/25 text-slate-900 dark:text-white focus:ring-2 ${modalTheme.focusRing} outline-none resize-none`}
                       />
                     </div>
 
                     {/* Descriptions: */}
                     <div>
                       <label className="text-xs font-bold text-slate-700 dark:text-neutral-300 mb-1.5 flex items-center gap-1.5">
-                        <FileText className="w-3.5 h-3.5 text-purple-500" />
+                        <FileText className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                         {ds.descriptions}
                       </label>
                       <textarea
@@ -993,7 +997,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                         value={entries[activeSlot].descriptions}
                         onChange={e => updateEntry(activeSlot, 'descriptions', e.target.value)}
                         placeholder="Installation specs, sign sizes, contact person, or leave empty for physical handwriting"
-                        className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-[#050817] border border-slate-200 dark:border-indigo-500/25 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none leading-relaxed"
+                        className={`w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-[#050817] border border-slate-200 dark:border-indigo-500/25 text-slate-900 dark:text-white focus:ring-2 ${modalTheme.focusRing} outline-none resize-none leading-relaxed`}
                       />
                     </div>
                   </div>
@@ -1010,7 +1014,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                           onClick={() => setActiveSlot(i)}
                           className={`p-2.5 rounded-xl border cursor-pointer transition-all ${
                             activeSlot === i
-                              ? 'border-cyan-500 bg-blue-50/50 dark:bg-cyan-500/10'
+                              ? `${modalTheme.pillActive} shadow-xs`
                               : 'border-slate-200 dark:border-indigo-500/15 hover:border-slate-300 dark:hover:border-indigo-500/30'
                           }`}
                         >

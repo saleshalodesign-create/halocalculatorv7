@@ -1199,6 +1199,7 @@ export default function App() {
         quoteItems={quoteItems}
         currentCustomerName={scheduleCustomerName}
         currentCustomerAddress={scheduleCustomerAddress}
+        theme={theme}
       />
 
       {/* Halo PDF Editor Modal */}
@@ -1215,6 +1216,7 @@ export default function App() {
         onSaveToQuoteSheet={(updatedItems) => {
           setQuoteItems(updatedItems);
         }}
+        theme={theme}
       />
 
       {/* Halo PDF Joiner & Splitter Modal */}
@@ -1226,6 +1228,7 @@ export default function App() {
           onOpenInEditor={(bytes, fileName) => {
             handleOpenPdfEditorWithFile(bytes, fileName);
           }}
+          theme={theme}
         />
       )}
 
@@ -1237,6 +1240,7 @@ export default function App() {
           onOpenInEditor={(bytes, fileName) => {
             handleOpenPdfEditorWithFile(bytes, fileName);
           }}
+          theme={theme}
         />
       )}
 

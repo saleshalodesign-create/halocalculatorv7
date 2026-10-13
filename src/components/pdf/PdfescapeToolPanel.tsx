@@ -32,6 +32,9 @@ import {
   Plus,
 } from 'lucide-react';
 
+import { Theme, ThemeType } from '../../types';
+import { getModalThemeStyle } from '../../utils/columnThemes';
+
 export type PdfescapeTab = 'insert' | 'annotate' | 'page' | 'merge_split' | 'document' | 'upload';
 
 interface PdfescapeToolPanelProps {
@@ -41,6 +44,7 @@ interface PdfescapeToolPanelProps {
   onSelectTool: (tool: string) => void;
   isZh: boolean;
   activeSource: string;
+  theme?: ThemeType;
   // Image upload trigger
   onTriggerImageUpload: () => void;
   // Page actions
@@ -70,6 +74,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
   onSelectTool,
   isZh,
   activeSource,
+  theme = Theme.DARK,
   onTriggerImageUpload,
   currentPageIndex,
   totalPages,
@@ -86,6 +91,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
   onOpenPdfSplitter,
   onOpenImageConverter,
 }) => {
+  const modalTheme = getModalThemeStyle(theme);
   const tabs: { id: PdfescapeTab; labelZh: string; labelEn: string }[] = [
     { id: 'insert', labelZh: '插入 (Insert)', labelEn: 'Insert' },
     { id: 'annotate', labelZh: '标注 (Annotate)', labelEn: 'Annotate' },
@@ -106,7 +112,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
             onClick={() => onChangeTab(tab.id)}
             className={`flex-1 py-2 px-2.5 text-center font-bold text-xs whitespace-nowrap transition-colors cursor-pointer border-b-2 ${
               activeTab === tab.id
-                ? 'border-cyan-400 text-cyan-300 bg-slate-900'
+                ? `${modalTheme.tagBg} ${modalTheme.accentText} border-b-2 font-bold`
                 : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
             }`}
           >

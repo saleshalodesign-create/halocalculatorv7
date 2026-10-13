@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { QuoteItem, QuoteRecord, Unit, UnitType, Theme, ThemeType } from '../types';
 import { AuthContextType } from '../hooks/useFirebaseAuth';
 import { useLanguage } from '../context/LanguageContext';
-import { getThemeTableHeaderStyle, getColumnTheme, ProductColumnKey } from '../utils/columnThemes';
+import { getThemeTableHeaderStyle, getModalThemeStyle, getColumnTheme, ProductColumnKey } from '../utils/columnThemes';
 import { GoogleIcon } from './GoogleIcon';
 import { copyToClipboard, formatQuotationText } from '../utils/clipboard';
 import {
@@ -109,6 +109,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
 }) => {
   const { language, t } = useLanguage();
   const tableHeaderTheme = getThemeTableHeaderStyle(theme);
+  const modalTheme = getModalThemeStyle(theme);
   const [activeSubTab, setActiveSubTab] = useState<'active' | 'cloudRecords'>('active');
   const [formMode, setFormMode] = useState<'quote' | 'invoice' | 'receipt' | 'textPreview' | null>(null);
   const [showCustomForm, setShowCustomForm] = useState(true);
@@ -808,8 +809,8 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
         onClick={e => e.stopPropagation()}
         className="w-full max-w-4xl h-[96vh] sm:h-[90vh] bg-white dark:bg-[#0a0f24] rounded-xl sm:rounded-2xl shadow-2xl border border-black/10 dark:border-indigo-500/25 flex flex-col overflow-hidden relative"
       >
-        {/* Ambient Cyber Neon Crown Accent */}
-        <div className="h-[2px] w-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 opacity-90 shrink-0"></div>
+        {/* Ambient Theme Crown Accent */}
+        <div className={`h-[2px] w-full ${modalTheme.crownGradient} opacity-90 shrink-0`}></div>
 
         {/* Floating Toast Notification */}
         {toastMessage && (
@@ -839,7 +840,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
               }}
               className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-md transition-all flex items-center gap-1 sm:gap-1.5 ${
                 activeSubTab === 'active'
-                  ? 'bg-white dark:bg-[#141d44] shadow-sm text-slate-900 dark:text-cyan-300 font-bold'
+                  ? `bg-white dark:bg-[#141d44] shadow-sm ${modalTheme.activeTabText} font-bold`
                   : 'text-slate-600 hover:text-slate-900 dark:hover:text-neutral-200'
               }`}
             >
@@ -853,7 +854,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
               }}
               className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-md transition-all flex items-center gap-1 sm:gap-1.5 ${
                 activeSubTab === 'cloudRecords'
-                  ? 'bg-white dark:bg-[#141d44] shadow-sm text-slate-900 dark:text-cyan-300 font-bold'
+                  ? `bg-white dark:bg-[#141d44] shadow-sm ${modalTheme.activeTabText} font-bold`
                   : 'text-slate-600 hover:text-slate-900 dark:hover:text-neutral-200'
               }`}
             >
@@ -901,7 +902,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   onClick={() => setShowCustomForm(!showCustomForm)}
                   className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
                     showCustomForm
-                      ? 'bg-blue-600 text-white shadow-sm'
+                      ? modalTheme.primaryBtn
                       : 'bg-slate-200/80 dark:bg-white/10 text-slate-700 dark:text-neutral-200 hover:bg-slate-300'
                   }`}
                   title={language === 'zh' ? '切换自定义项目添加抽屉' : 'Toggle Custom Item drawer'}
@@ -936,7 +937,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                       value={customName}
                       onChange={e => setCustomName(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleAddCustom()}
-                      className="flex-1 min-w-0 px-2.5 py-1 sm:py-1.5 text-xs rounded-lg bg-neutral-100 dark:bg-[#050817] border border-black/10 dark:border-indigo-500/25 focus:ring-1 focus:ring-cyan-500 outline-none text-neutral-900 dark:text-white"
+                      className={`flex-1 min-w-0 px-2.5 py-1 sm:py-1.5 text-xs rounded-lg bg-neutral-100 dark:bg-[#050817] border border-black/10 dark:border-indigo-500/25 ${modalTheme.focusRing} focus:ring-1 outline-none text-neutral-900 dark:text-white`}
                     />
                     {/* Beside Item Description: Preset Items Dropdown */}
                     <select
@@ -953,7 +954,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                           showToast(`${language === 'zh' ? '已选择' : 'Selected'}: ${localizedName} ($${selected.price})`);
                         }
                       }}
-                      className="w-32 sm:w-44 px-2 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold rounded-lg bg-blue-50 dark:bg-[#080d22] border border-blue-300 dark:border-cyan-800/60 text-blue-700 dark:text-cyan-300 outline-none hover:border-cyan-500 transition-colors cursor-pointer shrink-0 truncate"
+                      className={`w-32 sm:w-44 px-2 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold rounded-lg ${modalTheme.presetDropdown} outline-none transition-colors cursor-pointer shrink-0 truncate`}
                       title={language === 'zh' ? '快捷预设项目' : 'Preset Items'}
                     >
                       <option value="" disabled>
@@ -1035,7 +1036,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
 
                     <button
                       onClick={handleAddCustom}
-                      className="px-3 py-1 rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold hover:brightness-110 ml-auto transition-transform active:scale-95 shadow-sm shrink-0"
+                      className={`px-3 py-1 rounded-md ${modalTheme.addBtn} text-xs font-bold ml-auto transition-transform active:scale-95 shadow-sm shrink-0 cursor-pointer`}
                     >
                       {language === 'zh' ? '添加项目' : 'Add Item'}
                     </button>
@@ -1082,8 +1083,8 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
               <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-1.5 sm:space-y-2 mac-scrollbar min-h-0">
                 {items.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-neutral-400 py-6 sm:py-10 px-4 text-center">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-2 sm:mb-3">
-                      <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl ${modalTheme.sizesActive} flex items-center justify-center mb-2 sm:mb-3`}>
+                      <FileText className={`w-5 h-5 sm:w-6 sm:h-6 ${modalTheme.accentText}`} />
                     </div>
                     <p className="text-xs sm:text-base font-bold text-slate-800 dark:text-neutral-100">
                       {language === 'zh' ? '当前报价单为空' : 'Your quotation list is empty.'}
@@ -1320,7 +1321,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                       }}
                       className={`px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold rounded transition-all ${
                         discountType === 'percent' && discountValue === 5
-                          ? 'bg-blue-600 text-white shadow-sm'
+                          ? modalTheme.discountActive
                           : 'bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 text-slate-700 dark:text-neutral-300'
                       }`}
                     >
@@ -1333,7 +1334,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                       }}
                       className={`px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold rounded transition-all ${
                         discountType === 'percent' && discountValue === 10
-                          ? 'bg-blue-600 text-white shadow-sm'
+                          ? modalTheme.discountActive
                           : 'bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 text-slate-700 dark:text-neutral-300'
                       }`}
                     >
@@ -1357,7 +1358,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                     <div
                       className={`inline-flex items-center rounded transition-all border ${
                         discountType === 'fixed'
-                          ? 'border-blue-500/70 bg-blue-50/90 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 ring-1 ring-blue-500/30 shadow-sm'
+                          ? modalTheme.customDiscRing
                           : 'border-transparent bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 text-slate-700 dark:text-neutral-300'
                       }`}
                     >
@@ -1370,7 +1371,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                         }}
                         className={`px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold rounded transition-all ${
                           discountType === 'fixed'
-                            ? 'bg-blue-600 text-white'
+                            ? modalTheme.discountActive
                             : 'hover:bg-slate-200/80 dark:hover:bg-white/10'
                         }`}
                         title={language === 'zh' ? '自定义扣减金额 ($)' : 'Customize discount amount ($)'}
@@ -1379,7 +1380,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                       </button>
                       {discountType === 'fixed' && (
                         <div className="flex items-center px-1.5 py-0.5 animate-fade-in">
-                          <span className="text-[10px] sm:text-xs font-mono font-bold text-blue-600 dark:text-blue-400 mr-0.5">$</span>
+                          <span className={`text-[10px] sm:text-xs font-mono font-bold ${modalTheme.customDiscText} mr-0.5`}>$</span>
                           <input
                             type="number"
                             min="0"
@@ -1393,7 +1394,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                             }}
                             placeholder="0.00"
                             autoFocus
-                            className="w-14 sm:w-16 text-[10px] sm:text-xs font-mono font-bold bg-transparent outline-none text-slate-900 dark:text-white placeholder:text-blue-400/50"
+                            className="w-14 sm:w-16 text-[10px] sm:text-xs font-mono font-bold bg-transparent outline-none text-slate-900 dark:text-white placeholder:text-neutral-400"
                           />
                           {customDiscountInput && (
                             <button
@@ -1418,7 +1419,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                       onClick={() => setShowSizes(!showSizes)}
                       className={`px-1.5 py-0.5 text-[10px] sm:text-xs rounded font-semibold border transition-all flex items-center gap-1 ${
                         showSizes
-                          ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30'
+                          ? modalTheme.sizesActive
                           : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-neutral-500 border-slate-200 dark:border-white/10'
                       }`}
                       title={showSizes ? 'Dimensions included on PDF' : 'Dimensions hidden on PDF'}
@@ -1450,7 +1451,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   <button
                     disabled={items.length === 0}
                     onClick={() => setFormMode('textPreview')}
-                    className="py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-[#0e1638] hover:bg-slate-200 dark:hover:bg-[#142050] text-slate-800 dark:text-cyan-300 font-bold text-[10px] sm:text-xs disabled:opacity-40 transition-all flex items-center justify-center gap-1 border border-slate-200 dark:border-indigo-500/25 active:scale-95 shadow-sm"
+                    className={`py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl ${modalTheme.previewBtn} font-bold text-[10px] sm:text-xs disabled:opacity-40 transition-all flex items-center justify-center gap-1 active:scale-95 shadow-sm cursor-pointer`}
                   >
                     <FileText className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                     <span className="truncate">{language === 'zh' ? '文本预览' : 'Preview'}</span>
@@ -1458,7 +1459,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   <button
                     disabled={items.length === 0}
                     onClick={() => setFormMode('quote')}
-                    className="py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-[10px] sm:text-xs hover:brightness-110 disabled:opacity-40 transition-all flex items-center justify-center gap-1 shadow-md shadow-blue-500/25 active:scale-95"
+                    className={`py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl ${modalTheme.quotePdfBtn} font-bold text-[10px] sm:text-xs disabled:opacity-40 transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer`}
                   >
                     <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                     <span className="truncate">{language === 'zh' ? '报价单 PDF' : 'Quote PDF'}</span>
@@ -1466,7 +1467,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   <button
                     disabled={items.length === 0}
                     onClick={() => setFormMode('invoice')}
-                    className="py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-[10px] sm:text-xs hover:brightness-110 disabled:opacity-40 transition-all flex items-center justify-center gap-1 shadow-md shadow-purple-500/25 active:scale-95"
+                    className={`py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl ${modalTheme.invoicePdfBtn} font-bold text-[10px] sm:text-xs disabled:opacity-40 transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer`}
                   >
                     <FileText className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                     <span className="truncate">{language === 'zh' ? '发票 PDF' : 'Invoice PDF'}</span>
@@ -1491,7 +1492,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                           'quote'
                         );
                       }}
-                      className="py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-[10px] sm:text-xs hover:brightness-110 transition-all flex items-center justify-center gap-1 shadow-md shadow-emerald-500/25 active:scale-95 cursor-pointer"
+                      className={`py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl ${modalTheme.editPdfBtn} font-bold text-[10px] sm:text-xs transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer`}
                       title="Open in Visual PDF Editor & Annotator"
                     >
                       <FileCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
@@ -1501,7 +1502,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   {onOpenPdfTools && (
                     <button
                       onClick={() => onOpenPdfTools('join')}
-                      className="py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-[10px] sm:text-xs hover:brightness-110 transition-all flex items-center justify-center gap-1 shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+                      className={`py-1.5 sm:py-2.5 px-1 sm:px-3 rounded-lg sm:rounded-xl ${modalTheme.pdfToolsBtn} font-bold text-[10px] sm:text-xs transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer`}
                       title={language === 'zh' ? 'PDF 工具箱 (合并/拆分/加锁/去锁)' : 'PDF Tools (Join/Split/Lock/Unlock)'}
                     >
                       <Layers className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
@@ -1517,19 +1518,19 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
               <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-black/10 dark:border-indigo-500/20 shrink-0">
                 <button
                   onClick={() => setFormMode(null)}
-                  className="text-sm text-cyan-400 font-semibold flex items-center gap-1 hover:underline"
+                  className={`text-sm ${modalTheme.accentText} font-semibold flex items-center gap-1 hover:underline cursor-pointer`}
                 >
                   {language === 'zh' ? '← 返回清单' : '← Back to List'}
                 </button>
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Doc Type Selector */}
-                  <div className="flex p-0.5 rounded-lg bg-neutral-200/70 dark:bg-[#0c122c] border dark:border-indigo-500/20 text-xs font-bold">
+                  <div className={`flex p-0.5 rounded-lg bg-neutral-200/70 dark:bg-[#0c122c] border border-black/10 dark:${modalTheme.modalBorder} text-xs font-bold`}>
                     <button
                       type="button"
                       onClick={() => setTextPreviewDocType('quote')}
                       className={`px-2.5 py-1 rounded-md transition-all ${
                         textPreviewDocType === 'quote'
-                          ? 'bg-blue-600 text-white shadow-sm'
+                          ? modalTheme.primaryBtn
                           : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
                       }`}
                     >
@@ -1540,7 +1541,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                       onClick={() => setTextPreviewDocType('invoice')}
                       className={`px-2.5 py-1 rounded-md transition-all ${
                         textPreviewDocType === 'invoice'
-                          ? 'bg-purple-600 text-white shadow-sm'
+                          ? `${modalTheme.activeTabGradient} shadow-sm`
                           : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
                       }`}
                     >
@@ -1554,8 +1555,8 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                     onClick={() => setShowSizes(!showSizes)}
                     className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 ${
                       showSizes
-                        ? 'bg-blue-500/10 text-blue-600 dark:text-cyan-400 border-blue-500/30 dark:border-cyan-500/30'
-                        : 'bg-neutral-100 dark:bg-[#0c122c] text-neutral-500 border-black/10 dark:border-indigo-500/20'
+                        ? modalTheme.sizesActive
+                        : `bg-neutral-100 dark:bg-[#0c122c] text-neutral-500 border-black/10 dark:${modalTheme.modalBorder}`
                     }`}
                     title={showSizes ? 'Item dimensions included' : 'Item dimensions excluded'}
                   >
@@ -1563,7 +1564,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                     <span>{language === 'zh' ? (showSizes ? '尺寸: 显示' : '尺寸: 隐藏') : (showSizes ? 'Sizes: ON' : 'Sizes: OFF')}</span>
                   </button>
 
-                  <div className="flex p-0.5 rounded-lg bg-neutral-100 dark:bg-[#0c122c] border dark:border-indigo-500/20 text-xs font-semibold">
+                  <div className={`flex p-0.5 rounded-lg bg-neutral-100 dark:bg-[#0c122c] border border-black/10 dark:${modalTheme.modalBorder} text-xs font-semibold`}>
                     <button
                       onClick={() => setTextFormat('whatsapp')}
                       className={`px-2.5 py-1 rounded-md transition-all ${
@@ -1578,7 +1579,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                       onClick={() => setTextFormat('standard')}
                       className={`px-2.5 py-1 rounded-md transition-all ${
                         textFormat === 'standard'
-                          ? 'bg-blue-600 text-white shadow-sm'
+                          ? `${modalTheme.primaryBtn} shadow-sm`
                           : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
                       }`}
                     >
@@ -1590,7 +1591,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
 
               <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex items-center justify-between pb-2">
-                  <span className="text-xs font-bold uppercase text-neutral-400">
+                  <span className={`text-xs font-bold uppercase ${modalTheme.accentText}`}>
                     {textPreviewDocType === 'invoice'
                       ? (language === 'zh' ? '发票文本内容' : 'Tax Invoice Text Output')
                       : (language === 'zh' ? '报价单文本内容' : 'Quotation Text Output')}:
@@ -1602,12 +1603,12 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                 <textarea
                   readOnly
                   value={getPreviewText()}
-                  className="flex-1 w-full p-4 rounded-xl font-mono text-xs bg-neutral-100/80 dark:bg-[#050817] border border-black/10 dark:border-indigo-500/25 outline-none text-neutral-800 dark:text-neutral-200 resize-none leading-relaxed mac-scrollbar select-all"
+                  className={`flex-1 w-full p-4 rounded-xl font-mono text-xs bg-neutral-100/80 dark:bg-[#050817] border border-black/10 dark:${modalTheme.modalBorder} outline-none text-neutral-800 dark:text-neutral-200 resize-none leading-relaxed mac-scrollbar select-all`}
                 />
               </div>
 
               {/* Recipient Quick Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-2.5 rounded-xl bg-slate-100/80 dark:bg-[#0c122c] border border-slate-200/80 dark:border-indigo-500/20 shrink-0">
+              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-2.5 rounded-xl bg-slate-100/80 dark:bg-[#0c122c] border border-slate-200/80 dark:${modalTheme.modalBorder} shrink-0`}>
                 <div className="flex items-center gap-2 px-1">
                   <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <input
@@ -1664,7 +1665,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
               <div className="flex items-center justify-between pb-3 border-b border-black/10 dark:border-indigo-500/20">
                 <button
                   onClick={() => setFormMode(null)}
-                  className="text-sm text-cyan-400 font-semibold flex items-center gap-1 hover:underline"
+                  className={`text-sm ${modalTheme.accentText} font-semibold flex items-center gap-1 hover:underline cursor-pointer`}
                 >
                   {language === 'zh' ? '← 返回清单' : '← Back to List'}
                 </button>
@@ -1963,7 +1964,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   <button
                     type="button"
                     onClick={() => handleExport('view')}
-                    className="flex-1 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-600/25 active:scale-95"
+                    className={`flex-1 py-3 px-4 rounded-xl ${modalTheme.primaryBtn} text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer`}
                     title={language === 'zh' ? '在浏览器新标签页打开 PDF 供预览和打印' : 'Open PDF in new tab to view and print'}
                   >
                     <Printer className="w-4 h-4" />
@@ -1973,17 +1974,17 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   <button
                     type="button"
                     onClick={() => handleExport('save')}
-                    className="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 dark:bg-white/15 dark:hover:bg-white/20 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"
+                    className="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 dark:bg-white/15 dark:hover:bg-white/20 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer"
                     title={language === 'zh' ? '下载矢量 PDF 文件到电脑' : 'Download Vector PDF file'}
                   >
-                    <Download className="w-4 h-4 text-blue-400" />
+                    <Download className={`w-4 h-4 ${modalTheme.accentText}`} />
                     <span>{language === 'zh' ? '下载 PDF' : 'Download PDF'}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => handleCopyAllQuotes(textFormat, formMode === 'invoice' ? 'invoice' : 'quote')}
-                    className="py-3 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-neutral-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all border border-slate-200 dark:border-white/10 active:scale-95 shrink-0"
+                    className="py-3 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-neutral-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all border border-slate-200 dark:border-white/10 active:scale-95 shrink-0 cursor-pointer"
                     title={language === 'zh' ? '复制格式化文本清单' : 'Copy formatted text summary'}
                   >
                     {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
@@ -1996,7 +1997,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   <button
                     type="button"
                     onClick={() => handleQuickWhatsApp(formMode === 'invoice' ? 'invoice' : 'quote', sendFormat)}
-                    className="py-2.5 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95"
+                    className="py-2.5 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer"
                     title={sendFormat === 'pdf' ? 'Send PDF via WhatsApp' : 'Send text summary via WhatsApp'}
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
@@ -2006,7 +2007,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   <button
                     type="button"
                     onClick={() => handleQuickEmail(formMode === 'invoice' ? 'invoice' : 'quote', sendFormat)}
-                    className="py-2.5 px-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95"
+                    className="py-2.5 px-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer"
                     title={sendFormat === 'pdf' ? 'Send PDF via Email' : 'Send text summary via Email'}
                   >
                     <Mail className="w-3.5 h-3.5" />
@@ -2016,7 +2017,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   <button
                     type="button"
                     onClick={() => handleOpenSendModal(formMode === 'invoice' ? 'invoice' : 'quote')}
-                    className="py-2.5 px-2.5 rounded-xl bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                    className="py-2.5 px-2.5 rounded-xl bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                     title="Send & Share Hub"
                   >
                     <Share2 className="w-3.5 h-3.5 text-blue-500" />
@@ -2027,7 +2028,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenDailySchedule(customerName, customerAddress)}
-                      className="py-2.5 px-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 border border-emerald-500/25 transition-all active:scale-95"
+                      className="py-2.5 px-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 border border-emerald-500/25 transition-all active:scale-95 cursor-pointer"
                       title={language === 'zh' ? '填入每日外出安装排程表' : 'Open in Daily Outside Schedule'}
                     >
                       <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -2057,10 +2058,10 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                           formMode === 'invoice' ? 'invoice' : formMode === 'receipt' ? 'receipt' : 'quote'
                         );
                       }}
-                      className="py-2.5 px-2.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-center gap-1.5 border border-purple-500/30 transition-all active:scale-95"
+                      className={`py-2.5 px-2.5 rounded-xl ${modalTheme.editPdfBtn} text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer`}
                       title={language === 'zh' ? '在高级 PDF 编辑器中打开、盖印章、签名或修改' : 'Open in PDF Editor to sign, stamp or whiteout'}
                     >
-                      <FileCheck className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                      <FileCheck className="w-3.5 h-3.5" />
                       <span className="truncate">{language === 'zh' ? '编辑 PDF' : 'Edit PDF'}</span>
                     </button>
                   )}
@@ -2120,7 +2121,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-500 text-[11px] font-mono font-bold">
+                            <span className={`px-2 py-0.5 rounded-md ${modalTheme.accentBadge} text-[11px] font-mono font-bold`}>
                               {record.docNo || 'NO-DOC-ID'}
                             </span>
                             <h4 className="text-sm font-bold text-neutral-900 dark:text-white truncate">
@@ -2157,7 +2158,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                             {/* Load into Workspace */}
                             <button
                               onClick={() => handleLoadRecord(record)}
-                              className="px-3 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
+                              className={`px-3 py-2 rounded-xl ${modalTheme.cloudOpenBtn} text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer`}
                               title={language === 'zh' ? '打开并将此报价载入计算器' : 'Open and load this quote back into the calculator'}
                             >
                               <FolderOpen className="w-3.5 h-3.5" />
@@ -2170,10 +2171,10 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                                 onClick={() => {
                                   onOpenPdfEditor(record.items || [], record, record.docType || 'quote');
                                 }}
-                                className="px-2.5 py-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
+                                className={`px-2.5 py-2 rounded-xl ${modalTheme.editPdfBtn} text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer`}
                                 title={language === 'zh' ? '在 PDF 编辑器中打开修改此单据' : 'Edit this document in PDF Editor'}
                               >
-                                <FileCheck className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                                <FileCheck className="w-3.5 h-3.5" />
                                 <span>{language === 'zh' ? '编辑 PDF' : 'Edit PDF'}</span>
                               </button>
                             )}

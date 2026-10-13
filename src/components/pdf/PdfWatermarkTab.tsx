@@ -12,6 +12,8 @@ import {
   Eye,
   CheckCircle2,
 } from 'lucide-react';
+import { Theme, ThemeType } from '../../types';
+import { getModalThemeStyle } from '../../utils/columnThemes';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   watermarkPdfDocument,
@@ -26,6 +28,7 @@ export interface PdfWatermarkTabProps {
   onOpenInEditor?: (pdfBytes: ArrayBuffer | Uint8Array, fileName: string) => void;
   onCloseModal: () => void;
   showToast: (msg: string) => void;
+  theme?: ThemeType;
 }
 
 const WATERMARK_PRESETS = [
@@ -52,9 +55,11 @@ export const PdfWatermarkTab: React.FC<PdfWatermarkTabProps> = ({
   onOpenInEditor,
   onCloseModal,
   showToast,
+  theme = Theme.DARK,
 }) => {
   const { language } = useLanguage();
   const isZh = language === 'zh';
+  const modalTheme = getModalThemeStyle(theme);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -466,7 +471,7 @@ export const PdfWatermarkTab: React.FC<PdfWatermarkTabProps> = ({
                 type="button"
                 disabled={isProcessing}
                 onClick={() => handleApplyWatermark(false)}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-pink-500/25 flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all"
+                className={`w-full py-2.5 rounded-xl ${modalTheme.activeTabGradient} flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all text-white font-bold text-xs sm:text-sm`}
               >
                 {isProcessing ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />

@@ -1598,3 +1598,290 @@ export function getThemeTableHeaderStyle(theme: ThemeType): {
       };
   }
 }
+
+export interface ModalThemeStyle {
+  crownGradient: string;
+  activeTabText: string;
+  primaryBtn: string;
+  presetDropdown: string;
+  focusRing: string;
+  addBtn: string;
+  emptyIconColor: string;
+  discountActive: string;
+  customDiscRing: string;
+  customDiscText: string;
+  sizesActive: string;
+  previewBtn: string;
+  quotePdfBtn: string;
+  invoicePdfBtn: string;
+  editPdfBtn: string;
+  pdfToolsBtn: string;
+  accentText: string;
+  accentBadge: string;
+  cloudOpenBtn: string;
+  activeTabGradient: string;
+  iconBgGradient: string;
+  pillActive: string;
+  tagBg: string;
+  hoverBg: string;
+  modalBorder: string;
+}
+
+export function getModalThemeStyle(theme: ThemeType = Theme.DARK): ModalThemeStyle {
+  switch (theme) {
+    case Theme.CYBERPUNK:
+      return {
+        crownGradient: 'bg-gradient-to-r from-pink-500 via-fuchsia-500 to-cyan-400',
+        activeTabText: 'text-pink-600 dark:text-pink-400',
+        primaryBtn: 'bg-pink-600 hover:bg-pink-500 text-white shadow-pink-500/25',
+        presetDropdown: 'bg-pink-50 dark:bg-[#12061c] border border-pink-300 dark:border-pink-800/60 text-pink-700 dark:text-pink-300 hover:border-pink-500',
+        focusRing: 'focus:ring-pink-500',
+        addBtn: 'bg-gradient-to-r from-pink-600 to-fuchsia-600 text-white hover:brightness-110 shadow-pink-500/25',
+        emptyIconColor: 'text-pink-500/40',
+        discountActive: 'bg-pink-600 text-white shadow-sm',
+        customDiscRing: 'border-pink-500/70 bg-pink-50/90 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 ring-1 ring-pink-500/30 shadow-sm',
+        customDiscText: 'text-pink-600 dark:text-pink-400',
+        sizesActive: 'bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/30',
+        previewBtn: 'bg-slate-100 dark:bg-[#12061c] hover:bg-slate-200 dark:hover:bg-[#1c0a2b] text-slate-800 dark:text-pink-300 border border-slate-200 dark:border-pink-500/25',
+        quotePdfBtn: 'bg-gradient-to-r from-pink-600 to-fuchsia-600 text-white hover:brightness-110 shadow-md shadow-pink-500/25',
+        invoicePdfBtn: 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white hover:brightness-110 shadow-md shadow-fuchsia-500/25',
+        editPdfBtn: 'bg-gradient-to-r from-pink-600 to-rose-600 text-white hover:brightness-110 shadow-md shadow-pink-500/25',
+        pdfToolsBtn: 'bg-gradient-to-r from-cyan-600 to-pink-500 text-white hover:brightness-110 shadow-md shadow-pink-500/25',
+        accentText: 'text-pink-500 dark:text-pink-400',
+        accentBadge: 'bg-pink-500/15 text-pink-600 dark:text-pink-400 border border-pink-500/30',
+        cloudOpenBtn: 'bg-pink-600 hover:bg-pink-500 text-white shadow-pink-500/25',
+        activeTabGradient: 'bg-gradient-to-r from-pink-600 via-fuchsia-600 to-cyan-500 text-white shadow-md shadow-pink-500/25',
+        iconBgGradient: 'bg-gradient-to-tr from-pink-600 to-cyan-500 text-white shadow-pink-500/25',
+        pillActive: 'bg-pink-50 hover:bg-pink-100/80 dark:bg-pink-950/40 dark:hover:bg-pink-900/50 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-800/60 shadow-xs',
+        tagBg: 'bg-pink-950/60 text-pink-300 border border-pink-500/40',
+        hoverBg: 'hover:bg-pink-500/10',
+        modalBorder: 'border-pink-500/30',
+      };
+    case Theme.FOREST:
+      return {
+        crownGradient: 'bg-gradient-to-r from-emerald-400 via-teal-500 to-lime-400',
+        activeTabText: 'text-emerald-700 dark:text-emerald-400',
+        primaryBtn: 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/25',
+        presetDropdown: 'bg-emerald-50 dark:bg-[#031c13] border border-emerald-300 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 hover:border-emerald-500',
+        focusRing: 'focus:ring-emerald-500',
+        addBtn: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:brightness-110 shadow-emerald-500/25',
+        emptyIconColor: 'text-emerald-500/40',
+        discountActive: 'bg-emerald-600 text-white shadow-sm',
+        customDiscRing: 'border-emerald-500/70 bg-emerald-50/90 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/30 shadow-sm',
+        customDiscText: 'text-emerald-600 dark:text-emerald-400',
+        sizesActive: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+        previewBtn: 'bg-slate-100 dark:bg-[#031c13] hover:bg-slate-200 dark:hover:bg-[#072d20] text-slate-800 dark:text-emerald-300 border border-slate-200 dark:border-emerald-500/25',
+        quotePdfBtn: 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:brightness-110 shadow-md shadow-emerald-500/25',
+        invoicePdfBtn: 'bg-gradient-to-r from-teal-600 to-green-700 text-white hover:brightness-110 shadow-md shadow-teal-500/25',
+        editPdfBtn: 'bg-gradient-to-r from-emerald-600 to-lime-600 text-white hover:brightness-110 shadow-md shadow-emerald-500/25',
+        pdfToolsBtn: 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white hover:brightness-110 shadow-md shadow-teal-500/25',
+        accentText: 'text-emerald-600 dark:text-emerald-400',
+        accentBadge: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30',
+        cloudOpenBtn: 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/25',
+        activeTabGradient: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-lime-600 text-white shadow-md shadow-emerald-500/25',
+        iconBgGradient: 'bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-emerald-500/25',
+        pillActive: 'bg-emerald-50 hover:bg-emerald-100/80 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shadow-xs',
+        tagBg: 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/40',
+        hoverBg: 'hover:bg-emerald-500/10',
+        modalBorder: 'border-emerald-500/30',
+      };
+    case Theme.SUNSET:
+      return {
+        crownGradient: 'bg-gradient-to-r from-orange-500 via-amber-500 to-rose-500',
+        activeTabText: 'text-orange-700 dark:text-orange-400',
+        primaryBtn: 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-500/25',
+        presetDropdown: 'bg-orange-50 dark:bg-[#1f0b09] border border-orange-300 dark:border-orange-800/60 text-orange-700 dark:text-orange-300 hover:border-orange-500',
+        focusRing: 'focus:ring-orange-500',
+        addBtn: 'bg-gradient-to-r from-orange-600 to-amber-600 text-white hover:brightness-110 shadow-orange-500/25',
+        emptyIconColor: 'text-orange-500/40',
+        discountActive: 'bg-orange-600 text-white shadow-sm',
+        customDiscRing: 'border-orange-500/70 bg-orange-50/90 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 ring-1 ring-orange-500/30 shadow-sm',
+        customDiscText: 'text-orange-600 dark:text-orange-400',
+        sizesActive: 'bg-orange-500/15 text-orange-700 dark:text-orange-300 border-orange-500/30',
+        previewBtn: 'bg-slate-100 dark:bg-[#1f0b09] hover:bg-slate-200 dark:hover:bg-[#2d110e] text-slate-800 dark:text-orange-300 border border-slate-200 dark:border-orange-500/25',
+        quotePdfBtn: 'bg-gradient-to-r from-orange-600 to-amber-600 text-white hover:brightness-110 shadow-md shadow-orange-500/25',
+        invoicePdfBtn: 'bg-gradient-to-r from-rose-600 to-orange-600 text-white hover:brightness-110 shadow-md shadow-rose-500/25',
+        editPdfBtn: 'bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:brightness-110 shadow-md shadow-amber-500/25',
+        pdfToolsBtn: 'bg-gradient-to-r from-orange-600 to-rose-600 text-white hover:brightness-110 shadow-md shadow-orange-500/25',
+        accentText: 'text-orange-600 dark:text-orange-400',
+        accentBadge: 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30',
+        cloudOpenBtn: 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-500/25',
+        activeTabGradient: 'bg-gradient-to-r from-orange-600 via-amber-600 to-rose-600 text-white shadow-md shadow-orange-500/25',
+        iconBgGradient: 'bg-gradient-to-tr from-orange-600 to-rose-500 text-white shadow-orange-500/25',
+        pillActive: 'bg-orange-50 hover:bg-orange-100/80 dark:bg-orange-950/40 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/60 shadow-xs',
+        tagBg: 'bg-orange-950/60 text-orange-300 border border-orange-500/40',
+        hoverBg: 'hover:bg-orange-500/10',
+        modalBorder: 'border-orange-500/30',
+      };
+    case Theme.NORDIC:
+      return {
+        crownGradient: 'bg-gradient-to-r from-sky-400 via-cyan-500 to-indigo-400',
+        activeTabText: 'text-sky-700 dark:text-sky-300',
+        primaryBtn: 'bg-sky-600 hover:bg-sky-500 text-white shadow-sky-500/25',
+        presetDropdown: 'bg-sky-50 dark:bg-[#061528] border border-sky-300 dark:border-sky-800/60 text-sky-700 dark:text-sky-300 hover:border-sky-500',
+        focusRing: 'focus:ring-sky-500',
+        addBtn: 'bg-gradient-to-r from-sky-600 to-blue-600 text-white hover:brightness-110 shadow-sky-500/25',
+        emptyIconColor: 'text-sky-500/40',
+        discountActive: 'bg-sky-600 text-white shadow-sm',
+        customDiscRing: 'border-sky-500/70 bg-sky-50/90 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 shadow-sm',
+        customDiscText: 'text-sky-600 dark:text-sky-400',
+        sizesActive: 'bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30',
+        previewBtn: 'bg-slate-100 dark:bg-[#061528] hover:bg-slate-200 dark:hover:bg-[#0c223e] text-slate-800 dark:text-sky-300 border border-slate-200 dark:border-sky-500/25',
+        quotePdfBtn: 'bg-gradient-to-r from-sky-600 to-blue-600 text-white hover:brightness-110 shadow-md shadow-sky-500/25',
+        invoicePdfBtn: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:brightness-110 shadow-md shadow-blue-500/25',
+        editPdfBtn: 'bg-gradient-to-r from-cyan-600 to-sky-600 text-white hover:brightness-110 shadow-md shadow-cyan-500/25',
+        pdfToolsBtn: 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white hover:brightness-110 shadow-md shadow-sky-500/25',
+        accentText: 'text-sky-600 dark:text-sky-400',
+        accentBadge: 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30',
+        cloudOpenBtn: 'bg-sky-600 hover:bg-sky-500 text-white shadow-sky-500/25',
+        activeTabGradient: 'bg-gradient-to-r from-sky-600 via-cyan-600 to-blue-600 text-white shadow-md shadow-sky-500/25',
+        iconBgGradient: 'bg-gradient-to-tr from-sky-600 to-cyan-500 text-white shadow-sky-500/25',
+        pillActive: 'bg-sky-50 hover:bg-sky-100/80 dark:bg-sky-950/40 dark:hover:bg-sky-900/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60 shadow-xs',
+        tagBg: 'bg-sky-950/60 text-sky-300 border border-sky-500/40',
+        hoverBg: 'hover:bg-sky-500/10',
+        modalBorder: 'border-sky-500/30',
+      };
+    case Theme.RETRO:
+      return {
+        crownGradient: 'bg-gradient-to-r from-amber-500 via-stone-400 to-amber-600',
+        activeTabText: 'text-stone-700 dark:text-amber-300',
+        primaryBtn: 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-500/25',
+        presetDropdown: 'bg-amber-50 dark:bg-[#1c1917] border border-amber-300 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 hover:border-amber-500',
+        focusRing: 'focus:ring-amber-500',
+        addBtn: 'bg-gradient-to-r from-amber-600 to-stone-600 text-white hover:brightness-110 shadow-amber-500/25',
+        emptyIconColor: 'text-amber-500/40',
+        discountActive: 'bg-amber-600 text-white shadow-sm',
+        customDiscRing: 'border-amber-500/70 bg-amber-50/90 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/30 shadow-sm',
+        customDiscText: 'text-amber-600 dark:text-amber-400',
+        sizesActive: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+        previewBtn: 'bg-slate-100 dark:bg-[#1c1917] hover:bg-slate-200 dark:hover:bg-[#292524] text-slate-800 dark:text-amber-300 border border-slate-200 dark:border-amber-500/25',
+        quotePdfBtn: 'bg-gradient-to-r from-amber-600 to-yellow-600 text-white hover:brightness-110 shadow-md shadow-amber-500/25',
+        invoicePdfBtn: 'bg-gradient-to-r from-stone-600 to-amber-700 text-white hover:brightness-110 shadow-md shadow-stone-500/25',
+        editPdfBtn: 'bg-gradient-to-r from-amber-600 to-stone-600 text-white hover:brightness-110 shadow-md shadow-amber-500/25',
+        pdfToolsBtn: 'bg-gradient-to-r from-stone-700 to-amber-600 text-white hover:brightness-110 shadow-md shadow-stone-600/25',
+        accentText: 'text-amber-600 dark:text-amber-400',
+        accentBadge: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30',
+        cloudOpenBtn: 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-500/25',
+        activeTabGradient: 'bg-gradient-to-r from-amber-600 via-stone-600 to-yellow-600 text-white shadow-md shadow-amber-500/25',
+        iconBgGradient: 'bg-gradient-to-tr from-amber-600 to-stone-500 text-white shadow-amber-500/25',
+        pillActive: 'bg-amber-50 hover:bg-amber-100/80 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 shadow-xs',
+        tagBg: 'bg-amber-950/60 text-amber-300 border border-amber-500/40',
+        hoverBg: 'hover:bg-amber-500/10',
+        modalBorder: 'border-amber-500/30',
+      };
+    case Theme.NEBULA:
+      return {
+        crownGradient: 'bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500',
+        activeTabText: 'text-violet-700 dark:text-violet-300',
+        primaryBtn: 'bg-violet-600 hover:bg-violet-500 text-white shadow-violet-500/25',
+        presetDropdown: 'bg-violet-50 dark:bg-[#120524] border border-violet-300 dark:border-violet-800/60 text-violet-700 dark:text-violet-300 hover:border-violet-500',
+        focusRing: 'focus:ring-violet-500',
+        addBtn: 'bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:brightness-110 shadow-violet-500/25',
+        emptyIconColor: 'text-violet-500/40',
+        discountActive: 'bg-violet-600 text-white shadow-sm',
+        customDiscRing: 'border-violet-500/70 bg-violet-50/90 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 ring-1 ring-violet-500/30 shadow-sm',
+        customDiscText: 'text-violet-600 dark:text-violet-400',
+        sizesActive: 'bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30',
+        previewBtn: 'bg-slate-100 dark:bg-[#120524] hover:bg-slate-200 dark:hover:bg-[#1e0938] text-slate-800 dark:text-violet-300 border border-slate-200 dark:border-violet-500/25',
+        quotePdfBtn: 'bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:brightness-110 shadow-md shadow-violet-500/25',
+        invoicePdfBtn: 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:brightness-110 shadow-md shadow-purple-500/25',
+        editPdfBtn: 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:brightness-110 shadow-md shadow-violet-500/25',
+        pdfToolsBtn: 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:brightness-110 shadow-md shadow-indigo-500/25',
+        accentText: 'text-violet-600 dark:text-violet-400',
+        accentBadge: 'bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/30',
+        cloudOpenBtn: 'bg-violet-600 hover:bg-violet-500 text-white shadow-violet-500/25',
+        activeTabGradient: 'bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25',
+        iconBgGradient: 'bg-gradient-to-tr from-violet-600 to-fuchsia-500 text-white shadow-violet-500/25',
+        pillActive: 'bg-violet-50 hover:bg-violet-100/80 dark:bg-violet-950/40 dark:hover:bg-violet-900/50 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800/60 shadow-xs',
+        tagBg: 'bg-violet-950/60 text-violet-300 border border-violet-500/40',
+        hoverBg: 'hover:bg-violet-500/10',
+        modalBorder: 'border-violet-500/30',
+      };
+    case Theme.ROSE:
+      return {
+        crownGradient: 'bg-gradient-to-r from-rose-400 via-pink-500 to-amber-300',
+        activeTabText: 'text-rose-700 dark:text-rose-300',
+        primaryBtn: 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-500/25',
+        presetDropdown: 'bg-rose-50 dark:bg-[#1f0918] border border-rose-300 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 hover:border-rose-500',
+        focusRing: 'focus:ring-rose-500',
+        addBtn: 'bg-gradient-to-r from-rose-600 to-pink-600 text-white hover:brightness-110 shadow-rose-500/25',
+        emptyIconColor: 'text-rose-500/40',
+        discountActive: 'bg-rose-600 text-white shadow-sm',
+        customDiscRing: 'border-rose-500/70 bg-rose-50/90 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 ring-1 ring-rose-500/30 shadow-sm',
+        customDiscText: 'text-rose-600 dark:text-rose-400',
+        sizesActive: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30',
+        previewBtn: 'bg-slate-100 dark:bg-[#1f0918] hover:bg-slate-200 dark:hover:bg-[#2d0e23] text-slate-800 dark:text-rose-300 border border-slate-200 dark:border-rose-500/25',
+        quotePdfBtn: 'bg-gradient-to-r from-rose-600 to-pink-600 text-white hover:brightness-110 shadow-md shadow-rose-500/25',
+        invoicePdfBtn: 'bg-gradient-to-r from-pink-600 to-rose-700 text-white hover:brightness-110 shadow-md shadow-pink-500/25',
+        editPdfBtn: 'bg-gradient-to-r from-rose-600 to-amber-600 text-white hover:brightness-110 shadow-md shadow-rose-500/25',
+        pdfToolsBtn: 'bg-gradient-to-r from-rose-600 to-purple-600 text-white hover:brightness-110 shadow-md shadow-rose-500/25',
+        accentText: 'text-rose-600 dark:text-rose-400',
+        accentBadge: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30',
+        cloudOpenBtn: 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-500/25',
+        activeTabGradient: 'bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 text-white shadow-md shadow-rose-500/25',
+        iconBgGradient: 'bg-gradient-to-tr from-rose-600 to-pink-500 text-white shadow-rose-500/25',
+        pillActive: 'bg-rose-50 hover:bg-rose-100/80 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 shadow-xs',
+        tagBg: 'bg-rose-950/60 text-rose-300 border border-rose-500/40',
+        hoverBg: 'hover:bg-rose-500/10',
+        modalBorder: 'border-rose-500/30',
+      };
+    case Theme.LIGHT:
+      return {
+        crownGradient: 'bg-gradient-to-r from-blue-400 via-indigo-500 to-cyan-400',
+        activeTabText: 'text-blue-700',
+        primaryBtn: 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/25',
+        presetDropdown: 'bg-blue-50 border border-blue-300 text-blue-700 hover:border-blue-500',
+        focusRing: 'focus:ring-blue-500',
+        addBtn: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:brightness-110 shadow-blue-500/25',
+        emptyIconColor: 'text-blue-500/40',
+        discountActive: 'bg-blue-600 text-white shadow-sm',
+        customDiscRing: 'border-blue-500/70 bg-blue-50/90 text-blue-700 ring-1 ring-blue-500/30 shadow-sm',
+        customDiscText: 'text-blue-600',
+        sizesActive: 'bg-blue-500/15 text-blue-700 border-blue-500/30',
+        previewBtn: 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200',
+        quotePdfBtn: 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:brightness-110 shadow-md shadow-blue-500/25',
+        invoicePdfBtn: 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:brightness-110 shadow-md shadow-indigo-500/25',
+        editPdfBtn: 'bg-gradient-to-r from-sky-600 to-teal-600 text-white hover:brightness-110 shadow-md shadow-sky-500/25',
+        pdfToolsBtn: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:brightness-110 shadow-md shadow-blue-500/25',
+        accentText: 'text-blue-600',
+        accentBadge: 'bg-blue-500/15 text-blue-600 border border-blue-500/30',
+        cloudOpenBtn: 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/25',
+        activeTabGradient: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 text-white shadow-md shadow-blue-500/25',
+        iconBgGradient: 'bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-blue-500/25',
+        pillActive: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 shadow-xs',
+        tagBg: 'bg-blue-100 text-blue-800 border border-blue-300',
+        hoverBg: 'hover:bg-blue-500/10',
+        modalBorder: 'border-blue-400/30',
+      };
+    case Theme.DARK:
+    default:
+      return {
+        crownGradient: 'bg-gradient-to-r from-cyan-400 via-indigo-500 to-blue-500',
+        activeTabText: 'text-slate-900 dark:text-cyan-300',
+        primaryBtn: 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/25',
+        presetDropdown: 'bg-blue-50 dark:bg-[#080d22] border border-blue-300 dark:border-cyan-800/60 text-blue-700 dark:text-cyan-300 hover:border-cyan-500',
+        focusRing: 'focus:ring-cyan-500',
+        addBtn: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:brightness-110 shadow-blue-500/25',
+        emptyIconColor: 'text-cyan-500/40',
+        discountActive: 'bg-indigo-600 text-white shadow-sm',
+        customDiscRing: 'border-cyan-500/70 bg-blue-50/90 dark:bg-blue-950/40 text-blue-700 dark:text-cyan-300 ring-1 ring-cyan-500/30 shadow-sm',
+        customDiscText: 'text-cyan-600 dark:text-cyan-400',
+        sizesActive: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border-cyan-500/30',
+        previewBtn: 'bg-slate-100 dark:bg-[#0e1638] hover:bg-slate-200 dark:hover:bg-[#142050] text-slate-800 dark:text-cyan-300 border border-slate-200 dark:border-indigo-500/25',
+        quotePdfBtn: 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:brightness-110 shadow-md shadow-blue-500/25',
+        invoicePdfBtn: 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:brightness-110 shadow-md shadow-indigo-500/25',
+        editPdfBtn: 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white hover:brightness-110 shadow-md shadow-cyan-500/25',
+        pdfToolsBtn: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:brightness-110 shadow-md shadow-blue-500/25',
+        accentText: 'text-cyan-600 dark:text-cyan-400',
+        accentBadge: 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30',
+        cloudOpenBtn: 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/25',
+        activeTabGradient: 'bg-gradient-to-r from-cyan-600 via-indigo-600 to-blue-600 text-white shadow-md shadow-cyan-500/25',
+        iconBgGradient: 'bg-gradient-to-tr from-cyan-500 to-indigo-600 text-white shadow-cyan-500/25',
+        pillActive: 'bg-blue-50 hover:bg-blue-100/80 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-cyan-300 border border-blue-200 dark:border-cyan-800/60 shadow-xs',
+        tagBg: 'bg-cyan-950/60 text-cyan-300 border border-cyan-500/40',
+        hoverBg: 'hover:bg-cyan-500/10',
+        modalBorder: 'border-indigo-500/25',
+      };
+  }
+}
+
