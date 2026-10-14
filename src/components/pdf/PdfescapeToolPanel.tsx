@@ -137,11 +137,11 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 onClick={() => onSelectTool('text')}
                 className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTool === 'text'
-                    ? 'bg-blue-600/20 border-cyan-400 text-cyan-300 shadow-sm'
+                    ? `${modalTheme.tagBg} ${modalTheme.modalBorder} ${modalTheme.accentText} shadow-sm font-bold`
                     : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
                 }`}
               >
-                <Type className="w-5 h-5 text-cyan-400" />
+                <Type className={`w-5 h-5 ${activeTool === 'text' ? modalTheme.accentText : 'text-slate-300'}`} />
                 <span className="font-bold text-xs">{isZh ? '文字 (Text)' : 'Text'}</span>
               </button>
 
@@ -175,11 +175,11 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 onClick={() => onSelectTool('freehand')}
                 className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTool === 'freehand'
-                    ? 'bg-emerald-600/20 border-emerald-400 text-emerald-300 shadow-sm'
+                    ? `${modalTheme.tagBg} ${modalTheme.modalBorder} ${modalTheme.accentText} shadow-sm font-bold`
                     : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
                 }`}
               >
-                <PenTool className="w-5 h-5 text-emerald-400" />
+                <PenTool className={`w-5 h-5 ${activeTool === 'freehand' ? modalTheme.accentText : 'text-slate-300'}`} />
                 <span className="font-bold text-xs">{isZh ? '手写画笔 (Freehand)' : 'Freehand'}</span>
               </button>
 
@@ -203,11 +203,11 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 onClick={() => onSelectTool('line')}
                 className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTool === 'line'
-                    ? 'bg-blue-600/20 border-blue-400 text-blue-300 shadow-sm'
+                    ? `${modalTheme.tagBg} ${modalTheme.modalBorder} ${modalTheme.accentText} shadow-sm font-bold`
                     : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
                 }`}
               >
-                <Minus className="w-5 h-5 text-blue-400" />
+                <Minus className={`w-5 h-5 ${activeTool === 'line' ? modalTheme.accentText : 'text-slate-300'}`} />
                 <span className="font-bold text-xs">{isZh ? '线条 (Line)' : 'Line'}</span>
               </button>
 
@@ -217,11 +217,11 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 onClick={() => onSelectTool('rectangle')}
                 className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTool === 'rectangle'
-                    ? 'bg-indigo-600/20 border-indigo-400 text-indigo-300 shadow-sm'
+                    ? `${modalTheme.tagBg} ${modalTheme.modalBorder} ${modalTheme.accentText} shadow-sm font-bold`
                     : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
                 }`}
               >
-                <Square className="w-5 h-5 text-indigo-400" />
+                <Square className={`w-5 h-5 ${activeTool === 'rectangle' ? modalTheme.accentText : 'text-slate-300'}`} />
                 <span className="font-bold text-xs">{isZh ? '矩形框 (Rectangle)' : 'Rectangle'}</span>
               </button>
 
@@ -231,17 +231,17 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 onClick={() => onSelectTool('link')}
                 className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTool === 'link'
-                    ? 'bg-cyan-600/20 border-cyan-400 text-cyan-300 shadow-sm'
+                    ? `${modalTheme.tagBg} ${modalTheme.modalBorder} ${modalTheme.accentText} shadow-sm font-bold`
                     : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
                 }`}
               >
-                <Link2 className="w-5 h-5 text-cyan-400" />
+                <Link2 className={`w-5 h-5 ${activeTool === 'link' ? modalTheme.accentText : 'text-slate-300'}`} />
                 <span className="font-bold text-xs">{isZh ? '超链接 (Link)' : 'Link'}</span>
               </button>
             </div>
 
             {/* Quick Helper Banner */}
-            <div className="p-2.5 rounded-xl bg-cyan-950/40 border border-cyan-500/20 text-[11px] text-cyan-300 leading-relaxed">
+            <div className={`p-2.5 rounded-xl bg-slate-800/60 border ${modalTheme.modalBorder} text-[11px] ${modalTheme.accentText} leading-relaxed`}>
               💡 {isZh ? '点击【文字】后，直接点击画面上任何文字即可修改！或按住鼠标拖拽拉出涂白框。' : 'Select Text, then click any text on the PDF to edit it directly! Or drag to whiteout.'}
             </div>
           </div>
@@ -324,7 +324,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
             <div className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center justify-between text-xs">
               <span className="text-slate-300">
                 {isZh ? '当前选中第' : 'Current Page:'}{' '}
-                <strong className="text-cyan-400 font-mono text-sm">{currentPageIndex + 1}</strong> / {totalPages}{' '}
+                <strong className={`${modalTheme.accentText} font-mono text-sm`}>{currentPageIndex + 1}</strong> / {totalPages}{' '}
                 {isZh ? '页' : ''}
               </span>
             </div>
@@ -335,7 +335,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 onClick={onRotateClockwise}
                 className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 flex items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer active:scale-95"
               >
-                <RotateCw className="w-4 h-4 text-cyan-400" />
+                <RotateCw className={`w-4 h-4 ${modalTheme.accentText}`} />
                 <span>{isZh ? '顺时针 90°' : 'Rotate CW'}</span>
               </button>
 
@@ -344,7 +344,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 onClick={onRotateCounterClockwise}
                 className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 flex items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer active:scale-95"
               >
-                <RotateCcw className="w-4 h-4 text-cyan-400" />
+                <RotateCcw className={`w-4 h-4 ${modalTheme.accentText}`} />
                 <span>{isZh ? '逆时针 90°' : 'Rotate CCW'}</span>
               </button>
 
@@ -354,7 +354,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 disabled={currentPageIndex === 0}
                 className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 border border-slate-700 text-slate-200 flex items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer active:scale-95"
               >
-                <ArrowUp className="w-4 h-4 text-blue-400" />
+                <ArrowUp className={`w-4 h-4 ${modalTheme.accentText}`} />
                 <span>{isZh ? '上移一页' : 'Move Up'}</span>
               </button>
 
@@ -364,7 +364,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 disabled={currentPageIndex >= totalPages - 1}
                 className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 border border-slate-700 text-slate-200 flex items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer active:scale-95"
               >
-                <ArrowDown className="w-4 h-4 text-blue-400" />
+                <ArrowDown className={`w-4 h-4 ${modalTheme.accentText}`} />
                 <span>{isZh ? '下移一页' : 'Move Down'}</span>
               </button>
 
@@ -373,7 +373,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 onClick={onAddBlankPage}
                 className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 flex items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer active:scale-95"
               >
-                <FilePlus2 className="w-4 h-4 text-emerald-400" />
+                <FilePlus2 className={`w-4 h-4 ${modalTheme.accentText}`} />
                 <span>{isZh ? '追加空白页' : 'Add Blank Page'}</span>
               </button>
 
@@ -390,7 +390,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
 
             {/* Quick Access to Merge & Split Tools */}
             <div className="pt-2 border-t border-slate-700/80 space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block">
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${modalTheme.accentText} block`}>
                 {isZh ? 'PDF 合并与拆分工具' : 'PDF Joiner & Splitter'}
               </span>
 
@@ -398,18 +398,18 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 <button
                   type="button"
                   onClick={onOpenPdfJoiner}
-                  className="p-2.5 rounded-xl bg-gradient-to-r from-blue-900/30 to-indigo-900/30 hover:from-blue-900/50 hover:to-indigo-900/50 border border-blue-500/30 text-blue-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                  className={`p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border ${modalTheme.modalBorder} ${modalTheme.accentText} flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95`}
                 >
-                  <Layers className="w-4 h-4 text-blue-400" />
+                  <Layers className={`w-4 h-4 ${modalTheme.accentText}`} />
                   <span>{isZh ? '合并多个 PDF' : 'Merge PDFs'}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={onOpenPdfSplitter}
-                  className="p-2.5 rounded-xl bg-gradient-to-r from-purple-900/30 to-pink-900/30 hover:from-purple-900/50 hover:to-pink-900/50 border border-purple-500/30 text-purple-300 flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                  className={`p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border ${modalTheme.modalBorder} ${modalTheme.accentText} flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95`}
                 >
-                  <Scissors className="w-4 h-4 text-purple-400" />
+                  <Scissors className={`w-4 h-4 ${modalTheme.accentText}`} />
                   <span>{isZh ? '拆分提取页面' : 'Split PDF'}</span>
                 </button>
               </div>
@@ -425,9 +425,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
             </span>
 
             {/* Merge PDFs Card */}
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-950/60 to-indigo-950/60 border border-blue-500/30 space-y-2.5">
+            <div className={`p-3 rounded-2xl bg-slate-900 border ${modalTheme.modalBorder} space-y-2.5`}>
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400">
+                <div className={`p-1.5 rounded-lg ${modalTheme.iconBgGradient} text-white`}>
                   <Layers className="w-4 h-4" />
                 </div>
                 <div>
@@ -442,7 +442,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
               <button
                 type="button"
                 onClick={onOpenPdfJoiner}
-                className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all"
+                className={`w-full py-2 px-3 rounded-xl ${modalTheme.primaryBtn} text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all`}
               >
                 <Layers className="w-3.5 h-3.5" />
                 <span>{isZh ? '打开 PDF 合并工具箱...' : 'Open PDF Joiner Studio...'}</span>
@@ -450,9 +450,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
             </div>
 
             {/* Split PDF Card */}
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-950/60 to-pink-950/60 border border-purple-500/30 space-y-2.5">
+            <div className={`p-3 rounded-2xl bg-slate-900 border ${modalTheme.modalBorder} space-y-2.5`}>
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400">
+                <div className={`p-1.5 rounded-lg ${modalTheme.iconBgGradient} text-white`}>
                   <Scissors className="w-4 h-4" />
                 </div>
                 <div>
@@ -467,7 +467,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
               <button
                 type="button"
                 onClick={onOpenPdfSplitter}
-                className="w-full py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all"
+                className={`w-full py-2 px-3 rounded-xl ${modalTheme.activeTabGradient} text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all`}
               >
                 <Scissors className="w-3.5 h-3.5" />
                 <span>{isZh ? '打开 PDF 拆分工具箱...' : 'Open PDF Splitter Studio...'}</span>
@@ -476,9 +476,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
 
             {/* Image Converter Card */}
             {onOpenImageConverter && (
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-teal-950/60 to-emerald-950/60 border border-teal-500/30 space-y-2.5">
+              <div className={`p-3 rounded-2xl bg-slate-900 border ${modalTheme.modalBorder} space-y-2.5`}>
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-teal-500/20 text-teal-400">
+                  <div className={`p-1.5 rounded-lg ${modalTheme.iconBgGradient} text-white`}>
                     <ImageIcon className="w-4 h-4" />
                   </div>
                   <div>
@@ -493,7 +493,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
                 <button
                   type="button"
                   onClick={onOpenImageConverter}
-                  className="w-full py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all"
+                  className={`w-full py-2 px-3 rounded-xl ${modalTheme.primaryBtn} text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all`}
                 >
                   <ImageIcon className="w-3.5 h-3.5" />
                   <span>{isZh ? '打开图片格式转换工作台...' : 'Open Image Converter...'}</span>
@@ -517,8 +517,8 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
             </span>
 
             {/* Upload PDF Box */}
-            <label className="p-4 rounded-2xl border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 bg-cyan-950/20 hover:bg-cyan-950/40 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all text-center">
-              <Upload className="w-6 h-6 text-cyan-400" />
+            <label className={`p-4 rounded-2xl border-2 border-dashed ${modalTheme.modalBorder} ${modalTheme.tagBg} hover:opacity-90 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all text-center`}>
+              <Upload className={`w-6 h-6 ${modalTheme.accentText}`} />
               <div className="font-bold text-xs text-white">
                 {isZh ? '上传外部 PDF 文件' : 'Upload External PDF'}
               </div>
@@ -534,7 +534,7 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
               onClick={onCreateBlankA4}
               className="w-full p-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
             >
-              <FilePlus2 className="w-4 h-4 text-emerald-400" />
+              <FilePlus2 className={`w-4 h-4 ${modalTheme.accentText}`} />
               <span>{isZh ? '创建空白 A4 纸张画布' : 'Create Blank A4 Canvas'}</span>
             </button>
 
@@ -543,9 +543,9 @@ export const PdfescapeToolPanel: React.FC<PdfescapeToolPanelProps> = ({
               <button
                 type="button"
                 onClick={onSelectCurrentQuote}
-                className="w-full p-3 rounded-xl border border-blue-500/30 bg-blue-600/20 hover:bg-blue-600/30 text-cyan-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
+                className={`w-full p-3 rounded-xl border ${modalTheme.modalBorder} ${modalTheme.tagBg} ${modalTheme.accentText} font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95`}
               >
-                <RefreshCw className="w-4 h-4 text-cyan-400" />
+                <RefreshCw className={`w-4 h-4 ${modalTheme.accentText}`} />
                 <span>{isZh ? '切回开单报价单' : 'Switch Back to Quote Sheet'}</span>
               </button>
             )}

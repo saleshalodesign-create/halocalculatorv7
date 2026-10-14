@@ -1710,11 +1710,11 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden border-b border-cyan-500/30 bg-cyan-950/40 px-3 sm:px-4 py-2 shrink-0 flex flex-wrap items-center justify-between gap-2 text-xs"
+                className={`overflow-hidden border-b ${modalTheme.modalBorder} bg-slate-900/90 px-3 sm:px-4 py-2 shrink-0 flex flex-wrap items-center justify-between gap-2 text-xs`}
               >
                 <div className="flex flex-wrap items-center gap-2 flex-1">
-                  <div className="flex items-center gap-1.5 bg-slate-900 border border-cyan-500/30 rounded-lg px-2 py-1 text-slate-200">
-                    <Search className="w-3.5 h-3.5 text-cyan-400" />
+                  <div className={`flex items-center gap-1.5 bg-slate-900 border ${modalTheme.modalBorder} rounded-lg px-2 py-1 text-slate-200`}>
+                    <Search className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                     <input
                       type="text"
                       value={findText}
@@ -1753,7 +1753,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-cyan-300 font-mono">
+                  <span className={`text-[11px] ${modalTheme.accentText} font-mono font-bold`}>
                     {findText.trim()
                       ? `${
                           extractedTextItems.filter(it =>
@@ -1816,7 +1816,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
               {/* TAB: STRUCTURED QUOTE FORM (when activeTab === 'document') */}
               {activeTab === 'document' && (
                 <div className="space-y-3">
-                  <div className="p-2.5 rounded-xl bg-slate-100/80 dark:bg-[#0c122c] border border-slate-200 dark:border-indigo-500/20 space-y-2.5">
+                  <div className={`p-2.5 rounded-xl bg-slate-100/80 dark:bg-[#0c122c] border border-slate-200 dark:${modalTheme.modalBorder} space-y-2.5`}>
                     <span className="text-[11px] font-black uppercase text-slate-500 dark:text-neutral-400 tracking-wider block">
                       {isZh ? '单据类型与编号' : 'Document Type & Number'}
                     </span>
@@ -1828,7 +1828,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                           onClick={() => setDocType(t)}
                           className={`py-1 text-[10px] sm:text-xs font-bold rounded-lg uppercase transition-all cursor-pointer ${
                             docType === t
-                              ? 'bg-blue-600 text-white shadow-xs'
+                              ? `${modalTheme.primaryBtn} text-white shadow-xs`
                               : 'bg-white dark:bg-white/5 text-slate-700 dark:text-neutral-300'
                           }`}
                         >
@@ -1874,7 +1874,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                   </div>
 
                   {/* Customer Information */}
-                  <div className="p-2.5 rounded-xl bg-slate-100/80 dark:bg-[#0c122c] border border-slate-200 dark:border-indigo-500/20 space-y-2 text-xs">
+                  <div className={`p-2.5 rounded-xl bg-slate-100/80 dark:bg-[#0c122c] border border-slate-200 dark:${modalTheme.modalBorder} space-y-2 text-xs`}>
                     <span className="text-[11px] font-black uppercase text-slate-500 dark:text-neutral-400 tracking-wider block">
                       {isZh ? '客户资料' : 'Client Details'}
                     </span>
@@ -1933,7 +1933,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                   </div>
 
                   {/* Line Items List */}
-                  <div className="p-2.5 rounded-xl bg-slate-100/80 dark:bg-[#0c122c] border border-slate-200 dark:border-indigo-500/20 space-y-2">
+                  <div className={`p-2.5 rounded-xl bg-slate-100/80 dark:bg-[#0c122c] border border-slate-200 dark:${modalTheme.modalBorder} space-y-2`}>
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-black uppercase text-slate-500 dark:text-neutral-400 tracking-wider">
                         {isZh ? '项目明细' : 'Line Items'} ({items.length})
@@ -1941,7 +1941,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                       <button
                         type="button"
                         onClick={handleAddItem}
-                        className="px-2 py-0.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] flex items-center gap-1 cursor-pointer"
+                        className={`px-2 py-0.5 rounded-md ${modalTheme.primaryBtn} text-white font-bold text-[10px] flex items-center gap-1 cursor-pointer`}
                       >
                         <Plus className="w-3 h-3" />
                         <span>{isZh ? '添加项目' : 'Add Item'}</span>
@@ -2011,15 +2011,15 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
               )}
 
               {/* DETECTED TEXT INSPECTOR & 1-CLICK EDIT (Always available!) */}
-              <div className="p-3 rounded-xl bg-slate-100/90 dark:bg-[#0c122c] border border-slate-200 dark:border-indigo-500/20 space-y-2">
+              <div className={`p-3 rounded-xl bg-slate-100/90 dark:bg-[#0c122c] border border-slate-200 dark:${modalTheme.modalBorder} space-y-2`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <Scissors className="w-4 h-4 text-cyan-400" />
+                    <Scissors className={`w-4 h-4 ${modalTheme.accentText}`} />
                     <span className="text-xs font-black uppercase text-slate-800 dark:text-neutral-200">
                       {isZh ? '页面文字清单' : 'Page Text Items'} ({extractedTextItems.length})
                     </span>
                   </div>
-                  <span className="text-[10px] text-cyan-500 font-bold">
+                  <span className={`text-[10px] ${modalTheme.accentText} font-bold`}>
                     {isZh ? '可直接点击修改' : 'Click to Edit'}
                   </span>
                 </div>
@@ -2048,7 +2048,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                         onMouseLeave={() => setHoveredTextId(null)}
                         className={`p-1.5 rounded-lg border flex items-center justify-between gap-1.5 text-xs transition-all ${
                           hoveredTextId === item.id
-                            ? 'border-cyan-500 bg-cyan-500/10'
+                            ? `${modalTheme.modalBorder} ${modalTheme.tagBg}`
                             : 'border-slate-200 dark:border-white/10 bg-white dark:bg-[#050817]'
                         }`}
                       >
@@ -2059,7 +2059,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleStartEditText(item)}
-                            className="px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-xs"
+                            className={`px-2 py-0.5 rounded ${modalTheme.primaryBtn} text-white font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-xs`}
                             title="Edit this text"
                           >
                             <Edit3 className="w-2.5 h-2.5" />
@@ -2074,7 +2074,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
 
               {/* TOOL: STAMPS & PRESETS */}
               {activeTool === 'stamp' && (
-                <div className="p-3 rounded-xl bg-slate-100/90 dark:bg-[#0c122c] border border-slate-200 dark:border-indigo-500/20 space-y-2">
+                <div className={`p-3 rounded-xl bg-slate-100/90 dark:bg-[#0c122c] border border-slate-200 dark:${modalTheme.modalBorder} space-y-2`}>
                   <span className="text-xs font-black uppercase text-slate-700 dark:text-neutral-200 block">
                     {isZh ? '印章样式预设' : 'Stamp Presets'}
                   </span>
@@ -2086,7 +2086,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                         onClick={() => setSelectedStampId(preset.id)}
                         className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
                           selectedStampId === preset.id
-                            ? 'border-cyan-500 bg-white dark:bg-[#050817] shadow-xs'
+                            ? `${modalTheme.modalBorder} bg-white dark:bg-[#050817] shadow-xs`
                             : 'border-slate-200 dark:border-white/10 bg-white/60 dark:bg-white/5 opacity-80 hover:opacity-100'
                         }`}
                       >
@@ -2133,10 +2133,10 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
 
               {/* TOOL: SIGNATURE PAD */}
               {activeTool === 'signature' && (
-                <div className="p-3 rounded-xl bg-slate-100/90 dark:bg-[#0c122c] border border-slate-200 dark:border-indigo-500/20 space-y-2.5">
+                <div className={`p-3 rounded-xl bg-slate-100/90 dark:bg-[#0c122c] border border-slate-200 dark:${modalTheme.modalBorder} space-y-2.5`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <PenTool className="w-3.5 h-3.5 text-emerald-400" />
+                      <PenTool className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                       <span className="text-xs font-black uppercase text-slate-700 dark:text-neutral-200">
                         {isZh ? '电子签名板' : 'Digital Signature Pad'}
                       </span>
@@ -2166,7 +2166,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                           type="button"
                           onClick={() => setSignaturePenColor(c.color)}
                           className={`w-4 h-4 rounded-full border cursor-pointer transition-all ${
-                            signaturePenColor === c.color ? 'ring-2 ring-emerald-400 scale-110' : 'opacity-70 hover:opacity-100'
+                            signaturePenColor === c.color ? `ring-2 ${modalTheme.accentText.replace('text-', 'ring-')} scale-110` : 'opacity-70 hover:opacity-100'
                           }`}
                           style={{ backgroundColor: c.color }}
                           title={c.label}
@@ -2196,7 +2196,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                     <button
                       type="button"
                       onClick={handlePlaceSignatureFromSidebar}
-                      className="w-full py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-all active:scale-95"
+                      className={`w-full py-2 rounded-xl ${modalTheme.primaryBtn} text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-all active:scale-95`}
                     >
                       <Check className="w-3.5 h-3.5" />
                       <span>{isZh ? '放置签名到当前页面' : 'Place Signature on Page'}</span>
@@ -2207,7 +2207,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                       onClick={() => setSignatureModalOpen(true)}
                       className="w-full py-1.5 rounded-xl border border-slate-300 dark:border-white/15 bg-white/70 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-neutral-200 font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
                     >
-                      <Sparkles className="w-3 h-3 text-indigo-400" />
+                      <Sparkles className={`w-3 h-3 ${modalTheme.accentText}`} />
                       <span>{isZh ? '打开签名设计器 (书法生成/上传图片)' : 'Signature Studio (Type/Upload)'}</span>
                     </button>
                   </div>
@@ -2220,7 +2220,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
 
               {/* ACTIVE ANNOTATION LAYERS MANAGER */}
               {annotations.length > 0 && (
-                <div className="p-3 rounded-xl bg-slate-100/90 dark:bg-[#0c122c] border border-slate-200 dark:border-indigo-500/20 space-y-2">
+                <div className={`p-3 rounded-xl bg-slate-100/90 dark:bg-[#0c122c] border border-slate-200 dark:${modalTheme.modalBorder} space-y-2`}>
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-black uppercase text-slate-700 dark:text-neutral-200">
                       {isZh ? '已修改图层' : 'Active Edited Layers'} ({annotations.length})
@@ -2238,7 +2238,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                     {annotations.map((ann, idx) => (
                       <div
                         key={ann.id ? `${ann.id}-${idx}` : `ann-item-${idx}`}
-                        className="p-1.5 rounded-lg bg-white dark:bg-[#050817] border border-slate-200 dark:border-white/10 flex items-center justify-between gap-2 text-xs hover:border-cyan-500 transition-all"
+                        className={`p-1.5 rounded-lg bg-white dark:bg-[#050817] border border-slate-200 dark:border-white/10 flex items-center justify-between gap-2 text-xs hover:${modalTheme.modalBorder} transition-all`}
                       >
                         <span className="font-bold text-slate-400 text-[10px]">
                           P{ann.pageIndex + 1}
@@ -2259,7 +2259,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                             <button
                               type="button"
                               onClick={() => handleStartEditAnnotation(ann)}
-                              className="text-blue-500 hover:text-blue-700 p-1 cursor-pointer"
+                              className={`p-1 cursor-pointer ${modalTheme.accentText} hover:opacity-80`}
                               title="Edit text"
                             >
                               <Edit3 className="w-3 h-3" />
@@ -2314,7 +2314,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                         type="button"
                         disabled={currentPageIndex <= 0}
                         onClick={() => setCurrentPageIndex(prev => Math.max(0, prev - 1))}
-                        className="hover:text-cyan-300 disabled:opacity-30 p-0.5 cursor-pointer"
+                        className={`hover:${modalTheme.accentText} disabled:opacity-30 p-0.5 cursor-pointer`}
                         title="Previous page"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
@@ -2326,7 +2326,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                         type="button"
                         disabled={currentPageIndex >= totalPages - 1}
                         onClick={() => setCurrentPageIndex(prev => Math.min(totalPages - 1, prev + 1))}
-                        className="hover:text-cyan-300 disabled:opacity-30 p-0.5 cursor-pointer"
+                        className={`hover:${modalTheme.accentText} disabled:opacity-30 p-0.5 cursor-pointer`}
                         title="Next page"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -2339,7 +2339,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setZoomScale(prev => Math.max(0.7, prev - 0.2))}
-                      className="p-1 hover:text-cyan-300 cursor-pointer"
+                      className={`p-1 hover:${modalTheme.accentText} cursor-pointer`}
                       title="Zoom Out"
                     >
                       <ZoomOut className="w-3 h-3" />
@@ -2350,7 +2350,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setZoomScale(prev => Math.min(2.2, prev + 0.2))}
-                      className="p-1 hover:text-cyan-300 cursor-pointer"
+                      className={`p-1 hover:${modalTheme.accentText} cursor-pointer`}
                       title="Zoom In"
                     >
                       <ZoomIn className="w-3 h-3" />
@@ -2363,7 +2363,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                     className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[11px] font-semibold flex items-center gap-1 text-neutral-200 cursor-pointer active:scale-95"
                     title="Rotate page 90°"
                   >
-                    <RotateCw className="w-3 h-3 text-cyan-400" />
+                    <RotateCw className={`w-3 h-3 ${modalTheme.accentText}`} />
                     <span className="hidden sm:inline">{isZh ? '旋转' : 'Rotate'}</span>
                   </button>
                 </div>
@@ -2408,6 +2408,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                 onChangeShapeStrokeWidth={setShapeStrokeWidth}
                 shapeFillColor={shapeFillColor}
                 onChangeShapeFillColor={setShapeFillColor}
+                theme={theme}
               />
 
               {/* Main Canvas Scroll Viewport */}
@@ -2465,6 +2466,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                     selectedStampId={selectedStampId}
                     customStampText={customStampText}
                     customStampColor={customStampColor}
+                    theme={theme}
                   />
                 </div>
               </div>
@@ -2472,7 +2474,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
           </div>
 
           {/* Modal Footer Bar with Totals & Quick Actions */}
-          <div className="px-3 sm:px-4 py-2.5 bg-slate-50 dark:bg-[#0c122c] border-t border-slate-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-2.5 shrink-0 text-xs">
+          <div className={`px-3 sm:px-4 py-2.5 bg-slate-50 dark:bg-[#0c122c] border-t border-slate-200 dark:${modalTheme.modalBorder} flex flex-wrap items-center justify-between gap-2.5 shrink-0 text-xs`}>
             <div className="flex items-center gap-3 font-mono">
               <span className="text-slate-600 dark:text-neutral-400">
                 {isZh ? '合计总额' : 'Grand Total'}:{' '}
@@ -2483,7 +2485,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
               {depositNum > 0 && (
                 <span className="text-slate-600 dark:text-neutral-400">
                   {isZh ? '未付余款' : 'Balance'}:{' '}
-                  <strong className="text-blue-600 dark:text-cyan-400 text-sm">
+                  <strong className={`${modalTheme.accentText} text-sm font-bold`}>
                     ${balanceDue.toFixed(2)}
                   </strong>
                 </span>
@@ -2502,7 +2504,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
               <button
                 type="button"
                 onClick={handleDownload}
-                className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold transition-all shadow-md shadow-blue-500/25 active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                className={`px-4 py-1.5 rounded-xl ${modalTheme.primaryBtn} text-white font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5 cursor-pointer`}
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>{isZh ? '下载修改后 PDF' : 'Download Edited PDF'}</span>
@@ -2527,12 +2529,12 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="w-full max-w-lg bg-white dark:bg-[#0c122c] border border-slate-300 dark:border-indigo-500/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+              className={`w-full max-w-lg bg-white dark:bg-[#0c122c] border border-slate-300 dark:${modalTheme.modalBorder} rounded-2xl shadow-2xl overflow-hidden flex flex-col`}
             >
               {/* Header */}
               <div className="px-5 py-3.5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-white/5">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <div className={`p-1.5 rounded-lg ${modalTheme.iconBgGradient} text-white`}>
                     <PenTool className="w-4 h-4" />
                   </div>
                   <div>
@@ -2562,7 +2564,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                   onClick={() => setSignatureMode('draw')}
                   className={`flex-1 py-1.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     signatureMode === 'draw'
-                      ? 'bg-emerald-600 text-white shadow-xs'
+                      ? `${modalTheme.primaryBtn} text-white shadow-xs`
                       : 'bg-white dark:bg-white/5 text-slate-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'
                   }`}
                 >
@@ -2575,7 +2577,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                   onClick={() => setSignatureMode('type')}
                   className={`flex-1 py-1.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     signatureMode === 'type'
-                      ? 'bg-emerald-600 text-white shadow-xs'
+                      ? `${modalTheme.primaryBtn} text-white shadow-xs`
                       : 'bg-white dark:bg-white/5 text-slate-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'
                   }`}
                 >
@@ -2588,7 +2590,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                   onClick={() => setSignatureMode('upload')}
                   className={`flex-1 py-1.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     signatureMode === 'upload'
-                      ? 'bg-emerald-600 text-white shadow-xs'
+                      ? `${modalTheme.primaryBtn} text-white shadow-xs`
                       : 'bg-white dark:bg-white/5 text-slate-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'
                   }`}
                 >
@@ -2688,7 +2690,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                             onClick={() => setTypedSignatureStyle(st.id as any)}
                             className={`p-2 rounded-xl border text-center font-bold text-xs transition-all cursor-pointer ${
                               typedSignatureStyle === st.id
-                                ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                                ? `${modalTheme.modalBorder} ${modalTheme.tagBg} ${modalTheme.accentText}`
                                 : 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/5'
                             }`}
                           >
@@ -2718,8 +2720,8 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                 {/* 3. UPLOAD MODE */}
                 {signatureMode === 'upload' && (
                   <div className="space-y-3">
-                    <label className="p-6 rounded-2xl border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 bg-emerald-950/20 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all text-center">
-                      <Upload className="w-8 h-8 text-emerald-400" />
+                    <label className={`p-6 rounded-2xl border-2 border-dashed ${modalTheme.modalBorder} ${modalTheme.tagBg} hover:opacity-90 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all text-center`}>
+                      <Upload className={`w-8 h-8 ${modalTheme.accentText}`} />
                       <div className="font-bold text-xs text-slate-800 dark:text-white">
                         {isZh ? '点击上传签名文件 (PNG / JPG)' : 'Upload Signature Image'}
                       </div>
@@ -2760,7 +2762,7 @@ export const PdfEditorModal: React.FC<PdfEditorModalProps> = ({
                 <button
                   type="button"
                   onClick={handleConfirmSignaturePlacement}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/30 cursor-pointer active:scale-95 transition-all"
+                  className={`px-5 py-2 rounded-xl ${modalTheme.primaryBtn} text-white font-bold text-xs flex items-center gap-1.5 shadow-lg cursor-pointer active:scale-95 transition-all`}
                 >
                   <Check className="w-4 h-4" />
                   <span>{isZh ? '确定并放置到文档' : 'Insert Signature on Document'}</span>

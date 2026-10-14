@@ -3,6 +3,8 @@ import { Edit3, Check, Trash2, Move, StickyNote, Link2, ExternalLink } from 'luc
 import { ExtractedTextItem } from '../../utils/pdfRenderer';
 import { PdfAnnotation, STAMP_PRESETS, generateUniqueAnnotationId } from '../../utils/pdfEditor';
 import { ActiveTextProps } from './PdfescapePropertyBar';
+import { Theme, ThemeType } from '../../types';
+import { getModalThemeStyle } from '../../utils/columnThemes';
 
 interface PdfescapeCanvasOverlayProps {
   canvasWidth: number;
@@ -48,6 +50,7 @@ interface PdfescapeCanvasOverlayProps {
   customStampColor?: string;
   // Signature placement
   onPlaceSignatureAt?: (x: number, y: number) => void;
+  theme?: ThemeType;
 }
 
 export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
@@ -81,7 +84,9 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
   customStampText = 'APPROVED & VERIFIED',
   customStampColor = '#b91c1c',
   onPlaceSignatureAt,
+  theme = Theme.DARK,
 }) => {
+  const modalTheme = getModalThemeStyle(theme);
   const overlayRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -605,7 +610,7 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
               e.stopPropagation();
               onStartEditTextItem(item);
             }}
-            className="extracted-text-item absolute cursor-pointer hover:bg-cyan-500/20 hover:outline hover:outline-1 hover:outline-cyan-400 rounded-xs transition-colors group z-10"
+            className="extracted-text-item absolute cursor-pointer hover:bg-white/10 hover:outline hover:outline-1 hover:outline-current rounded-xs transition-colors group z-10"
             style={{
               left: `${item.xPercent * 100}%`,
               top: `${item.yPercent * 100}%`,
@@ -615,8 +620,8 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
             title={`${isZh ? '点击直接编辑文字' : 'Click to edit'}: "${item.text}" • ${item.fontDisplayName || item.fontFamily} • ${item.fontSizePt}pt`}
           >
             {/* Hover mini-badge with auto-detected font info */}
-            <span className="hidden group-hover:flex absolute -top-5 left-0 items-center gap-1 px-1.5 py-0.5 bg-slate-900/95 text-cyan-300 border border-cyan-500/40 text-[9px] font-mono font-bold rounded shadow-lg pointer-events-none whitespace-nowrap z-40">
-              <Edit3 className="w-2.5 h-2.5 text-cyan-400" />
+            <span className={`hidden group-hover:flex absolute -top-5 left-0 items-center gap-1 px-1.5 py-0.5 bg-slate-900/95 ${modalTheme.accentText} border ${modalTheme.modalBorder} text-[9px] font-mono font-bold rounded shadow-lg pointer-events-none whitespace-nowrap z-40`}>
+              <Edit3 className={`w-2.5 h-2.5 ${modalTheme.accentText}`} />
               <span>
                 {item.fontDisplayName || 'Font'} • {item.fontSizePt}pt{item.isBold ? ' • Bold' : ''}
               </span>
@@ -656,7 +661,7 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
             }}
             onMouseDown={e => e.stopPropagation()}
           >
-            <div className="relative w-full h-full flex items-center bg-white border border-cyan-400 rounded-xs shadow-xs box-border overflow-hidden">
+            <div className={`relative w-full h-full flex items-center bg-white border ${modalTheme.modalBorder} rounded-xs shadow-xs box-border overflow-hidden`}>
               <input
                 ref={inputRef}
                 type="text"
@@ -687,7 +692,7 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
                   e.stopPropagation();
                   onCommitEditing();
                 }}
-                className="absolute -right-6 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs cursor-pointer transition-transform active:scale-90"
+                className={`absolute -right-6 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full ${modalTheme.primaryBtn} text-white shadow-xs cursor-pointer transition-transform active:scale-90`}
                 title="Apply (Enter)"
               >
                 <Check className="w-3 h-3" />
@@ -723,7 +728,7 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
               onStartEditAnnotation(ann);
             }}
             className={`annotation-item absolute pointer-events-auto transition-all group z-20 ${
-              isSelected ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:ring-1 hover:ring-cyan-400'
+              isSelected ? `ring-2 ${modalTheme.accentText.replace('text-', 'ring-')} shadow-lg` : 'hover:ring-1 hover:ring-current'
             }`}
             style={{
               left,
@@ -868,7 +873,7 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
               <>
                 {/* Center Move Handle */}
                 <div
-                  className="interactive-handle absolute -top-6 left-1/2 -translate-x-1/2 p-1 rounded bg-blue-600 text-white cursor-move shadow-md z-30"
+                  className={`interactive-handle absolute -top-6 left-1/2 -translate-x-1/2 p-1 rounded ${modalTheme.primaryBtn} text-white cursor-move shadow-md z-30`}
                   onMouseDown={e => {
                     e.stopPropagation();
                     const rect = overlayRef.current?.getBoundingClientRect();
@@ -888,7 +893,7 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
 
                 {/* 4 Corner Resize Handles */}
                 <div
-                  className="interactive-handle absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-full cursor-nwse-resize z-30 shadow-xs"
+                  className={`interactive-handle absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-current ${modalTheme.accentText} rounded-full cursor-nwse-resize z-30 shadow-xs`}
                   onMouseDown={e => {
                     e.stopPropagation();
                     const rect = overlayRef.current?.getBoundingClientRect();
@@ -906,7 +911,7 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
                   }}
                 />
                 <div
-                  className="interactive-handle absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-full cursor-nesw-resize z-30 shadow-xs"
+                  className={`interactive-handle absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-current ${modalTheme.accentText} rounded-full cursor-nesw-resize z-30 shadow-xs`}
                   onMouseDown={e => {
                     e.stopPropagation();
                     const rect = overlayRef.current?.getBoundingClientRect();
@@ -924,7 +929,7 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
                   }}
                 />
                 <div
-                  className="interactive-handle absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-full cursor-nesw-resize z-30 shadow-xs"
+                  className={`interactive-handle absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-current ${modalTheme.accentText} rounded-full cursor-nesw-resize z-30 shadow-xs`}
                   onMouseDown={e => {
                     e.stopPropagation();
                     const rect = overlayRef.current?.getBoundingClientRect();
@@ -942,7 +947,7 @@ export const PdfescapeCanvasOverlay: React.FC<PdfescapeCanvasOverlayProps> = ({
                   }}
                 />
                 <div
-                  className="interactive-handle absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-blue-600 rounded-full cursor-nwse-resize z-30 shadow-xs"
+                  className={`interactive-handle absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-current ${modalTheme.accentText} rounded-full cursor-nwse-resize z-30 shadow-xs`}
                   onMouseDown={e => {
                     e.stopPropagation();
                     const rect = overlayRef.current?.getBoundingClientRect();

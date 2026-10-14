@@ -17,6 +17,8 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { PdfAnnotation, STAMP_PRESETS } from '../../utils/pdfEditor';
+import { Theme, ThemeType } from '../../types';
+import { getModalThemeStyle } from '../../utils/columnThemes';
 
 export const STANDARD_FONTS = [
   { label: 'Plus Jakarta Sans', value: '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
@@ -94,6 +96,7 @@ interface PdfescapePropertyBarProps {
   onChangeShapeStrokeWidth: (w: number) => void;
   shapeFillColor: string;
   onChangeShapeFillColor: (c: string) => void;
+  theme?: ThemeType;
 }
 
 export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
@@ -127,7 +130,9 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
   onChangeShapeStrokeWidth,
   shapeFillColor,
   onChangeShapeFillColor,
+  theme = Theme.DARK,
 }) => {
+  const modalTheme = getModalThemeStyle(theme);
   const isTextMode =
     activeEditingText !== null ||
     (selectedAnnotation && (selectedAnnotation.type === 'text' || selectedAnnotation.type === 'whiteout')) ||
@@ -190,12 +195,12 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
   const hasMatchingStandard = STANDARD_FONTS.some(f => f.value === currentFont);
 
   return (
-    <div className="w-full bg-slate-900 border-b border-cyan-500/20 px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 text-xs select-none shadow-sm z-30 shrink-0">
+    <div className={`w-full bg-slate-900 border-b ${modalTheme.modalBorder} px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 text-xs select-none shadow-sm z-30 shrink-0`}>
       {/* Left side: Contextual property controls */}
       <div className="flex flex-wrap items-center gap-2">
         {isTextMode ? (
           <>
-            <span className="flex items-center gap-1 text-[11px] font-bold text-cyan-400 uppercase tracking-wider border-r border-white/10 pr-2">
+            <span className={`flex items-center gap-1 text-[11px] font-bold ${modalTheme.accentText} uppercase tracking-wider border-r border-white/10 pr-2`}>
               <Type className="w-3.5 h-3.5" />
               <span>{isZh ? '文字属性' : 'Text'}</span>
             </span>
@@ -240,7 +245,7 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
                 type="button"
                 onClick={handleBoldToggle}
                 className={`p-1 rounded cursor-pointer transition-colors ${
-                  currentBold ? 'bg-cyan-500 text-black font-black' : 'text-slate-300 hover:text-white'
+                  currentBold ? `${modalTheme.tagBg} ${modalTheme.accentText} font-black` : 'text-slate-300 hover:text-white'
                 }`}
                 title="Bold (Ctrl+B)"
               >
@@ -250,7 +255,7 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
                 type="button"
                 onClick={handleItalicToggle}
                 className={`p-1 rounded cursor-pointer transition-colors ${
-                  currentItalic ? 'bg-cyan-500 text-black font-black' : 'text-slate-300 hover:text-white'
+                  currentItalic ? `${modalTheme.tagBg} ${modalTheme.accentText} font-black` : 'text-slate-300 hover:text-white'
                 }`}
                 title="Italic (Ctrl+I)"
               >
@@ -260,7 +265,7 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
                 type="button"
                 onClick={handleUnderlineToggle}
                 className={`p-1 rounded cursor-pointer transition-colors ${
-                  currentUnderline ? 'bg-cyan-500 text-black font-black' : 'text-slate-300 hover:text-white'
+                  currentUnderline ? `${modalTheme.tagBg} ${modalTheme.accentText} font-black` : 'text-slate-300 hover:text-white'
                 }`}
                 title="Underline (Ctrl+U)"
               >
@@ -291,12 +296,12 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
             </div>
 
             {/* Whiteout Background Toggle */}
-            <label className="flex items-center gap-1.5 px-2 py-1 rounded bg-slate-800/90 border border-slate-700 text-[11px] text-slate-300 cursor-pointer select-none hover:border-cyan-500">
+            <label className={`flex items-center gap-1.5 px-2 py-1 rounded bg-slate-800/90 border border-slate-700 text-[11px] text-slate-300 cursor-pointer select-none hover:${modalTheme.modalBorder}`}>
               <input
                 type="checkbox"
                 checked={currentWhiteout}
                 onChange={e => handleWhiteoutToggle(e.target.checked)}
-                className="rounded cursor-pointer accent-cyan-500"
+                className="rounded cursor-pointer"
               />
               <span>{isZh ? '涂白遮盖原字' : 'Whiteout Background'}</span>
             </label>
@@ -478,7 +483,7 @@ export const PdfescapePropertyBar: React.FC<PdfescapePropertyBarProps> = ({
           <button
             type="button"
             onClick={onCommitEditing}
-            className="px-2.5 py-1 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs cursor-pointer active:scale-95"
+            className={`px-2.5 py-1 rounded ${modalTheme.primaryBtn} text-white font-bold text-[11px] flex items-center gap-1 shadow-xs cursor-pointer active:scale-95`}
             title="Commit text edit (Enter)"
           >
             <Check className="w-3 h-3" />

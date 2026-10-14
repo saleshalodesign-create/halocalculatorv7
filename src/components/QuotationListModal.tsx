@@ -1697,7 +1697,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                     value={customerName}
                     onChange={e => setCustomerName(e.target.value)}
                     placeholder={language === 'zh' ? '输入客户姓名或公司名称' : 'Client name'}
-                    className="w-full mt-1 p-2.5 rounded-xl bg-neutral-100 dark:bg-[#050817] border border-black/10 dark:border-indigo-500/20 text-sm outline-none focus:ring-2 focus:ring-cyan-500 text-neutral-900 dark:text-white"
+                    className={`w-full mt-1 p-2.5 rounded-xl bg-neutral-100 dark:bg-[#050817] border border-black/10 dark:${modalTheme.modalBorder} text-sm outline-none focus:ring-2 focus:ring-current text-neutral-900 dark:text-white`}
                   />
                 </div>
                 <div>
@@ -1709,7 +1709,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                     value={docNo}
                     onChange={e => setDocNo(e.target.value)}
                     placeholder="e.g. QT-2026-001"
-                    className="w-full mt-1 p-2.5 rounded-xl bg-neutral-100 dark:bg-[#050817] border border-black/10 dark:border-indigo-500/20 text-sm font-mono outline-none focus:ring-2 focus:ring-cyan-500 text-neutral-900 dark:text-white"
+                    className={`w-full mt-1 p-2.5 rounded-xl bg-neutral-100 dark:bg-[#050817] border border-black/10 dark:${modalTheme.modalBorder} text-sm font-mono outline-none focus:ring-2 focus:ring-current text-neutral-900 dark:text-white`}
                   />
                 </div>
               </div>
@@ -1722,7 +1722,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                   value={customerAddress}
                   onChange={e => setCustomerAddress(e.target.value)}
                   placeholder={language === 'zh' ? '施工现场或收货送货地址' : 'Site or delivery location'}
-                  className="w-full mt-1 p-2.5 rounded-xl bg-neutral-100 dark:bg-[#050817] border border-black/10 dark:border-indigo-500/20 text-sm outline-none focus:ring-2 focus:ring-cyan-500 h-20 text-neutral-900 dark:text-white"
+                  className={`w-full mt-1 p-2.5 rounded-xl bg-neutral-100 dark:bg-[#050817] border border-black/10 dark:${modalTheme.modalBorder} text-sm outline-none focus:ring-2 focus:ring-current h-20 text-neutral-900 dark:text-white`}
                 />
               </div>
 
@@ -1736,7 +1736,7 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                     value={contact}
                     onChange={e => setContact(e.target.value)}
                     placeholder={language === 'zh' ? '联系人姓名' : 'Contact person'}
-                    className="w-full mt-1 p-2.5 rounded-xl bg-neutral-100 dark:bg-[#050817] border border-black/10 dark:border-indigo-500/20 text-sm outline-none focus:ring-2 focus:ring-cyan-500 text-neutral-900 dark:text-white"
+                    className={`w-full mt-1 p-2.5 rounded-xl bg-neutral-100 dark:bg-[#050817] border border-black/10 dark:${modalTheme.modalBorder} text-sm outline-none focus:ring-2 focus:ring-current text-neutral-900 dark:text-white`}
                   />
                 </div>
                 <div>

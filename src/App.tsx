@@ -1190,6 +1190,7 @@ export default function App() {
           setWidth(w);
           setHeight(h);
         }}
+        theme={theme}
       />
 
       {/* Daily Outside Schedule Form Modal */}

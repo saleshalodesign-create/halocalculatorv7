@@ -764,7 +764,7 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                     <button
                       type="button"
                       onClick={() => multiFileInputRef.current?.click()}
-                      className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all"
+                      className={`px-3.5 py-2 rounded-xl ${modalTheme.activeTabGradient} hover:brightness-110 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all`}
                     >
                       <Plus className="w-4 h-4" />
                       <span>{isZh ? '选择并添加 PDF 文件...' : 'Add PDF Files...'}</span>
@@ -798,9 +798,9 @@ export const PdfToolsModal: React.FC<PdfToolsModalProps> = ({
                 {joinFiles.length === 0 && (
                   <div
                     onClick={() => multiFileInputRef.current?.click()}
-                    className="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 text-center cursor-pointer transition-colors bg-slate-950/40"
+                    className={`border-2 border-dashed border-slate-700 hover:${modalTheme.modalBorder} rounded-2xl p-8 flex flex-col items-center justify-center gap-3 text-center cursor-pointer transition-colors bg-slate-950/40`}
                   >
-                    <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <div className={`w-14 h-14 rounded-2xl ${modalTheme.iconBgGradient} flex items-center justify-center text-white shadow-lg`}>
                       <Layers className="w-7 h-7" />
                     </div>
                     <div>

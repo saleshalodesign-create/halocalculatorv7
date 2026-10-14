@@ -655,7 +655,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between">
                       <span className="flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                        <Sparkles className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                         <span>{isZh ? '目标输出格式 (10种格式)' : 'Target Format (10 Formats)'}</span>
                       </span>
                     </label>
@@ -667,13 +667,13 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                           onClick={() => setTargetFormat(fmt.id)}
                           className={`py-2 px-2.5 text-left rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                             targetFormat === fmt.id
-                              ? 'bg-cyan-600 border-cyan-400 text-white shadow-md shadow-cyan-600/30'
-                              : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+                              ? `${modalTheme.activeTabGradient} border-white/40 text-white shadow-md`
+                              : `bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 hover:${modalTheme.modalBorder}`
                           }`}
                         >
                           <div>
                             <span className="font-mono font-bold text-xs uppercase block">{fmt.label}</span>
-                            <span className="text-[10px] text-slate-400 block">
+                            <span className={`text-[10px] block ${targetFormat === fmt.id ? 'text-white/80' : 'text-slate-400'}`}>
                               {isZh ? fmt.subLabelZh : fmt.subLabelEn}
                             </span>
                           </div>
@@ -682,7 +682,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                               className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
                                 targetFormat === fmt.id
                                   ? 'bg-white/20 text-white'
-                                  : 'bg-cyan-950 text-cyan-400 border border-cyan-500/30'
+                                  : `bg-slate-800 ${modalTheme.accentText} border ${modalTheme.modalBorder}`
                               }`}
                             >
                               {fmt.badge}
@@ -695,12 +695,12 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
 
                   {/* Quality & Max KB (for JPEG / WEBP / AVIF) */}
                   {(targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'avif') && (
-                    <div className="space-y-2.5 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <div className={`space-y-2.5 p-3 rounded-xl bg-slate-900/80 border border-slate-800 dark:${modalTheme.modalBorder}`}>
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-bold text-slate-300">
                           {isZh ? '压缩质量 (Quality)' : 'Quality'}:
                         </span>
-                        <span className="font-mono text-cyan-400 font-bold">
+                        <span className={`font-mono ${modalTheme.accentText} font-bold`}>
                           {Math.round(quality * 100)}%
                         </span>
                       </div>
@@ -711,7 +711,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                         step="0.05"
                         value={quality}
                         onChange={(e) => setQuality(parseFloat(e.target.value))}
-                        className="w-full accent-cyan-400 cursor-pointer"
+                        className={`w-full cursor-pointer ${modalTheme.accentText}`}
                       />
                       <div className="flex justify-between text-[10px] text-slate-500 font-mono">
                         <span>{isZh ? '极小体积' : 'Small'}</span>
@@ -723,14 +723,14 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                       <div className="pt-1.5 border-t border-slate-800/80">
                         <div className="flex items-center justify-between text-[11px] mb-1">
                           <span className="text-slate-300 font-semibold flex items-center gap-1">
-                            <Gauge className="w-3 h-3 text-cyan-400" />
+                            <Gauge className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                             {isZh ? '限制目标体积 (Max KB)' : 'Target Max Size'}
                           </span>
                           {targetMaxKb && (
                             <button
                               type="button"
                               onClick={() => setTargetMaxKb('')}
-                              className="text-cyan-400 hover:underline text-[10px] cursor-pointer"
+                              className={`${modalTheme.accentText} hover:underline text-[10px] cursor-pointer`}
                             >
                               {isZh ? '清除限制' : 'Clear'}
                             </button>
@@ -742,7 +742,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                             placeholder={isZh ? '例如: 500 (留空为无限制)' : 'e.g. 500 KB (empty=none)'}
                             value={targetMaxKb}
                             onChange={(e) => setTargetMaxKb(e.target.value)}
-                            className="flex-1 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white outline-none focus:border-cyan-400"
+                            className={`flex-1 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white outline-none focus:${modalTheme.modalBorder}`}
                           />
                           <div className="flex items-center gap-1">
                             {['200', '500', '1024'].map((kb, idx) => (
@@ -752,7 +752,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                                 onClick={() => setTargetMaxKb(kb)}
                                 className={`px-2 py-1 rounded-md text-[10px] font-mono border cursor-pointer ${
                                   targetMaxKb === kb
-                                    ? 'bg-cyan-600 border-cyan-400 text-white font-bold'
+                                    ? `${modalTheme.primaryBtn} font-bold`
                                     : 'bg-slate-800 border-slate-700 text-slate-300'
                                 }`}
                               >
@@ -767,7 +767,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
 
                   {/* ICO Size Selector */}
                   {targetFormat === 'ico' && (
-                    <div className="space-y-2 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <div className={`space-y-2 p-3 rounded-xl bg-slate-900/80 border border-slate-800 dark:${modalTheme.modalBorder}`}>
                       <label className="text-xs font-bold text-slate-300 block">
                         {isZh ? 'Windows/Web 图标规格' : 'Favicon / Icon Size'}:
                       </label>
@@ -779,7 +779,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                             onClick={() => setIcoSize(sz)}
                             className={`py-1 text-center rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer ${
                               icoSize === sz
-                                ? 'bg-cyan-600 border-cyan-400 text-white'
+                                ? `${modalTheme.primaryBtn} border-transparent`
                                 : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
                             }`}
                           >
@@ -792,7 +792,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
 
                   {/* Background Color Fill (For JPEG, BMP, and TIFF) */}
                   {(targetFormat === 'jpeg' || targetFormat === 'bmp' || targetFormat === 'tiff') && (
-                    <div className="space-y-2 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <div className={`space-y-2 p-3 rounded-xl bg-slate-900/80 border border-slate-800 dark:${modalTheme.modalBorder}`}>
                       <label className="text-xs font-bold text-slate-300 block">
                         {isZh
                           ? '底色填充 (JPG/BMP/TIFF 不支持透明)'
@@ -812,7 +812,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                               type="button"
                               onClick={() => setBackgroundColor(c)}
                               className={`w-6 h-6 rounded-md border transition-transform cursor-pointer ${
-                                backgroundColor === c ? 'scale-110 ring-2 ring-cyan-400' : 'opacity-70'
+                                backgroundColor === c ? `scale-110 ring-2 ring-current ${modalTheme.accentText}` : 'opacity-70'
                               }`}
                               style={{ backgroundColor: c }}
                               title={c}
@@ -824,9 +824,9 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                   )}
 
                   {/* Resize & Scaling Controls */}
-                  <div className="space-y-2 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <div className={`space-y-2 p-3 rounded-xl bg-slate-900/80 border border-slate-800 dark:${modalTheme.modalBorder}`}>
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1">
-                      <Maximize2 className="w-3.5 h-3.5 text-blue-400" />
+                      <Maximize2 className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                       <span>{isZh ? '尺寸调整 (Resize)' : 'Resize Options'}</span>
                     </label>
 
@@ -842,7 +842,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                           onClick={() => setResizeMode(m.id as any)}
                           className={`py-1.5 text-center rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                             resizeMode === m.id
-                              ? 'bg-blue-600 border-blue-400 text-white'
+                              ? `${modalTheme.primaryBtn} border-transparent`
                               : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                           }`}
                         >
@@ -856,7 +856,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                       <div className="space-y-1 pt-1">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-slate-400">{isZh ? '缩放比例' : 'Scale'}:</span>
-                          <span className="font-mono text-cyan-400 font-bold">{scalePercent}%</span>
+                          <span className={`font-mono ${modalTheme.accentText} font-bold`}>{scalePercent}%</span>
                         </div>
                         <div className="grid grid-cols-5 gap-1">
                           {[25, 50, 75, 150, 200].map((p, idx) => (
@@ -866,7 +866,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                               onClick={() => setScalePercent(p)}
                               className={`py-1 text-center rounded-md text-[11px] font-mono border cursor-pointer ${
                                 scalePercent === p
-                                  ? 'bg-cyan-600 border-cyan-400 text-white font-bold'
+                                  ? `${modalTheme.primaryBtn} font-bold border-transparent`
                                   : 'bg-slate-800 border-slate-700 text-slate-300'
                               }`}
                             >
@@ -890,7 +890,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                               placeholder="1920"
                               value={customWidth}
                               onChange={(e) => setCustomWidth(e.target.value)}
-                              className="w-full px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white outline-none focus:border-cyan-400"
+                              className={`w-full px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white outline-none focus:${modalTheme.modalBorder}`}
                             />
                           </div>
 
@@ -899,7 +899,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                             onClick={() => setMaintainAspect(!maintainAspect)}
                             className={`p-2 rounded-lg border mt-3 transition-colors cursor-pointer ${
                               maintainAspect
-                                ? 'bg-cyan-950/80 border-cyan-500 text-cyan-400'
+                                ? `${modalTheme.pillActive} ${modalTheme.accentText}`
                                 : 'bg-slate-800 border-slate-700 text-slate-500'
                             }`}
                             title={isZh ? '锁定长宽比例' : 'Lock Aspect Ratio'}
@@ -920,7 +920,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                               placeholder="1080"
                               value={customHeight}
                               onChange={(e) => setCustomHeight(e.target.value)}
-                              className="w-full px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white outline-none focus:border-cyan-400"
+                              className={`w-full px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-xs font-mono text-white outline-none focus:${modalTheme.modalBorder}`}
                             />
                           </div>
                         </div>
@@ -936,7 +936,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                                 key={`${pr.label}-${idx}`}
                                 type="button"
                                 onClick={() => handleApplyPreset(pr.w, pr.h)}
-                                className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-left truncate cursor-pointer transition-colors"
+                                className={`p-1 rounded bg-slate-800 hover:bg-slate-700 hover:${modalTheme.accentText} text-slate-300 text-left truncate cursor-pointer transition-colors`}
                               >
                                 {pr.label}
                               </button>
@@ -953,14 +953,14 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
               {sidebarTab === 'effects' && (
                 <div className="space-y-3">
                   {/* Rotation & Flip */}
-                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+                  <div className={`p-3 rounded-xl bg-slate-900/80 border border-slate-800 dark:${modalTheme.modalBorder} space-y-2`}>
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between">
                       <span className="flex items-center gap-1">
-                        <RotateCw className="w-3.5 h-3.5 text-cyan-400" />
+                        <RotateCw className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                         <span>{isZh ? '旋转与镜像' : 'Rotate & Flip'}</span>
                       </span>
                       {(rotation !== 0 || flipHorizontal || flipVertical) && (
-                        <span className="text-[10px] text-cyan-400 font-mono">
+                        <span className={`text-[10px] ${modalTheme.accentText} font-mono`}>
                           {rotation}° {flipHorizontal ? 'H' : ''} {flipVertical ? 'V' : ''}
                         </span>
                       )}
@@ -979,7 +979,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                           onClick={() => setRotation(item.r as any)}
                           className={`py-1.5 rounded-lg text-xs font-mono font-bold border transition-colors cursor-pointer ${
                             rotation === item.r
-                              ? 'bg-cyan-600 border-cyan-400 text-white'
+                              ? `${modalTheme.primaryBtn} border-transparent`
                               : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                           }`}
                         >
@@ -994,7 +994,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                         onClick={() => setFlipHorizontal(!flipHorizontal)}
                         className={`py-1.5 px-2 rounded-lg text-xs font-bold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                           flipHorizontal
-                            ? 'bg-cyan-600 border-cyan-400 text-white'
+                            ? `${modalTheme.primaryBtn} border-transparent`
                             : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                         }`}
                       >
@@ -1007,7 +1007,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                         onClick={() => setFlipVertical(!flipVertical)}
                         className={`py-1.5 px-2 rounded-lg text-xs font-bold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                           flipVertical
-                            ? 'bg-cyan-600 border-cyan-400 text-white'
+                            ? `${modalTheme.primaryBtn} border-transparent`
                             : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                         }`}
                       >
@@ -1018,13 +1018,13 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                   </div>
 
                   {/* Brightness, Contrast, Saturation */}
-                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+                  <div className={`p-3 rounded-xl bg-slate-900/80 border border-slate-800 dark:${modalTheme.modalBorder} space-y-2.5`}>
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between">
                       <span>{isZh ? '亮度 / 对比度 / 饱和度' : 'Color Adjustments'}</span>
                       <button
                         type="button"
                         onClick={handleResetAdjustments}
-                        className="text-[10px] text-cyan-400 hover:underline cursor-pointer"
+                        className={`text-[10px] ${modalTheme.accentText} hover:underline cursor-pointer`}
                       >
                         {isZh ? '重置全部' : 'Reset All'}
                       </button>
@@ -1034,7 +1034,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between text-[11px]">
                         <span className="text-slate-400">{isZh ? '亮度 (Brightness)' : 'Brightness'}</span>
-                        <span className="font-mono text-cyan-400">{brightness > 0 ? `+${brightness}` : brightness}</span>
+                        <span className={`font-mono ${modalTheme.accentText}`}>{brightness > 0 ? `+${brightness}` : brightness}</span>
                       </div>
                       <input
                         type="range"
@@ -1042,7 +1042,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                         max="100"
                         value={brightness}
                         onChange={(e) => setBrightness(parseInt(e.target.value, 10))}
-                        className="w-full accent-cyan-400 cursor-pointer"
+                        className={`w-full cursor-pointer ${modalTheme.accentText}`}
                       />
                     </div>
 
@@ -1050,7 +1050,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between text-[11px]">
                         <span className="text-slate-400">{isZh ? '对比度 (Contrast)' : 'Contrast'}</span>
-                        <span className="font-mono text-cyan-400">{contrast > 0 ? `+${contrast}` : contrast}</span>
+                        <span className={`font-mono ${modalTheme.accentText}`}>{contrast > 0 ? `+${contrast}` : contrast}</span>
                       </div>
                       <input
                         type="range"
@@ -1058,7 +1058,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                         max="100"
                         value={contrast}
                         onChange={(e) => setContrast(parseInt(e.target.value, 10))}
-                        className="w-full accent-cyan-400 cursor-pointer"
+                        className={`w-full cursor-pointer ${modalTheme.accentText}`}
                       />
                     </div>
 
@@ -1066,7 +1066,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                     <div className="space-y-1">
                       <div className="flex justify-between text-[11px]">
                         <span className="text-slate-400">{isZh ? '饱和度 (Saturation)' : 'Saturation'}</span>
-                        <span className="font-mono text-cyan-400">{saturation}%</span>
+                        <span className={`font-mono ${modalTheme.accentText}`}>{saturation}%</span>
                       </div>
                       <input
                         type="range"
@@ -1074,13 +1074,13 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                         max="200"
                         value={saturation}
                         onChange={(e) => setSaturation(parseInt(e.target.value, 10))}
-                        className="w-full accent-cyan-400 cursor-pointer"
+                        className={`w-full cursor-pointer ${modalTheme.accentText}`}
                       />
                     </div>
                   </div>
 
                   {/* Creative & Industrial Filters */}
-                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+                  <div className={`p-3 rounded-xl bg-slate-900/80 border border-slate-800 dark:${modalTheme.modalBorder} space-y-2`}>
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-300 block">
                       {isZh ? '特效与工业滤镜' : 'Creative & Stencil Filters'}
                     </label>
@@ -1091,7 +1091,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                         onClick={() => setGrayscale(!grayscale)}
                         className={`py-1.5 px-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                           grayscale
-                            ? 'bg-purple-600 border-purple-400 text-white'
+                            ? `${modalTheme.primaryBtn} border-transparent`
                             : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                         }`}
                       >
@@ -1103,7 +1103,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                         onClick={() => setSharpen(!sharpen)}
                         className={`py-1.5 px-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                           sharpen
-                            ? 'bg-purple-600 border-purple-400 text-white'
+                            ? `${modalTheme.primaryBtn} border-transparent`
                             : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                         }`}
                       >
@@ -1127,7 +1127,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                         onClick={() => setInvert(!invert)}
                         className={`py-1.5 px-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                           invert
-                            ? 'bg-purple-600 border-purple-400 text-white'
+                            ? `${modalTheme.primaryBtn} border-transparent`
                             : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                         }`}
                       >
@@ -1143,12 +1143,12 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                             type="checkbox"
                             checked={threshold}
                             onChange={(e) => setThreshold(e.target.checked)}
-                            className="rounded accent-cyan-500 cursor-pointer"
+                            className="rounded cursor-pointer"
                           />
                           <span>{isZh ? '纯黑白二值化 (激光雕刻/标牌切割)' : 'Laser / CNC Binary Threshold'}</span>
                         </label>
                         {threshold && (
-                          <span className="font-mono text-xs text-cyan-400">{thresholdVal}</span>
+                          <span className={`font-mono text-xs ${modalTheme.accentText}`}>{thresholdVal}</span>
                         )}
                       </div>
                       {threshold && (
@@ -1159,7 +1159,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                             max="254"
                             value={thresholdVal}
                             onChange={(e) => setThresholdVal(parseInt(e.target.value, 10))}
-                            className="w-full accent-cyan-400 cursor-pointer"
+                            className={`w-full cursor-pointer ${modalTheme.accentText}`}
                           />
                           <div className="flex justify-between text-[10px] text-slate-500">
                             <span>{isZh ? '偏白' : 'More White'}</span>
@@ -1174,17 +1174,17 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
 
               {/* TAB 3: WATERMARK */}
               {sidebarTab === 'watermark' && (
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+                <div className={`p-3 rounded-xl bg-slate-900/80 border border-slate-800 dark:${modalTheme.modalBorder} space-y-3`}>
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                      <Stamp className="w-3.5 h-3.5 text-cyan-400" />
+                      <Stamp className={`w-3.5 h-3.5 ${modalTheme.accentText}`} />
                       <span>{isZh ? '添加防伪/品牌水印' : 'Branding Watermark'}</span>
                     </label>
                     {watermarkText && (
                       <button
                         type="button"
                         onClick={() => setWatermarkText('')}
-                        className="text-[10px] text-cyan-400 hover:underline cursor-pointer"
+                        className={`text-[10px] ${modalTheme.accentText} hover:underline cursor-pointer`}
                       >
                         {isZh ? '清除' : 'Clear'}
                       </button>
@@ -1200,7 +1200,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                       placeholder={isZh ? '例如: 报价样品 / HALO SIGNAGE' : 'e.g. SAMPLE / CONFIDENTIAL'}
                       value={watermarkText}
                       onChange={(e) => setWatermarkText(e.target.value)}
-                      className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white outline-none focus:border-cyan-400"
+                      className={`w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white outline-none focus:${modalTheme.modalBorder}`}
                     />
                   </div>
 
@@ -1225,7 +1225,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                               onClick={() => setWatermarkPosition(pos.id as any)}
                               className={`py-1 text-center rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                                 watermarkPosition === pos.id
-                                  ? 'bg-cyan-600 border-cyan-400 text-white'
+                                  ? `${modalTheme.primaryBtn} border-transparent`
                                   : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                               }`}
                             >
@@ -1239,7 +1239,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
                           <span className="text-slate-400">{isZh ? '透明度' : 'Opacity'}:</span>
-                          <span className="font-mono text-cyan-400">
+                          <span className={`font-mono ${modalTheme.accentText}`}>
                             {Math.round(watermarkOpacity * 100)}%
                           </span>
                         </div>
@@ -1250,7 +1250,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                           step="0.05"
                           value={watermarkOpacity}
                           onChange={(e) => setWatermarkOpacity(parseFloat(e.target.value))}
-                          className="w-full accent-cyan-400 cursor-pointer"
+                          className={`w-full cursor-pointer ${modalTheme.accentText}`}
                         />
                       </div>
 
@@ -1272,7 +1272,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                               onClick={() => setWatermarkColor(c.color)}
                               className={`px-2.5 py-1 rounded-md text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
                                 watermarkColor === c.color
-                                  ? 'border-cyan-400 ring-2 ring-cyan-400/50 bg-slate-800'
+                                  ? `border-white ring-2 ring-current ${modalTheme.accentText} bg-slate-800`
                                   : 'border-slate-700 bg-slate-900 text-slate-400'
                               }`}
                             >
@@ -1361,7 +1361,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                           <button
                             type="button"
                             onClick={() => setPdfMergeMenuOpen(!pdfMergeMenuOpen)}
-                            className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md shadow-purple-600/30 cursor-pointer active:scale-95 transition-all"
+                            className={`px-3.5 py-2 rounded-xl ${modalTheme.primaryBtn} text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all`}
                           >
                             <FileText className="w-4 h-4" />
                             <span>{isZh ? '合并为多页 PDF' : 'Merge to PDF'}</span>
@@ -1369,28 +1369,28 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                           </button>
 
                           {pdfMergeMenuOpen && (
-                            <div className="absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-1.5 z-30 space-y-1">
+                            <div className={`absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-slate-900 border ${modalTheme.modalBorder} shadow-2xl p-1.5 z-30 space-y-1`}>
                               <span className="text-[10px] font-bold text-slate-400 px-2 py-0.5 block">
                                 {isZh ? '选择页面版式:' : 'Page Layout:'}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => handleMergeAllToPdf('fit')}
-                                className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-200 hover:bg-purple-600 hover:text-white cursor-pointer transition-colors"
+                                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-200 hover:bg-white/10 hover:${modalTheme.accentText} cursor-pointer transition-colors`}
                               >
                                 {isZh ? '自适应原图尺寸' : 'Auto-Fit Original'}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleMergeAllToPdf('a4_portrait')}
-                                className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-200 hover:bg-purple-600 hover:text-white cursor-pointer transition-colors"
+                                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-200 hover:bg-white/10 hover:${modalTheme.accentText} cursor-pointer transition-colors`}
                               >
                                 {isZh ? 'A4 纵向 (Portrait)' : 'A4 Portrait'}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleMergeAllToPdf('a4_landscape')}
-                                className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-200 hover:bg-purple-600 hover:text-white cursor-pointer transition-colors"
+                                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-200 hover:bg-white/10 hover:${modalTheme.accentText} cursor-pointer transition-colors`}
                               >
                                 {isZh ? 'A4 横向 (Landscape)' : 'A4 Landscape'}
                               </button>
@@ -1413,11 +1413,11 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                       onClick={() => fileInputRef.current?.click()}
                       className={`flex-1 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-colors bg-slate-950/40 ${
                         isDragOver
-                          ? 'border-cyan-400 bg-cyan-950/20'
-                          : 'border-slate-800 hover:border-cyan-500/60'
+                          ? `${modalTheme.modalBorder} bg-white/5`
+                          : `border-slate-800 hover:${modalTheme.modalBorder}`
                       }`}
                     >
-                      <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-3 shadow-inner">
+                      <div className={`w-16 h-16 rounded-2xl ${modalTheme.iconBgGradient} flex items-center justify-center text-white mb-3 shadow-lg`}>
                         <Upload className="w-8 h-8" />
                       </div>
                       <h4 className="font-bold text-base sm:text-lg text-white flex items-center justify-center gap-2">
@@ -1428,7 +1428,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                           ? '全面支持 iPhone 苹果相机照片 (.heic / .heif)、AVIF、PNG、JPG、WEBP、TIFF (ProRAW)、BMP、GIF、SVG、PDF。支持 Ctrl+V 直接粘贴系统截屏！'
                           : 'Full support for iPhone Camera photos (.heic / .heif), AVIF, PNG, JPG, WEBP, TIFF (ProRAW), BMP, GIF, SVG, PDF. Press Ctrl+V anytime to paste screenshots!'}
                       </p>
-                      <div className="flex flex-wrap items-center justify-center gap-1.5 mt-4 text-[11px] font-mono text-cyan-400/90 bg-cyan-950/50 px-3.5 py-1.5 rounded-full border border-cyan-500/30">
+                      <div className={`flex flex-wrap items-center justify-center gap-1.5 mt-4 text-[11px] font-mono ${modalTheme.accentText} bg-slate-950/80 px-3.5 py-1.5 rounded-full border ${modalTheme.modalBorder}`}>
                         <span className="text-amber-400 font-bold flex items-center gap-1">
                           <Smartphone className="w-3.5 h-3.5" />
                           iPhone HEIC
@@ -1509,7 +1509,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
 
                               {isDone && item.result ? (
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-10 h-10 rounded-lg bg-slate-900 border border-cyan-500/40 overflow-hidden flex items-center justify-center shrink-0">
+                                  <div className={`w-10 h-10 rounded-lg bg-slate-900 border ${modalTheme.modalBorder} overflow-hidden flex items-center justify-center shrink-0`}>
                                     <img
                                       src={item.result.dataUrl}
                                       alt={item.result.convertedName}
@@ -1518,7 +1518,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-1.5">
-                                      <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-400 border border-cyan-500/40 text-[10px] font-mono font-bold uppercase">
+                                      <span className={`px-1.5 py-0.2 rounded bg-slate-900 ${modalTheme.accentText} border ${modalTheme.modalBorder} text-[10px] font-mono font-bold uppercase`}>
                                         {item.result.format}
                                       </span>
                                       <span className="text-xs text-emerald-400 font-mono font-bold">
@@ -1558,7 +1558,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                                   <button
                                     type="button"
                                     onClick={() => handleCopyImageToClipboard(item.result!)}
-                                    className="p-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 cursor-pointer"
+                                    className={`p-1.5 rounded-lg bg-white/5 hover:bg-white/10 ${modalTheme.accentText} border ${modalTheme.modalBorder} cursor-pointer`}
                                     title={isZh ? '复制图片到剪贴板' : 'Copy Image to Clipboard'}
                                   >
                                     <Copy className="w-3.5 h-3.5" />
@@ -1581,7 +1581,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                                       setSelectedItemForCompare(item);
                                       setActiveView('compare');
                                     }}
-                                    className="p-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 cursor-pointer"
+                                    className={`p-1.5 rounded-lg bg-white/5 hover:bg-white/10 ${modalTheme.accentText} border ${modalTheme.modalBorder} cursor-pointer`}
                                     title={isZh ? '在画质对比台查看' : 'Inspect in Studio'}
                                   >
                                     <Eye className="w-3.5 h-3.5" />
@@ -1596,7 +1596,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                                         onOpenInEditor(buf, item.result!.convertedName);
                                         onClose();
                                       }}
-                                      className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 cursor-pointer"
+                                      className={`p-1.5 rounded-lg bg-white/5 hover:bg-white/10 ${modalTheme.accentText} border ${modalTheme.modalBorder} cursor-pointer`}
                                       title={isZh ? '在 PDF 编辑器中打开' : 'Open in PDF Editor'}
                                     >
                                       <FileCheck className="w-3.5 h-3.5" />
@@ -1609,7 +1609,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                                     onClick={() =>
                                       downloadBlobFile(item.result!.blob, item.result!.convertedName)
                                     }
-                                    className="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center gap-1 cursor-pointer shadow-sm active:scale-95 transition-all"
+                                    className={`px-3 py-1.5 rounded-lg ${modalTheme.primaryBtn} text-white font-bold text-xs flex items-center gap-1 cursor-pointer shadow-sm active:scale-95 transition-all`}
                                   >
                                     <Download className="w-3.5 h-3.5" />
                                     <span>{isZh ? '下载' : 'Download'}</span>
@@ -1620,7 +1620,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                                   type="button"
                                   disabled={isConverting}
                                   onClick={() => handleConvertSingleItem(item.id)}
-                                  className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1 cursor-pointer shadow-sm active:scale-95 transition-all disabled:opacity-50"
+                                  className={`px-3 py-1.5 rounded-lg ${modalTheme.primaryBtn} text-white font-bold text-xs flex items-center gap-1 cursor-pointer shadow-sm active:scale-95 transition-all disabled:opacity-50`}
                                 >
                                   {isConverting ? (
                                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -1697,7 +1697,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleConvertSingleItem(selectedItemForCompare.id)}
-                            className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer active:scale-95 transition-all"
+                            className={`px-3 py-1.5 rounded-xl ${modalTheme.primaryBtn} text-white font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer active:scale-95 transition-all`}
                           >
                             <RefreshCw className="w-3.5 h-3.5" />
                             <span>{isZh ? '以当前参数渲染' : 'Render with Settings'}</span>
@@ -1708,7 +1708,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleCopyImageToClipboard(selectedItemForCompare.result!)}
-                                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer active:scale-95 transition-all"
+                                className={`px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 ${modalTheme.accentText} border ${modalTheme.modalBorder} font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer active:scale-95 transition-all`}
                               >
                                 <Copy className="w-3.5 h-3.5" />
                                 <span>{isZh ? '复制图片' : 'Copy'}</span>
@@ -1722,7 +1722,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                                     selectedItemForCompare.result!.convertedName
                                   )
                                 }
-                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer active:scale-95 transition-all"
+                                className={`px-3 py-1.5 rounded-xl ${modalTheme.primaryBtn} text-white font-bold text-xs flex items-center gap-1.5 shadow-sm cursor-pointer active:scale-95 transition-all`}
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 <span>{isZh ? '下载结果' : 'Download'}</span>
@@ -1753,8 +1753,8 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                         </div>
 
                         {/* Converted Canvas Box */}
-                        <div className="flex flex-col rounded-xl bg-slate-950 border border-cyan-500/30 overflow-hidden">
-                          <div className="px-3 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs font-semibold text-cyan-300">
+                        <div className={`flex flex-col rounded-xl bg-slate-950 border ${modalTheme.modalBorder} overflow-hidden`}>
+                          <div className={`px-3 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs font-semibold ${modalTheme.accentText}`}>
                             <span>
                               {isZh ? '转换后效果 (Output)' : 'Converted Output'} (
                               {targetFormat.toUpperCase()})
@@ -1811,7 +1811,7 @@ export const ImageConverterModal: React.FC<ImageConverterModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setActiveView('batch')}
-                        className="mt-3 px-4 py-2 rounded-xl bg-cyan-600 text-white font-bold text-xs cursor-pointer"
+                        className={`mt-3 px-4 py-2 rounded-xl ${modalTheme.primaryBtn} text-white font-bold text-xs cursor-pointer`}
                       >
                         {isZh ? '返回队列' : 'Back to Queue'}
                       </button>
