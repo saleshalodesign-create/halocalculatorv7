@@ -189,13 +189,13 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
           ? `${getLitAuraClasses()} border-2 text-white`
           : isLit
           ? `${colTheme.selectedLightBg} ${colTheme.selectedDarkBg} border-2 ${colTheme.selectedLightBorder} ${colTheme.selectedDarkBorder} ${colTheme.selectedDarkShadow} glass-rainbow-rim ring-2 ring-current/20 shadow-lg`
-          : `apple-card-glass border ${colTheme.border} ${colTheme.hoverBorder} ${colTheme.hoverBgDark} ${colTheme.hoverBgLight} shadow-sm`
+          : `${colTheme.normalLightBg} ${colTheme.normalDarkBg} border ${colTheme.border} ${colTheme.hoverBorder} ${colTheme.hoverBgDark} ${colTheme.hoverBgLight} backdrop-blur-xl shadow-sm hover:shadow-md`
       }`}
     >
       {/* Subtle Ambient Theme Column Glow */}
       {!isNightLit && (
         <div
-          className={`pointer-events-none absolute -right-6 -bottom-6 w-24 h-24 rounded-full opacity-15 dark:opacity-25 blur-2xl transition-all ${effectiveIconBg}`}
+          className={`pointer-events-none absolute -right-6 -bottom-6 w-28 h-28 rounded-full opacity-25 dark:opacity-40 blur-2xl transition-all ${effectiveIconBg}`}
         />
       )}
 
@@ -203,7 +203,7 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
       <div
         className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[inherit] z-0"
         style={{
-          background: `radial-gradient(190px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255, 255, 255, 0.18), transparent 75%)`,
+          background: `radial-gradient(190px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255, 255, 255, 0.22), transparent 75%)`,
         }}
       />
 
@@ -242,13 +242,13 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
               className={`font-extrabold text-[11px] sm:text-xs lg:text-sm tracking-tight leading-snug truncate transition-colors ${
                 isNightLit
                   ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                  : `${colTheme.selectedTitleText}`
+                  : `${colTheme.selectedTitleText} ${colTheme.hoverTitleText}`
               }`}
             >
               {title}
             </h4>
             {subtitle && (
-              <span className={`block text-[8px] sm:text-[9px] font-bold tracking-wider uppercase truncate opacity-75 ${
+              <span className={`block text-[8px] sm:text-[9px] font-bold tracking-wider uppercase truncate opacity-80 ${
                 isNightLit ? 'text-white/80' : `${colTheme.selectedTitleText}`
               }`}>
                 {subtitle}
@@ -308,7 +308,7 @@ const MacPricingCardComponent: React.FC<MacPricingCardProps> = ({
           className={`font-black font-mono tracking-tight transition-colors whitespace-nowrap shrink-0 text-right ${
             isNightLit
               ? 'text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]'
-              : `${colTheme.selectedPriceText}`
+              : `${colTheme.selectedPriceText} ${colTheme.hoverPriceText}`
           } ${
             formattedPrice.length > 7
               ? 'text-xs sm:text-sm lg:text-base'

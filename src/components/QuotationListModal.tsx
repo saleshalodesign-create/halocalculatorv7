@@ -1116,8 +1116,8 @@ export const QuotationListModal: React.FC<QuotationListModalProps> = ({
                             : isDropTarget
                             ? 'border-t-2 border-t-cyan-500 border-slate-200/80 dark:border-cyan-400 bg-cyan-50/40 dark:bg-cyan-950/30 shadow-md shadow-cyan-500/10'
                             : itemCol
-                            ? `border-slate-200/80 dark:${itemCol.border} hover:${itemCol.border}`
-                            : `border-slate-200/80 dark:${tableHeaderTheme.headerBorder}`
+                            ? `${itemCol.border} ${itemCol.normalLightBg} ${itemCol.normalDarkBg} hover:${itemCol.border}`
+                            : `border-slate-200/80 ${tableHeaderTheme.headerBorder}`
                         }`}
                       >
                         <div className="flex-1 min-w-0 flex items-start sm:items-center gap-1.5 sm:gap-2">

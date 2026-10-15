@@ -140,6 +140,77 @@
     0 0 25px rgba(99, 102, 241, 0.18);
 }
 
+/* Theme-specific card glass overrides */
+.theme-cyberpunk .apple-card-glass {
+  background: linear-gradient(135deg, rgba(26, 7, 34, 0.72) 0%, rgba(14, 4, 22, 0.86) 100%);
+  border-color: rgba(236, 72, 153, 0.22);
+  box-shadow: inset 0 1px 1px 0 rgba(236, 72, 153, 0.22), 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+}
+.theme-cyberpunk .apple-card-glass:hover {
+  border-color: rgba(236, 72, 153, 0.55);
+  box-shadow: inset 0 1.5px 1px 0 rgba(236, 72, 153, 0.35), 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 25px rgba(236, 72, 153, 0.22);
+}
+
+.theme-forest .apple-card-glass {
+  background: linear-gradient(135deg, rgba(5, 29, 20, 0.72) 0%, rgba(2, 18, 12, 0.86) 100%);
+  border-color: rgba(16, 185, 129, 0.22);
+  box-shadow: inset 0 1px 1px 0 rgba(16, 185, 129, 0.22), 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+}
+.theme-forest .apple-card-glass:hover {
+  border-color: rgba(16, 185, 129, 0.55);
+  box-shadow: inset 0 1.5px 1px 0 rgba(16, 185, 129, 0.35), 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 25px rgba(16, 185, 129, 0.22);
+}
+
+.theme-sunset .apple-card-glass {
+  background: linear-gradient(135deg, rgba(34, 15, 8, 0.72) 0%, rgba(19, 7, 5, 0.86) 100%);
+  border-color: rgba(249, 115, 22, 0.22);
+  box-shadow: inset 0 1px 1px 0 rgba(249, 115, 22, 0.22), 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+}
+.theme-sunset .apple-card-glass:hover {
+  border-color: rgba(249, 115, 22, 0.55);
+  box-shadow: inset 0 1.5px 1px 0 rgba(249, 115, 22, 0.35), 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 25px rgba(249, 115, 22, 0.22);
+}
+
+.theme-nordic .apple-card-glass {
+  background: linear-gradient(135deg, rgba(7, 24, 44, 0.72) 0%, rgba(3, 14, 28, 0.86) 100%);
+  border-color: rgba(56, 189, 248, 0.22);
+  box-shadow: inset 0 1px 1px 0 rgba(56, 189, 248, 0.22), 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+}
+.theme-nordic .apple-card-glass:hover {
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: inset 0 1.5px 1px 0 rgba(56, 189, 248, 0.35), 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 25px rgba(56, 189, 248, 0.22);
+}
+
+.theme-retro .apple-card-glass {
+  background: linear-gradient(135deg, rgba(34, 31, 26, 0.8) 0%, rgba(21, 19, 16, 0.9) 100%);
+  border-color: rgba(245, 158, 11, 0.22);
+  box-shadow: inset 0 1px 1px 0 rgba(245, 158, 11, 0.18), 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+}
+.theme-retro .apple-card-glass:hover {
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: inset 0 1.5px 1px 0 rgba(245, 158, 11, 0.3), 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 25px rgba(245, 158, 11, 0.18);
+}
+
+.theme-nebula .apple-card-glass {
+  background: linear-gradient(135deg, rgba(23, 7, 40, 0.72) 0%, rgba(13, 3, 24, 0.86) 100%);
+  border-color: rgba(168, 85, 247, 0.22);
+  box-shadow: inset 0 1px 1px 0 rgba(168, 85, 247, 0.22), 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+}
+.theme-nebula .apple-card-glass:hover {
+  border-color: rgba(168, 85, 247, 0.55);
+  box-shadow: inset 0 1.5px 1px 0 rgba(168, 85, 247, 0.35), 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 25px rgba(168, 85, 247, 0.22);
+}
+
+.theme-rose .apple-card-glass {
+  background: linear-gradient(135deg, rgba(36, 12, 24, 0.72) 0%, rgba(21, 6, 15, 0.86) 100%);
+  border-color: rgba(251, 113, 133, 0.22);
+  box-shadow: inset 0 1px 1px 0 rgba(251, 113, 133, 0.22), 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+}
+.theme-rose .apple-card-glass:hover {
+  border-color: rgba(251, 113, 133, 0.55);
+  box-shadow: inset 0 1.5px 1px 0 rgba(251, 113, 133, 0.35), 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 25px rgba(251, 113, 133, 0.22);
+}
+
 /* Floating Dock Liquid Glass */
 .apple-dock-glass {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(245, 248, 255, 0.58) 100%);
