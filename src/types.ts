@@ -11,6 +11,7 @@ export type UnitType = typeof Unit[keyof typeof Unit];
 export const Theme = {
   DARK: 'dark',
   LIGHT: 'light',
+  MAC_CLASSIC: 'mac-classic',
   CYBERPUNK: 'cyberpunk',
   FOREST: 'forest',
   SUNSET: 'sunset',

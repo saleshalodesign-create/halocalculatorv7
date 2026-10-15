@@ -151,6 +151,16 @@
   box-shadow: inset 0 1.5px 1px 0 rgba(236, 72, 153, 0.35), 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 25px rgba(236, 72, 153, 0.22);
 }
 
+.theme-mac-classic .apple-card-glass {
+  background: linear-gradient(135deg, rgba(14, 24, 40, 0.76) 0%, rgba(8, 15, 27, 0.88) 100%);
+  border-color: rgba(56, 189, 248, 0.25);
+  box-shadow: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.22), 0 8px 24px -4px rgba(0, 0, 0, 0.55);
+}
+.theme-mac-classic .apple-card-glass:hover {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.4), 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 25px rgba(56, 189, 248, 0.25);
+}
+
 .theme-forest .apple-card-glass {
   background: linear-gradient(135deg, rgba(5, 29, 20, 0.72) 0%, rgba(2, 18, 12, 0.86) 100%);
   border-color: rgba(16, 185, 129, 0.22);
@@ -416,6 +426,17 @@
   background-attachment: fixed;
 }
 
+.wallpaper-classic-mac {
+  background: 
+    radial-gradient(ellipse 75% 65% at 15% 15%, rgba(56, 189, 248, 0.45) 0%, rgba(14, 165, 233, 0.22) 35%, transparent 68%),
+    radial-gradient(ellipse 65% 55% at 85% 18%, rgba(16, 185, 129, 0.38) 0%, rgba(5, 150, 105, 0.18) 35%, transparent 68%),
+    radial-gradient(ellipse 70% 60% at 75% 80%, rgba(245, 158, 11, 0.25) 0%, transparent 65%),
+    radial-gradient(ellipse 75% 65% at 20% 85%, rgba(244, 63, 94, 0.22) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 70% at 50% 50%, rgba(99, 102, 241, 0.25) 0%, transparent 70%),
+    linear-gradient(155deg, #070e1c 0%, #0d1729 35%, #07101f 70%, #03070f 100%);
+  background-attachment: fixed;
+}
+
 .wallpaper-cyberpunk {
   background: 
     radial-gradient(ellipse 65% 55% at 12% 14%, rgba(236, 72, 153, 0.42) 0%, rgba(219, 39, 119, 0.22) 35%, transparent 68%),
@@ -538,6 +559,19 @@ html.dark .mac-main-window {
     inset 0 -1px 1px 0 rgba(0, 0, 0, 0.45),
     0 25px 65px -15px rgba(2, 6, 23, 0.9),
     0 0 45px -10px rgba(99, 102, 241, 0.18);
+}
+
+/* Classic Apple Macintosh Theme Chassis */
+html.theme-mac-classic .mac-main-window,
+html.theme-mac-classic .apple-liquid-glass {
+  background: linear-gradient(135deg, rgba(16, 26, 44, 0.82) 0%, rgba(9, 16, 29, 0.92) 100%);
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  box-shadow: 
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.6),
+    0 25px 65px -15px rgba(0, 0, 0, 0.95),
+    0 0 45px -8px rgba(56, 189, 248, 0.3),
+    0 0 55px -12px rgba(16, 185, 129, 0.22);
 }
 
 /* Cyberpunk Neon Theme Chassis */

@@ -55,6 +55,8 @@ export default function App() {
     switch (savedTheme) {
       case Theme.LIGHT:
         return 'blue';
+      case Theme.MAC_CLASSIC:
+        return 'classic-mac';
       case Theme.CYBERPUNK:
         return 'cyberpunk';
       case Theme.FOREST:
@@ -226,6 +228,9 @@ export default function App() {
         case Theme.LIGHT:
           setWallpaper('blue');
           break;
+        case Theme.MAC_CLASSIC:
+          setWallpaper('classic-mac');
+          break;
         case Theme.CYBERPUNK:
           setWallpaper('cyberpunk');
           break;
@@ -261,6 +266,7 @@ export default function App() {
       'light',
       'theme-dark',
       'theme-light',
+      'theme-mac-classic',
       'theme-cyberpunk',
       'theme-forest',
       'theme-sunset',
@@ -281,6 +287,9 @@ export default function App() {
     switch (newTheme) {
       case Theme.LIGHT:
         setWallpaper('blue');
+        break;
+      case Theme.MAC_CLASSIC:
+        setWallpaper('classic-mac');
         break;
       case Theme.CYBERPUNK:
         setWallpaper('cyberpunk');
@@ -312,6 +321,7 @@ export default function App() {
 
   const wallpapersList = [
     'cyber-midnight',
+    'classic-mac',
     'blue',
     'cyberpunk',
     'forest',
@@ -457,6 +467,8 @@ export default function App() {
     switch (wallpaper) {
       case 'blue':
         return 'wallpaper-blue';
+      case 'classic-mac':
+        return 'wallpaper-classic-mac';
       case 'cyber-midnight':
         return 'wallpaper-cyber-midnight';
       case 'cyberpunk':
@@ -485,6 +497,8 @@ export default function App() {
         switch (theme) {
           case Theme.LIGHT:
             return 'wallpaper-blue';
+          case Theme.MAC_CLASSIC:
+            return 'wallpaper-classic-mac';
           case Theme.CYBERPUNK:
             return 'wallpaper-cyberpunk';
           case Theme.FOREST:
@@ -589,6 +603,7 @@ export default function App() {
         const themesList: ThemeType[] = [
           Theme.DARK,
           Theme.LIGHT,
+          Theme.MAC_CLASSIC,
           Theme.CYBERPUNK,
           Theme.FOREST,
           Theme.SUNSET,

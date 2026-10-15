@@ -59,6 +59,8 @@ import {
   Zap,
   Snowflake,
   Tv,
+  Command,
+  Folder,
 } from 'lucide-react';
 import { Theme, ThemeType, IconStyleType } from '../types';
 
@@ -114,6 +116,25 @@ export const THEME_REGISTRY: Record<ThemeType, ThemeMeta> = {
       <CalendarClock key="prev-light-1" className="w-3.5 h-3.5 text-teal-500" />,
       <FileSignature key="prev-light-2" className="w-3.5 h-3.5 text-indigo-500" />,
       <Boxes key="prev-light-3" className="w-3.5 h-3.5 text-sky-500" />,
+    ],
+  },
+  [Theme.MAC_CLASSIC]: {
+    id: Theme.MAC_CLASSIC,
+    label: '经典苹果',
+    enLabel: 'Classic Mac',
+    icon: <Command className="w-3.5 h-3.5 text-blue-400" />,
+    colorDot: 'bg-gradient-to-r from-emerald-400 via-amber-400 via-rose-500 to-blue-500',
+    iconSetName: 'Apple 6-Color Rainbow & Platinum Icons',
+    iconSetEn: 'Apple 6-Color Rainbow & Platinum Icons',
+    description: '经典苹果电脑彩虹六色与阳极氧化银铝质感，重现 Macintosh 经典传奇',
+    enDescription: 'Classic Apple 6-color rainbow & platinum brushed aluminum, honoring iconic Macintosh heritage',
+    defaultWallpaper: 'classic-mac',
+    accentColor: 'blue',
+    previewIcons: [
+      <Command key="prev-mac-0" className="w-3.5 h-3.5 text-blue-400" />,
+      <Monitor key="prev-mac-1" className="w-3.5 h-3.5 text-emerald-400" />,
+      <Sparkles key="prev-mac-2" className="w-3.5 h-3.5 text-amber-400" />,
+      <Folder key="prev-mac-3" className="w-3.5 h-3.5 text-purple-400" />,
     ],
   },
   [Theme.CYBERPUNK]: {
@@ -267,6 +288,64 @@ export function getThemeIconsConfig(
   shapeType: 'horizontal' | 'vertical' | 'square' | 'invalid' = 'horizontal'
 ): Record<string, DockItemThemedConfig> {
   switch (theme) {
+    case Theme.MAC_CLASSIC:
+      return {
+        quotes: {
+          id: 'quotes',
+          icon: <Command className="w-4 h-4 sm:w-5 sm:h-5 text-blue-200" />,
+          gradient: 'from-blue-600 via-sky-600 to-slate-900',
+          shadow: 'shadow-blue-500/40',
+          borderStyle: 'border border-sky-300/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)]',
+          glowAura: 'from-blue-500 via-emerald-400 to-amber-400',
+          themeBadgeText: 'CMD',
+        },
+        schedule: {
+          id: 'schedule',
+          icon: <Monitor className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-200" />,
+          gradient: 'from-emerald-600 via-teal-700 to-slate-900',
+          shadow: 'shadow-emerald-500/40',
+          borderStyle: 'border border-emerald-300/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)]',
+          glowAura: 'from-emerald-400 to-cyan-400',
+          themeBadgeText: 'MAC',
+        },
+        'pdf-editor': {
+          id: 'pdf-editor',
+          icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200" />,
+          gradient: 'from-amber-500 via-orange-600 to-slate-900',
+          shadow: 'shadow-amber-500/40',
+          borderStyle: 'border border-amber-300/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)]',
+          glowAura: 'from-amber-400 to-rose-400',
+          themeBadgeText: 'EDIT',
+        },
+        'pdf-tools': {
+          id: 'pdf-tools',
+          icon: <Folder className="w-4 h-4 sm:w-5 sm:h-5 text-rose-200" />,
+          gradient: 'from-rose-600 via-purple-700 to-slate-900',
+          shadow: 'shadow-rose-500/40',
+          borderStyle: 'border border-rose-300/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)]',
+          glowAura: 'from-rose-400 to-purple-500',
+          themeBadgeText: 'FIND',
+        },
+        converter: {
+          id: 'converter',
+          icon: <Palette className="w-4 h-4 sm:w-5 sm:h-5 text-purple-200" />,
+          gradient: 'from-purple-600 via-indigo-700 to-slate-900',
+          shadow: 'shadow-purple-500/40',
+          borderStyle: 'border border-purple-300/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)]',
+          glowAura: 'from-purple-400 to-blue-400',
+          themeBadgeText: 'PICT',
+        },
+        shape: {
+          id: 'shape',
+          icon: <Box className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-200" />,
+          gradient: 'from-sky-600 via-blue-700 to-slate-900',
+          shadow: 'shadow-sky-500/40',
+          borderStyle: 'border border-sky-300/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)]',
+          glowAura: 'from-sky-400 to-emerald-400',
+          themeBadgeText: shapeType === 'horizontal' ? 'HORIZ' : shapeType === 'vertical' ? 'VERT' : 'SQR',
+        },
+      };
+
     case Theme.CYBERPUNK:
       return {
         quotes: {
