@@ -298,6 +298,69 @@ export const renderTextToDataUrl = (
 };
 
 /**
+ * Renders high-resolution watermark text to a crisp PNG Data URL.
+ * Strictly matches the screen preview font family, extra-bold weight (900), and letter spacing,
+ * with 100% Unicode and Chinese character support (no WinAnsi encoding crashes).
+ * Supports solid fill, hollow outline, and custom font weights.
+ */
+export const renderWatermarkToDataUrl = (
+  text: string,
+  color: string = '#ef4444',
+  fontSize: number = 46,
+  fontFamily: string = '-apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", "SF Pro Display", "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif',
+  isOutline: boolean = false,
+  outlineWidth: number = 2,
+  fontWeight: string = '900'
+): { dataUrl: string; width: number; height: number } => {
+  if (typeof document === 'undefined') return { dataUrl: '', width: 0, height: 0 };
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return { dataUrl: '', width: 0, height: 0 };
+
+  const scale = 3; // 3x Retina resolution for razor-sharp vector-grade PDF output
+  const effectiveFont = `${fontWeight} ${fontSize * scale}px ${fontFamily}`;
+
+  ctx.font = effectiveFont;
+  const letterSpacingPx = fontSize * 0.05 * scale;
+  if ('letterSpacing' in ctx) {
+    (ctx as any).letterSpacing = `${letterSpacingPx}px`;
+  }
+
+  const textMetrics = ctx.measureText(text);
+  const textWidth = textMetrics.width;
+  const paddingX = 24 * scale;
+  const paddingY = 12 * scale;
+  const canvasWidth = Math.ceil(textWidth + paddingX * 2);
+  const canvasHeight = Math.ceil(fontSize * scale * 1.4 + paddingY * 2);
+
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
+
+  // Setting width/height resets context state, reapply font and spacing
+  ctx.font = effectiveFont;
+  if ('letterSpacing' in ctx) {
+    (ctx as any).letterSpacing = `${letterSpacingPx}px`;
+  }
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  if (isOutline) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(1.5 * scale, outlineWidth * scale);
+    ctx.strokeText(text, canvasWidth / 2, canvasHeight / 2);
+  } else {
+    ctx.fillStyle = color;
+    ctx.fillText(text, canvasWidth / 2, canvasHeight / 2);
+  }
+
+  return {
+    dataUrl: canvas.toDataURL('image/png'),
+    width: canvasWidth / scale,
+    height: canvasHeight / scale,
+  };
+};
+
+/**
  * Renders an authentic cursive calligraphy signature to PNG Data URL
  */
 export const generateSignatureDataUrl = (
@@ -487,25 +550,24 @@ export const applyPdfAnnotations = async (
     const wmText = options.watermarkText.trim();
     const wmColor = options.watermarkColor || '#94a3b8';
     const wmOpacity = options.watermarkOpacity ?? 0.25;
-    const wmRotation = options.watermarkRotation ?? 45;
+    const wmRotation = options.watermarkRotation ?? -45;
+    // Invert angle for PDF coordinate space where +Y is up (matching screen CSS orientation)
+    const pdfRotDeg = -wmRotation;
     const wmFontSize = options.watermarkFontSize || 48;
     const wmLayout = options.watermarkLayout || 'center';
 
-    // Render watermark via high-resolution PNG dataUrl for full Unicode/Chinese support and crisp rotation
-    const { dataUrl, width, height } = renderTextToDataUrl(
+    // Render watermark via high-resolution PNG dataUrl for full Unicode/Chinese support, crisp vector look, and exact font match
+    const { dataUrl, width, height } = renderWatermarkToDataUrl(
       wmText,
       wmColor,
-      wmFontSize,
-      true,
-      false,
-      'Arial, "Segoe UI", sans-serif'
+      wmFontSize
     );
 
     if (dataUrl) {
       try {
         const imgBytes = await fetch(dataUrl).then(r => r.arrayBuffer());
         const embedded = await finalPdfDoc.embedPng(imgBytes);
-        const rad = (wmRotation * Math.PI) / 180;
+        const rad = (pdfRotDeg * Math.PI) / 180;
         const cos = Math.cos(rad);
         const sin = Math.sin(rad);
 
@@ -533,7 +595,7 @@ export const applyPdfAnnotations = async (
                   width: tileW,
                   height: tileH,
                   opacity: Math.min(1, wmOpacity * 0.85),
-                  rotate: degrees(wmRotation),
+                  rotate: degrees(pdfRotDeg),
                 });
               }
             }
@@ -550,7 +612,7 @@ export const applyPdfAnnotations = async (
               width,
               height,
               opacity: wmOpacity,
-              rotate: degrees(wmRotation),
+              rotate: degrees(pdfRotDeg),
             });
           }
         }
@@ -1177,27 +1239,41 @@ export const organizePdfDocument = async (
  * Options for watermarking a PDF
  */
 export interface WatermarkOptions {
-  text: string;
+  type?: 'text' | 'image';
+  text?: string;
+  imageDataUrl?: string; // Data URL for image watermark / company seal / logo
+  imageScale?: number; // Scale factor e.g. 0.2 to 1.5
   fontSize?: number;
   color?: string; // hex string e.g. '#ef4444'
   opacity?: number; // 0.05 to 1
   rotationDegrees?: number; // default -45
+  fontFamily?: string;
+  isOutline?: boolean; // Hollow outline stroke style
+  outlineWidth?: number;
+  fontWeight?: string;
+  layout?: 'center' | 'tiled' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'header' | 'footer';
+  tiledDensity?: 'compact' | 'normal' | 'sparse';
   targetPages?: 'all' | 'first' | string; // 'all', 'first', or comma/dash range "1, 3-5"
 }
 
 /**
- * Stamps a visual text watermark across specified pages
+ * Stamps a visual text or image watermark across specified pages.
+ * Supports:
+ * - Text watermarks (Solid & Hollow Outline, custom fonts & weights)
+ * - Image / Logo / Seal watermarks
+ * - Single Placement (Center, Corners, Header, Footer) or Full-Page Tiled Grid
+ * - Exact CSS preview synchronization (inverted rotation angle)
  */
 export const watermarkPdfDocument = async (
   pdfBytes: ArrayBuffer | Uint8Array,
   options: WatermarkOptions
 ): Promise<Uint8Array> => {
-  if (!options.text || !options.text.trim()) {
+  const isImageMode = options.type === 'image' && Boolean(options.imageDataUrl);
+  if (!isImageMode && (!options.text || !options.text.trim())) {
     throw new Error('Watermark text cannot be empty.');
   }
 
   const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
-  const font = await doc.embedFont(StandardFonts.HelveticaBold);
   const total = doc.getPageCount();
   const pages = doc.getPages();
 
@@ -1210,37 +1286,151 @@ export const watermarkPdfDocument = async (
     targetIndices = parsePageRange(options.targetPages, total);
   }
 
-  const hex = (options.color || '#ef4444').replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16) / 255 || 0.8;
-  const g = parseInt(hex.substring(2, 4), 16) / 255 || 0.2;
-  const b = parseInt(hex.substring(4, 6), 16) / 255 || 0.2;
+  const colorHex = options.color || '#ef4444';
   const size = options.fontSize || 46;
   const opacity = options.opacity ?? 0.25;
-  const rotDeg = options.rotationDegrees ?? -45;
-  const rotRad = (rotDeg * Math.PI) / 180;
+  const layout = options.layout || 'center';
+  const cssRotDeg = options.rotationDegrees ?? (layout === 'header' || layout === 'footer' ? 0 : -45);
+  // Invert angle for PDF coordinate space where +Y is up (matching screen CSS orientation)
+  const pdfRotDeg = -cssRotDeg;
+  const rotRad = (pdfRotDeg * Math.PI) / 180;
+
+  let embeddedImage: any = null;
+  let imgWidth = 0;
+  let imgHeight = 0;
+
+  if (isImageMode && options.imageDataUrl) {
+    try {
+      const imgBytes = await fetch(options.imageDataUrl).then(r => r.arrayBuffer());
+      if (options.imageDataUrl.includes('image/png') || options.imageDataUrl.startsWith('data:image/png')) {
+        embeddedImage = await doc.embedPng(imgBytes);
+      } else {
+        embeddedImage = await doc.embedJpg(imgBytes);
+      }
+      const scale = options.imageScale || 0.45;
+      imgWidth = embeddedImage.width * scale;
+      imgHeight = embeddedImage.height * scale;
+    } catch (e) {
+      console.warn('Failed to embed watermark image:', e);
+    }
+  } else {
+    // Render text via high-resolution canvas to perfectly match screen UI font and support all Unicode/Chinese text
+    const { dataUrl, width, height } = renderWatermarkToDataUrl(
+      (options.text || 'SAMPLE').trim(),
+      colorHex,
+      size,
+      options.fontFamily,
+      options.isOutline,
+      options.outlineWidth || 2,
+      options.fontWeight || '900'
+    );
+
+    if (dataUrl) {
+      try {
+        const imgBytes = await fetch(dataUrl).then(r => r.arrayBuffer());
+        embeddedImage = await doc.embedPng(imgBytes);
+        imgWidth = width;
+        imgHeight = height;
+      } catch (e) {
+        console.warn('Failed to embed watermark canvas image, falling back to vector font', e);
+      }
+    }
+  }
 
   for (const idx of targetIndices) {
     if (idx < 0 || idx >= total) continue;
     const page = pages[idx];
-    const { width, height } = page.getSize();
-    const textWidth = font.widthOfTextAtSize(options.text, size);
-    const textHeight = font.heightAtSize(size);
+    const { width: pageWidth, height: pageHeight } = page.getSize();
 
-    // Compute center point coordinates under rotation
-    const cx = width / 2;
-    const cy = height / 2;
-    const drawX = cx - (textWidth / 2) * Math.cos(rotRad) + (textHeight / 2) * Math.sin(rotRad);
-    const drawY = cy - (textWidth / 2) * Math.sin(rotRad) - (textHeight / 2) * Math.cos(rotRad);
+    if (embeddedImage) {
+      if (layout === 'tiled') {
+        // Tiled grid pattern
+        const rows = options.tiledDensity === 'compact' ? 5 : options.tiledDensity === 'sparse' ? 3 : 4;
+        const cols = options.tiledDensity === 'compact' ? 4 : options.tiledDensity === 'sparse' ? 2 : 3;
+        const tileW = imgWidth * (options.tiledDensity === 'compact' ? 0.6 : 0.75);
+        const tileH = imgHeight * (options.tiledDensity === 'compact' ? 0.6 : 0.75);
 
-    page.drawText(options.text, {
-      x: drawX,
-      y: drawY,
-      size,
-      font,
-      color: rgb(r, g, b),
-      opacity,
-      rotate: degrees(rotDeg),
-    });
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const colOffset = r % 2 === 1 ? 0.25 : 0;
+            const cx = ((c + 0.5 + colOffset) / cols) * pageWidth;
+            const cy = ((r + 0.5) / rows) * pageHeight;
+            const drawX = cx - ((tileW / 2) * Math.cos(rotRad) - (tileH / 2) * Math.sin(rotRad));
+            const drawY = cy - ((tileW / 2) * Math.sin(rotRad) + (tileH / 2) * Math.cos(rotRad));
+
+            page.drawImage(embeddedImage, {
+              x: drawX,
+              y: drawY,
+              width: tileW,
+              height: tileH,
+              opacity: Math.min(1, opacity * 0.85),
+              rotate: degrees(pdfRotDeg),
+            });
+          }
+        }
+      } else {
+        // Single target placement
+        let cx = pageWidth / 2;
+        let cy = pageHeight / 2;
+
+        if (layout === 'topLeft') {
+          cx = pageWidth * 0.25;
+          cy = pageHeight * 0.8;
+        } else if (layout === 'topRight') {
+          cx = pageWidth * 0.75;
+          cy = pageHeight * 0.8;
+        } else if (layout === 'bottomLeft') {
+          cx = pageWidth * 0.25;
+          cy = pageHeight * 0.2;
+        } else if (layout === 'bottomRight') {
+          cx = pageWidth * 0.75;
+          cy = pageHeight * 0.2;
+        } else if (layout === 'header') {
+          cx = pageWidth / 2;
+          cy = pageHeight - 35;
+        } else if (layout === 'footer') {
+          cx = pageWidth / 2;
+          cy = 35;
+        }
+
+        const drawX = cx - ((imgWidth / 2) * Math.cos(rotRad) - (imgHeight / 2) * Math.sin(rotRad));
+        const drawY = cy - ((imgWidth / 2) * Math.sin(rotRad) + (imgHeight / 2) * Math.cos(rotRad));
+
+        page.drawImage(embeddedImage, {
+          x: drawX,
+          y: drawY,
+          width: imgWidth,
+          height: imgHeight,
+          opacity,
+          rotate: degrees(pdfRotDeg),
+        });
+      }
+    } else {
+      // Pure ASCII fallback if canvas fails
+      const font = await doc.embedFont(StandardFonts.HelveticaBold);
+      const textWidth = font.widthOfTextAtSize(options.text || 'SAMPLE', size);
+      const textHeight = font.heightAtSize(size);
+
+      const cx = pageWidth / 2;
+      const cy = pageHeight / 2;
+      const drawX = cx - (textWidth / 2) * Math.cos(rotRad) + (textHeight / 2) * Math.sin(rotRad);
+      const drawY = cy - (textWidth / 2) * Math.sin(rotRad) - (textHeight / 2) * Math.cos(rotRad);
+
+      const hex = colorHex.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16) / 255 || 0.8;
+      const g = parseInt(hex.substring(2, 4), 16) / 255 || 0.2;
+      const b = parseInt(hex.substring(4, 6), 16) / 255 || 0.2;
+
+      page.drawText(options.text || 'SAMPLE', {
+        x: drawX,
+        y: drawY,
+        size,
+        font,
+        color: rgb(r, g, b),
+        opacity,
+        rotate: degrees(pdfRotDeg),
+      });
+    }
   }
 
   return await doc.save();
