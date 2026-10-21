@@ -842,6 +842,8 @@ export interface DailyScheduleEntry {
 export interface DailyScheduleData {
   date: string;
   dayOfWeek?: string;
+  name?: string;
+  isBlank?: boolean;
   entries: DailyScheduleEntry[];
   fontSizeScale?: number;
   slotCount?: number;
@@ -895,17 +897,21 @@ export const generateDailyOutsideSchedulePDF = (
   doc.setTextColor(0, 0, 0);
   doc.text("Daily Outside Works Schedule", titleX, headerY + 8);
 
-  // 3. Right side: Day of week placed ALWAYS ON TOP of Date
+  // 3. Right side: Top line & Date
+  // When printing a blank form, remove "Day" and replace with "Name: ____________"
   const dateRightX = pageWidth - rightMargin;
   doc.setFont("helvetica", "bold");
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(10);
 
-  const dayText = data.dayOfWeek ? data.dayOfWeek : "Day: ____________";
+  const isBlankForm = Boolean(data.isBlank);
+  const topText = isBlankForm
+    ? (data.name ? `Name: ${data.name}` : "Name: ____________")
+    : (data.dayOfWeek ? data.dayOfWeek : (data.name ? `Name: ${data.name}` : "Day: ____________"));
   const dateText = data.date ? `Date: ${data.date}` : "Date: ____________";
 
-  // Top line: Day of week
-  doc.text(dayText, dateRightX, headerY + 4.5, { align: 'right' });
+  // Top line: Name (on blank form) or Day of week (on standard schedule)
+  doc.text(topText, dateRightX, headerY + 4.5, { align: 'right' });
 
   // Bottom line: Date (never on same line as title or overlapping)
   doc.text(dateText, dateRightX, headerY + 10, { align: 'right' });

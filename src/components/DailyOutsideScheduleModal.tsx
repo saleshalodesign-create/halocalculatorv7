@@ -305,6 +305,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
         {
           date: isBlank ? '' : date,
           dayOfWeek: isBlank ? undefined : (currentDay || undefined),
+          isBlank,
           entries: activeEntries,
           slotCount,
           fontSizeScale: fontScale / 100,
@@ -313,7 +314,11 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
       );
 
       if (action === 'save') {
-        showToast(language === 'zh' ? 'PDF 排程表已下载！' : 'Schedule PDF downloaded!');
+        showToast(
+          language === 'zh'
+            ? (isBlank ? '空白排程表 PDF 已下载！' : 'PDF 排程表已下载！')
+            : (isBlank ? 'Blank schedule PDF downloaded!' : 'Schedule PDF downloaded!')
+        );
       } else {
         showToast(
           language === 'zh'
@@ -328,11 +333,11 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
   };
 
   const handlePrint = (isBlank: boolean = false) => {
-    handleExport('view', isBlank);
+    handleExport('view', isBlank || printBlankMode);
   };
 
   const handleDownloadPDF = (isBlank: boolean = false) => {
-    handleExport('save', isBlank);
+    handleExport('save', isBlank || printBlankMode);
   };
 
   const handleZoomChange = (newVal: 'fit' | number) => {
@@ -450,17 +455,31 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
-                onClick={() => handlePrint(false)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold ${modalTheme.primaryBtn} rounded-lg shadow-sm transition-all`}
-                title="Print or view A4 schedule in new tab"
+                onClick={() => setPrintBlankMode(prev => !prev)}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                  printBlankMode
+                    ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40 font-bold shadow-xs'
+                    : 'bg-slate-200/60 dark:bg-white/5 text-slate-600 dark:text-neutral-400 border-slate-300/40 dark:border-white/10 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title={printBlankMode ? 'Switch back to standard schedule' : 'Preview blank form for clipboard handwriting'}
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>{ds.print}</span>
+                <FileText className="w-3.5 h-3.5" />
+                <span>{printBlankMode ? (language === 'zh' ? '空白模式' : 'Blank Mode') : ds.printBlank}</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleDownloadPDF(false)}
+                onClick={() => handlePrint(printBlankMode ? true : false)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold ${modalTheme.primaryBtn} rounded-lg shadow-sm transition-all`}
+                title={printBlankMode ? 'Print blank schedule with Name line' : 'Print or view A4 schedule in new tab'}
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>{printBlankMode ? (language === 'zh' ? '打印空白单' : 'Print Blank') : ds.print}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDownloadPDF(printBlankMode ? true : false)}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-neutral-200 bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/15 rounded-lg transition-all"
                 title="Download Vector PDF"
               >
@@ -468,14 +487,17 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                 <span className="hidden sm:inline">PDF</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => handlePrint(true)}
-                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white bg-slate-200/60 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-lg transition-all"
-                title="Print or view blank template in new tab"
-              >
-                {ds.printBlank}
-              </button>
+              {!printBlankMode && (
+                <button
+                  type="button"
+                  onClick={() => handlePrint(true)}
+                  className="hidden md:inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white bg-slate-200/60 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-lg transition-all"
+                  title="Directly print blank template with Name line in new tab"
+                >
+                  <Printer className="w-3 h-3 opacity-70" />
+                  <span>{language === 'zh' ? '快速打印空白' : 'Print Blank'}</span>
+                </button>
+              )}
 
               <button
                 type="button"
@@ -725,50 +747,70 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                         </h1>
                       </div>
 
-                      {/* Right: Day (Top) & Date (Bottom) */}
+                      {/* Right: Day or Name (Top) & Date (Bottom) */}
                       <div className="text-right pt-0.5 shrink-0 flex flex-col items-end gap-1">
-                        {/* Day of Week Display & Selector on Top */}
-                        <div className="relative inline-flex items-center">
-                          <select
-                            value={currentDay}
-                            onChange={e => setDayOverride(e.target.value)}
-                            className="appearance-none text-sm font-serif font-bold text-blue-900 bg-blue-50/70 hover:bg-blue-100/90 border border-blue-300 rounded px-2 py-0.5 outline-none cursor-pointer pr-4 transition-colors"
-                            title="Click to select or change day of week (Monday, Tuesday, Wednesday...)"
-                          >
-                            <option value="">(Select Day)</option>
-                            <option value="Monday">Monday</option>
-                            <option value="Tuesday">Tuesday</option>
-                            <option value="Wednesday">Wednesday</option>
-                            <option value="Thursday">Thursday</option>
-                            <option value="Friday">Friday</option>
-                            <option value="Saturday">Saturday</option>
-                            <option value="Sunday">Sunday</option>
-                          </select>
-                          <span className="pointer-events-none absolute right-1 text-[9px] text-blue-700 font-bold select-none">▾</span>
-                        </div>
+                        {printBlankMode ? (
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm font-serif font-bold text-black select-none">
+                              Name:
+                            </span>
+                            <span className="text-sm font-serif font-bold text-black select-none tracking-wider">
+                              ____________
+                            </span>
+                          </div>
+                        ) : (
+                          /* Day of Week Display & Selector on Top */
+                          <div className="relative inline-flex items-center">
+                            <select
+                              value={currentDay}
+                              onChange={e => setDayOverride(e.target.value)}
+                              className="appearance-none text-sm font-serif font-bold text-blue-900 bg-blue-50/70 hover:bg-blue-100/90 border border-blue-300 rounded px-2 py-0.5 outline-none cursor-pointer pr-4 transition-colors"
+                              title="Click to select or change day of week (Monday, Tuesday, Wednesday...)"
+                            >
+                              <option value="">(Select Day)</option>
+                              <option value="Monday">Monday</option>
+                              <option value="Tuesday">Tuesday</option>
+                              <option value="Wednesday">Wednesday</option>
+                              <option value="Thursday">Thursday</option>
+                              <option value="Friday">Friday</option>
+                              <option value="Saturday">Saturday</option>
+                              <option value="Sunday">Sunday</option>
+                            </select>
+                            <span className="pointer-events-none absolute right-1 text-[9px] text-blue-700 font-bold select-none">▾</span>
+                          </div>
+                        )}
 
-                        {/* Date below Day */}
+                        {/* Date below Day or Name */}
                         <div className="flex items-center gap-1">
                           <span className="text-sm font-serif font-bold text-black select-none">
                             Date:
                           </span>
-                          <input
-                            type="text"
-                            value={date}
-                            onChange={e => {
-                              setDate(e.target.value);
-                              setDayOverride('');
-                            }}
-                            placeholder="____________"
-                            className="w-28 text-sm font-serif font-bold text-black bg-transparent border-b border-black/60 focus:border-black outline-none px-1 text-left"
-                          />
+                          {printBlankMode ? (
+                            <span className="text-sm font-serif font-bold text-black select-none tracking-wider">
+                              ____________
+                            </span>
+                          ) : (
+                            <input
+                              type="text"
+                              value={date}
+                              onChange={e => {
+                                setDate(e.target.value);
+                                setDayOverride('');
+                              }}
+                              placeholder="____________"
+                              className="w-28 text-sm font-serif font-bold text-black bg-transparent border-b border-black/60 focus:border-black outline-none px-1 text-left"
+                            />
+                          )}
                         </div>
                       </div>
                     </div>
 
                     {/* Schedule Slots (Dynamic count) */}
                     <div className={`flex flex-col ${slotCount <= 3 ? 'gap-5' : slotCount === 4 ? 'gap-3.5' : slotCount === 5 ? 'gap-2.5' : 'gap-1.5'} mt-2.5`}>
-                      {entries.slice(0, slotCount).map((entry, idx) => (
+                      {(printBlankMode
+                        ? Array.from({ length: slotCount }, () => ({ companyName: '', address: '', descriptions: '' }))
+                        : entries.slice(0, slotCount)
+                      ).map((entry, idx) => (
                         <div key={`sched-slot-${idx}`} className="flex items-start gap-2.5 group">
                           {/* Slot Number: 1 to N (Fixed template size) */}
                           <div
@@ -1031,7 +1073,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                   </div>
 
                   {/* Action buttons inside form editor */}
-                  <div className="flex items-center gap-3 pt-2">
+                  <div className="flex items-center gap-2 sm:gap-3 pt-2">
                     <button
                       type="button"
                       onClick={() => handlePrint(false)}
@@ -1039,6 +1081,15 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
                     >
                       <Printer className="w-4 h-4" />
                       {ds.print}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handlePrint(true)}
+                      className="py-3 px-3.5 text-xs font-bold text-slate-700 dark:text-neutral-300 bg-slate-200 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/15 rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                      title="Print blank form with Name line"
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>{ds.printBlank}</span>
                     </button>
                     <button
                       type="button"
@@ -1085,7 +1136,7 @@ export const DailyOutsideScheduleModal: React.FC<DailyOutsideScheduleModalProps>
 
           <div className="text-right pt-0.5 shrink-0 flex flex-col items-end">
             <span className="text-sm font-serif font-bold text-black pb-0.5">
-              {printBlankMode ? 'Day: ____________' : (currentDay || 'Day: ____________')}
+              {printBlankMode ? 'Name: ____________' : (currentDay || 'Day: ____________')}
             </span>
             <span className="text-sm font-serif font-bold text-black">
               Date: {printBlankMode ? '____________' : (date || '____________')}
